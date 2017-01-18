@@ -74,9 +74,23 @@ void Board_Draw(Board *board) {
 	}
 }
 
-int	Board_getPiece(const Board *board, int in_pos);
+int	Board_getPiece(const Board *board, int pos) {
 
-int	Board_CountPieces(const Board *board, int in_color);
+	return board->Piece[pos];
+
+}
+
+int	Board_CountPieces(const Board *board, int color) {
+	int i, j, sum = 0;
+	for (i = 1; i <= BOARD_SIZE; i++) {
+		for (j = 1; j <= BOARD_SIZE; j++) {
+			if (board->Piece[Board_getPos(i, j)] == color) {
+				sum++;
+			}
+		}
+	}
+	return sum;
+}
 
 int	Board_Flip(Board *board, int in_color, int in_pos);
 

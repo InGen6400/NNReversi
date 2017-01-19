@@ -93,10 +93,10 @@ const short H8 = 88;
 
 struct _Board
 {
-	int Stone[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
-	int Stack[((BOARD_SIZE - 2) * 3 + 3)*BOARD_SIZE*BOARD_SIZE];
-	int White, Black;
-	int *Sp;
+	char Stone[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
+	char Stack[((BOARD_SIZE - 2) * 3 + 3)*BOARD_SIZE*BOARD_SIZE];
+	char White, Black;
+	char *Sp;
 }typedef Board;
 
 Board *Board_New(void);
@@ -107,28 +107,28 @@ void Board_Reset(Board *board);
 
 void Board_Draw(Board *board);
 
-int	Board_CountStone(const Board *board, int in_color);
+char Board_CountStone(const Board *board, char in_color);
 
-int	Board_Flip(Board *board, char color, int x, int y);
+char Board_Flip(Board *board, char color, char x, char y);
 
-int Board_FlipLine(Board *board, char color, int x, int y, int vec_x, int vec_y);
+char Board_FlipLine(Board *board, char color, char x, char y, char vec_x, char vec_y);
 
 void Board_Undo(Board *board);
 
-int	Board_CanFlip(const Board *board, int in_color, int x, int y);
+char Board_CanFlip(const Board *board, char in_color, char x, char y);
 
-int Board_CanFlipLine(const Board *board, char color, int x, int y, int vec_x, int vec_y);
+char Board_CanFlipLine(const Board *board, char color, char x, char y, char vec_x, char vec_y);
 
-int	Board_CountFlips(const Board *board, int in_color, int in_pos);
+char Board_CountFlips(const Board *board, char in_color, char in_pos);
 
-int ConvertPos(int x, int y);
+char ConvertPos(char x, char y);
 
-int getX(int pos);
+char getX(char pos);
 
-int getY(int pos);
+char getY(char pos);
 
-int getOppStone(char color);
+char getOppStone(char color);
 
-int Stack_POP(Board *board);
+char Stack_POP(Board *board);
 
-void Stack_PUSH(Board *board, int num);
+void Stack_PUSH(Board *board, char num);

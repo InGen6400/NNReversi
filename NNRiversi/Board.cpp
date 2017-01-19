@@ -23,7 +23,7 @@ void Board_Delete(Board *board) {
 
 //盤面の初期化
 void Board_Reset(Board *board) {
-	int y, x;
+	char y, x;
 	for (y = 0; y < BOARD_SIZE + 2; y++) {
 		for (x = 0; x < BOARD_SIZE + 2; x++) {
 			if (y == 0 || x == 0 || y == BOARD_SIZE + 1 || x == BOARD_SIZE + 1) {
@@ -52,7 +52,7 @@ void Board_Reset(Board *board) {
 
 //盤面の描画
 void Board_Draw(Board *board) {
-	int x, y;
+	char x, y;
 	char icon[5];
 	printf("\n\n");
 	printf(" 　　　　Ａ  Ｂ  Ｃ  Ｄ  Ｅ  Ｆ  Ｇ  Ｈ                        黒:%d  vs  白:%d\n", board->Black, board->White);
@@ -87,9 +87,9 @@ void Board_Draw(Board *board) {
 }
 
 //着手
-int	Board_Flip(Board *board, char color, int x, int y) {
+char Board_Flip(Board *board, char color, char x, char y) {
 
-	int flipCount=0;
+	char flipCount=0;
 
 	if (x <= 0 || y <= 0 || x > BOARD_SIZE || y > BOARD_SIZE)return 0;
 	if (board->Stone[ConvertPos(x, y)] != NONE)return 0;
@@ -123,11 +123,11 @@ int	Board_Flip(Board *board, char color, int x, int y) {
 }
 
 //直線を裏返す
-int Board_FlipLine(Board *board, char color, int x, int y, int vec_x, int vec_y) {
+char Board_FlipLine(Board *board, char color, char x, char y, char vec_x, char vec_y) {
 	char oppColor = getOppStone(color);
-	int flips[10];
-	int flipCount = 0;
-	int i;
+	char flips[10];
+	char flipCount = 0;
+	char i;
 
 	x += vec_x;
 	y += vec_y;
@@ -159,7 +159,7 @@ int Board_FlipLine(Board *board, char color, int x, int y, int vec_x, int vec_y)
 }
 
 //posに着手できるか
-int	Board_CanFlip(const Board *board, char color, int x, int y) {
+char Board_CanFlip(const Board *board, char color, char x, char y) {
 
 	if (x <= 0 && y <= 0 && x > BOARD_SIZE && y > BOARD_SIZE)return FALSE;
 	if (board->Stone[ConvertPos(x, y)] != NONE)return FALSE;
@@ -178,7 +178,7 @@ int	Board_CanFlip(const Board *board, char color, int x, int y) {
 }
 
 //Board_CanFlipの補助
-int Board_CanFlipLine(const Board *board, char color, int x, int y, int vec_x, int vec_y) {
+char Board_CanFlipLine(const Board *board, char color, char x, char y, char vec_x, char vec_y) {
 	char oppColor = getOppStone(color);
 
 	x += vec_x;
@@ -218,35 +218,35 @@ void Board_Undo(Board *board) {
 		board->Black -= flipCount + 1;
 	}
 
-	for (int i = 0; i < flipCount; i++) {
+	for (char i = 0; i < flipCount; i++) {
 		board->Stone[Stack_POP(board)] = opp;
 	}
 }
 
 //x,y から インデックス座標へ
-int ConvertPos(int x, int y) {
+char ConvertPos(char x, char y) {
 	return x + 10 * y;
 }
 
 //x座標を返す
-int getX(int pos) {
+char getX(char pos) {
 	return pos % 10;
 }
 
 //y座標を返す
-int getY(int pos) {
+char getY(char pos) {
 	return pos / 10;
 }
 
 //反転色を返す　1->2 2->1 (0->1)
-int getOppStone(char color) {
+char getOppStone(char color) {
 	return color % 2 + 1;
 }
 
-int Stack_POP(Board *board) {
+char Stack_POP(Board *board) {
 	return *(--board->Sp);
 }
 
-void Stack_PUSH(Board *board, int num) {
+void Stack_PUSH(Board *board, char num) {
 	*(board->Sp++) = num;
 }

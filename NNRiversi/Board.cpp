@@ -92,13 +92,25 @@ int	Board_CountPieces(const Board *board, int color) {
 	return sum;
 }
 
-int	Board_Flip(Board *board, int in_color, int in_pos);
+int	Board_Flip(Board *board, int in_color, int in_pos) {
 
-int	Board_Reflip(Board *board);
+}
 
-int	Board_CanFlip(const Board *board, int in_color, int in_pos);
+int Board_FlipLine() {
 
-int	Board_CountFlips(const Board *board, int in_color, int in_pos);
+}
+
+int	Board_Reflip(Board *board) {
+
+}
+
+int	Board_CanFlip(const Board *board, int in_color, int in_pos) {
+
+}
+
+int	Board_CountFlips(const Board *board, int in_color, int in_pos) {
+
+}
 
 int Board_getPos(int x, int y) {
 	return x + 10 * y;

@@ -20,21 +20,44 @@ int main()
 	while (1) {
 		fgets(tmp, sizeof(tmp), stdin);
 		if (tmp[0] == 'q')break;
-
-		Player_Input(tmp, &x, &y);
-		if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
-			system("cls");
-			if (Board_Flip(mainBoard, turn, x, y) >= 1) {
-				printf("You Put (%d, %d)", x, y);
+		if (tmp[0] == 'b') {
+			if (*(mainBoard->Sp-1) != -2) {
+				Board_Undo(mainBoard);
 				turn = getOppStone(turn);
+				system("cls");
+				printf("–ß‚µ‚Ü‚µ‚½\n");
+				Board_Draw(mainBoard);
 			}
 			else {
-				printf("You Can't Put (%d, %d)\n", x, y);
+				printf("‚±‚êˆÈã–ß‚¹‚Ü‚¹‚ñ\n");
 			}
-			Board_Draw(mainBoard);
 		}
-		else {
-			printf("You Can't Place that position : out of board\n");
+		else 
+		{
+			if (Player_Input(tmp, &x, &y)) {
+				if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
+					system("cls");
+					if (Board_Flip(mainBoard, turn, x, y) >= 1) {
+						if (turn == WHITE) {
+							printf("”’ Put (%d, %d)", x, y);
+						}
+						else {
+							printf("• Put (%d, %d)", x, y);
+						}
+						turn = getOppStone(turn);
+					}
+					else {
+						printf("You Can't Put (%d, %d)\n", x, y);
+					}
+					Board_Draw(mainBoard);
+				}
+				else {
+					printf("You Can't Place that position\n");
+				}
+			}
+			else {
+				printf("‚¨‚Á‚ÆAŠë‚¤‚­’â~‚·‚é‚Æ‚±‚ë‚Å‚µ‚½B\n•Ï‚È•¶š‚Í“ü‚ê‚È‚¢‚Å‚­‚¾‚³‚¢‚Ë\n");
+			}
 		}
 	}
 	Board_Delete(mainBoard);

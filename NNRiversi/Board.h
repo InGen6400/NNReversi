@@ -1,6 +1,10 @@
 #pragma once
 
 const short BOARD_SIZE = 8;
+const short NUM_STONE = BOARD_SIZE * BOARD_SIZE;
+
+const short STACK_STOP = -2;
+const short STACK_BREAK = -1;
 
 #pragma region piece_define
 
@@ -89,8 +93,9 @@ const short H8 = 88;
 
 struct _Board
 {
-	int Piece[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
+	int Stone[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
 	int Stack[((BOARD_SIZE - 2) * 3 + 3)*BOARD_SIZE*BOARD_SIZE];
+	int White, Black;
 	int *Sp;
 }typedef Board;
 
@@ -102,15 +107,13 @@ void Board_Reset(Board *board);
 
 void Board_Draw(Board *board);
 
-int	Board_getPiece(const Board *board, int in_pos);
-
-int	Board_CountPieces(const Board *board, int in_color);
+int	Board_CountStone(const Board *board, int in_color);
 
 int	Board_Flip(Board *board, char color, int x, int y);
 
 int Board_FlipLine(Board *board, char color, int x, int y, int vec_x, int vec_y);
 
-int	Board_Reflip(Board *board);
+void Board_Undo(Board *board);
 
 int	Board_CanFlip(const Board *board, int in_color, int x, int y);
 
@@ -125,3 +128,7 @@ int getX(int pos);
 int getY(int pos);
 
 int getOppStone(char color);
+
+int Stack_POP(Board *board);
+
+void Stack_PUSH(Board *board, int num);

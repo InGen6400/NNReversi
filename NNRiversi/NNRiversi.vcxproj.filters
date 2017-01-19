@@ -30,6 +30,9 @@
     <ClInclude Include="Board.h">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="const.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

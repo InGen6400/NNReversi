@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Board.h"
+#include "const.h"
 
 Board *Board_New(void) {
 	Board *res;
@@ -44,7 +45,7 @@ void Board_Draw(Board *board) {
 	int i, j;
 	char icon[5];
 	printf(" 　　　　Ａ  Ｂ  Ｃ  Ｄ  Ｅ  Ｆ  Ｇ  Ｈ\n");
-	printf(" 　＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋\n");
+	printf(" 　＋―＋―＋―＋―＋―＋―＋―＋―＋―＋―＋\n");
 	for (i = 0; i < BOARD_SIZE + 2; i++) {
 		if (i != 0 && i != 9) {
 			printf(" %d ｜", i);
@@ -70,7 +71,7 @@ void Board_Draw(Board *board) {
 			printf("%s｜", icon);
 		}
 		putchar('\n');
-		printf(" 　＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋ー＋\n");
+		printf(" 　＋―＋―＋―＋―＋―＋―＋―＋―＋―＋―＋\n");
 	}
 }
 
@@ -80,7 +81,7 @@ int	Board_getPiece(const Board *board, int pos) {
 
 }
 
-int	Board_CountPieces(const Board *board, int color) {
+int	Board_CountPieces(const Board *board, char color) {
 	int i, j, sum = 0;
 	for (i = 1; i <= BOARD_SIZE; i++) {
 		for (j = 1; j <= BOARD_SIZE; j++) {
@@ -92,26 +93,110 @@ int	Board_CountPieces(const Board *board, int color) {
 	return sum;
 }
 
-int	Board_Flip(Board *board, int in_color, int in_pos) {
+int	Board_Flip(Board *board, char color, int x, int y) {
 
+	int flipCount=0;
+
+	if (x <= 0 && y <= 0 && x > BOARD_SIZE && y > BOARD_SIZE)return 0;
+	if (board->Piece[ConvertPos(x, y)] != NONE)return 0;
+
+	flipCount += Board_FlipLine(board, color, x, y, 1, 0);
+	flipCount += Board_FlipLine(board, color, x, y, 1, 1);
+	flipCount += Board_FlipLine(board, color, x, y, 0, 1);
+	flipCount += Board_FlipLine(board, color, x, y, -1, 1);
+	flipCount += Board_FlipLine(board, color, x, y, -1, 0);
+	flipCount += Board_FlipLine(board, color, x, y, -1, -1);
+	flipCount += Board_FlipLine(board, color, x, y, 0, -1);
+	flipCount += Board_FlipLine(board, color, x, y, 1, -1);
+
+	return flipCount;
 }
 
-int Board_FlipLine() {
+int Board_FlipLine(Board *board, char color, int x, int y, int vec_x, int vec_y) {
+	char oppColor = getOppStone(color);
+	int flips[10];
+	int flipCount = 0;
 
+	x += vec_x;
+	y += vec_y;
+
+	if (x <= 0 && y <= 0 && x > BOARD_SIZE && y > BOARD_SIZE)return 0;
+	if (board->Piece[ConvertPos(x, y)] == NONE)return 0;
+	if (board->Piece[ConvertPos(x, y)] == color)return 0;
+
+	x += vec_x;
+	y += vec_y;
+
+	while (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
+		if (board->Piece[ConvertPos(x, y)] == NONE)return 0;
+		if (board->Piece[ConvertPos(x, y)] == color)return TRUE;
+		x += vec_x;
+		y += vec_y;
+	}
+	return 0;
 }
 
 int	Board_Reflip(Board *board) {
-
+	return 0;
 }
 
-int	Board_CanFlip(const Board *board, int in_color, int in_pos) {
+int	Board_CanFlip(const Board *board, char color, int x, int y) {
 
+	if (x <= 0 && y <= 0 && x > BOARD_SIZE && y > BOARD_SIZE)return FALSE;
+	if (board->Piece[ConvertPos(x, y)] != NONE)return FALSE;
+
+	flipCount += Board_CanFlipLine(board, color, x, y, 1, 0))return TRUE;
+	flipCount += Board_CanFlipLine(board, color, x, y, 1, 1))return TRUE;
+	flipCount += Board_CanFlipLine(board, color, x, y, 0, 1))return TRUE;
+	flipCount += Board_CanFlipLine(board, color, x, y, -1, 1))return TRUE;
+	flipCount += Board_CanFlipLine(board, color, x, y, -1, 0))return TRUE;
+	flipCount += Board_CanFlipLine(board, color, x, y, -1, -1))return TRUE;
+	flipCount += Board_CanFlipLine(board, color, x, y, 0, -1))return TRUE;
+	flipCount += Board_CanFlipLine(board, color, x, y, 1, -1))return TRUE;
+
+	return FALSE;
+	return 0;
 }
 
-int	Board_CountFlips(const Board *board, int in_color, int in_pos) {
+int Board_CanFlipLine(const Board *board, char color, int x, int y, int vec_x, int vec_y) {
+	char oppColor = getOppStone(color);
 
+	x += vec_x;
+	y += vec_y;
+
+	if (x <= 0 && y <= 0 && x > BOARD_SIZE && y > BOARD_SIZE)return FALSE;
+	if (board->Piece[ConvertPos(x, y)] == NONE)return FALSE;
+	if (board->Piece[ConvertPos(x, y)] == color)return FALSE;
+
+	x += vec_x;
+	y += vec_y;
+
+	while (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
+		if (board->Piece[ConvertPos(x, y)] == NONE)return FALSE;
+		if (board->Piece[ConvertPos(x, y)] == color)return TRUE;
+		x += vec_x;
+		y += vec_y;
+	}
+	return FALSE;
 }
 
-int Board_getPos(int x, int y) {
+int	Board_CountFlips(const Board *board, char color, int pos) {
+	return 0;
+}
+
+int ConvertPos(int x, int y) {
 	return x + 10 * y;
+}
+
+int getX(int pos) {
+	return pos % 10;
+}
+
+int getY(int pos) {
+	return pos / 10;
+}
+
+//1->2 2->1 (0->1)
+int getOppStone(char color) {
+	return color % 2 + 1;
 }

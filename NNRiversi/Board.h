@@ -106,12 +106,22 @@ int	Board_getPiece(const Board *board, int in_pos);
 
 int	Board_CountPieces(const Board *board, int in_color);
 
-int	Board_Flip(Board *board, int in_color, int in_pos);
+int	Board_Flip(Board *board, char color, int x, int y);
+
+int Board_FlipLine(Board *board, char color, int x, int y, int vec_x, int vec_y);
 
 int	Board_Reflip(Board *board);
 
-int	Board_CanFlip(const Board *board, int in_color, int in_pos);
+int	Board_CanFlip(const Board *board, int in_color, int x, int y);
+
+int Board_CanFlipLine(const Board *board, char color, int x, int y, int vec_x, int vec_y);
 
 int	Board_CountFlips(const Board *board, int in_color, int in_pos);
 
-int Board_getPos(int x, int y);
+int ConvertPos(int x, int y);
+
+int getX(int pos);
+
+int getY(int pos);
+
+int getOppStone(char color);

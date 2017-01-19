@@ -108,15 +108,15 @@ int	Board_Flip(Board *board, char color, int x, int y) {
 		Stack_PUSH(board, ConvertPos(x, y));
 		Stack_PUSH(board, flipCount);
 		Stack_PUSH(board, color);
-	}
 
-	if (color == WHITE) {
-		board->White += flipCount + 1;
-		board->Black -= flipCount;
-	}
-	else {
-		board->White -= flipCount;
-		board->Black += flipCount + 1;
+		if (color == WHITE) {
+			board->White += flipCount + 1;
+			board->Black -= flipCount;
+		}
+		else {
+			board->White -= flipCount;
+			board->Black += flipCount + 1;
+		}
 	}
 
 	return flipCount;

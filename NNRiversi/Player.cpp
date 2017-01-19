@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "const.h"
 
+//“ü—Í‚Ìx,y‚ğ”»’f‚µ‚Ä“KØ‚É•ÏŠ·‚µ‚Ä•Ô‚·
 int Player_Input(char *Input, int *x, int *y) {
 	char cpy[100], *tmp;
 	strcpy(cpy, Input);
@@ -38,6 +39,7 @@ int Player_Input(char *Input, int *x, int *y) {
 	}
 }
 
+//A~H ‚ğ 1~8‚É‚·‚é
 char CharToPos(char Input) {
 	Input = tolower(Input);
 	return Input - 'a' + 1;

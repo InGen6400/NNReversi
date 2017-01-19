@@ -1,5 +1,7 @@
 #pragma once
 
-int ABSearch();
+const char MAX_DEPTH = 6;
 
-int Evaluation(Board *board);
+unsigned int NegaMaxSearch(Board *board, char color, char depth, char *PutPos);
+
+unsigned int Evaluation(Board *board, char color);

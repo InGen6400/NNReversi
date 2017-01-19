@@ -174,7 +174,6 @@ char Board_CanFlip(const Board *board, char color, char x, char y) {
 	if(Board_CanFlipLine(board, color, x, y, 1, -1))return TRUE;
 
 	return FALSE;
-	return 0;
 }
 
 //Board_CanFlipの補助
@@ -221,6 +220,16 @@ void Board_Undo(Board *board) {
 	for (char i = 0; i < flipCount; i++) {
 		board->Stone[Stack_POP(board)] = opp;
 	}
+}
+
+char Board_CountStone(const Board *board, char in_color) {
+	if (in_color == WHITE) {
+		return board->White;
+	}
+	else {
+		return board->Black;
+	}
+	return -1;
 }
 
 //x,y から インデックス座標へ

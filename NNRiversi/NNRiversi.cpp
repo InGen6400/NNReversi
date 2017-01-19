@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Board.h"
 #include "Player.h"
+#include "CPU.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -12,7 +13,7 @@ int main()
 {
 	char tmp[50] = "";
 	Board *mainBoard;
-	char turn = BLACK;
+	char cpuPut = 0, turn = BLACK;
 	int x, y;
 
 	mainBoard = Board_New();
@@ -39,12 +40,20 @@ int main()
 					system("cls");
 					if (Board_Flip(mainBoard, turn, x, y) >= 1) {
 						if (turn == WHITE) {
-							printf("îí Put (%d, %d)", x, y);
+							printf("îí Put (%d, %d)\n", x, y);
 						}
 						else {
-							printf("çï Put (%d, %d)", x, y);
+							printf("çï Put (%d, %d)\n", x, y);
 						}
 						turn = getOppStone(turn);
+						NegaMaxSearch(mainBoard, turn, 0, &cpuPut);
+						if (turn == WHITE) {
+							x = getX(cpuPut);
+							y = getY(cpuPut);
+							printf("CPU : %d,%d(%d)\n", x, y, cpuPut);
+							printf("flip:%d\n", Board_Flip(mainBoard, turn, x, y));
+							turn = getOppStone(turn);
+						}
 					}
 					else {
 						printf("You Can't Put (%d, %d)\n", x, y);

@@ -31,11 +31,6 @@ BOARD
  ReversePos
  ReversePos
  ReversePos
- ReversePos
- ReversePos
- ReversePos
- ReversePos
- .
  .
  .
  color
@@ -45,5 +40,6 @@ BOARD
  ReversePos
  .
  .
- .
  -2(STACK_STOP)
+
+ CPU‚Í”’å‘Ì‚Ì‘Ì‚Åì¬‚·‚é(•‚Ì‚Æ‚«‚ÍEEE)

@@ -115,7 +115,7 @@ char Board_FlipLine(Board *board, char color, char x, char y, char vec_x, char v
 
 void Board_Undo(Board *board);
 
-char Board_CanFlip(const Board *board, char in_color, char x, char y);
+char Board_CanFlip(const Board *board, char color, char x, char y);
 
 char Board_CanFlipLine(const Board *board, char color, char x, char y, char vec_x, char vec_y);
 

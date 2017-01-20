@@ -2,6 +2,6 @@
 
 const char MAX_DEPTH = 6;
 
-unsigned int NegaMaxSearch(Board *board, char color, char depth, char *PutPos);
+int NegaMaxSearch(Board *board, char isPassed, char color, char depth, char *PutPos);
 
-unsigned int Evaluation(Board *board, char color);
+int Evaluation(Board *board, char color);

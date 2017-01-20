@@ -1,93 +1,96 @@
 #pragma once
 
-const short BOARD_SIZE = 8;
-const short NUM_STONE = BOARD_SIZE * BOARD_SIZE;
+const char BOARD_SIZE = 8;
+const char NUM_STONE = BOARD_SIZE * BOARD_SIZE;
 
-const short STACK_STOP = -2;
-const short STACK_BREAK = -1;
+const char STACK_STOP = -2;
+const char STACK_BREAK = -1;
 
 #pragma region piece_define
 
-const short WALL = -1;
-const short NONE = 0;
-const short WHITE = 1;
-const short BLACK  = 2;
+const char WALL = -1;
+const char NONE = 0;
+const char WHITE = 1;
+const char BLACK  = 2;
 
 #pragma endregion
 
 #pragma region POS_define
 
-const short A1 = 11;
-const short A2 = 21;
-const short A3 = 31;
-const short A4 = 41;
-const short A5 = 51;
-const short A6 = 61;
-const short A7 = 71;
-const short A8 = 81;
+const char NOMOVE = -2;
+const char PASS = -1;
 
-const short B1 = 12;
-const short B2 = 22;
-const short B3 = 32;
-const short B4 = 42;
-const short B5 = 52;
-const short B6 = 62;
-const short B7 = 72;
-const short B8 = 82;
+const char A1 = 11;
+const char A2 = 21;
+const char A3 = 31;
+const char A4 = 41;
+const char A5 = 51;
+const char A6 = 61;
+const char A7 = 71;
+const char A8 = 81;
 
-const short C1 = 13;
-const short C2 = 23;
-const short C3 = 33;
-const short C4 = 43;
-const short C5 = 53;
-const short C6 = 63;
-const short C7 = 73;
-const short C8 = 83;
+const char B1 = 12;
+const char B2 = 22;
+const char B3 = 32;
+const char B4 = 42;
+const char B5 = 52;
+const char B6 = 62;
+const char B7 = 72;
+const char B8 = 82;
 
-const short D1 = 14;
-const short D2 = 24;
-const short D3 = 34;
-const short D4 = 44;
-const short D5 = 54;
-const short D6 = 64;
-const short D7 = 74;
-const short D8 = 84;
+const char C1 = 13;
+const char C2 = 23;
+const char C3 = 33;
+const char C4 = 43;
+const char C5 = 53;
+const char C6 = 63;
+const char C7 = 73;
+const char C8 = 83;
 
-const short E1 = 15;
-const short E2 = 25;
-const short E3 = 35;
-const short E4 = 45;
-const short E5 = 55;
-const short E6 = 65;
-const short E7 = 75;
-const short E8 = 85;
+const char D1 = 14;
+const char D2 = 24;
+const char D3 = 34;
+const char D4 = 44;
+const char D5 = 54;
+const char D6 = 64;
+const char D7 = 74;
+const char D8 = 84;
 
-const short F1 = 16;
-const short F2 = 26;
-const short F3 = 36;
-const short F4 = 46;
-const short F5 = 56;
-const short F6 = 66;
-const short F7 = 76;
-const short F8 = 86;
+const char E1 = 15;
+const char E2 = 25;
+const char E3 = 35;
+const char E4 = 45;
+const char E5 = 55;
+const char E6 = 65;
+const char E7 = 75;
+const char E8 = 85;
 
-const short G1 = 17;
-const short G2 = 27;
-const short G3 = 37;
-const short G4 = 47;
-const short G5 = 57;
-const short G6 = 67;
-const short G7 = 77;
-const short G8 = 87;
+const char F1 = 16;
+const char F2 = 26;
+const char F3 = 36;
+const char F4 = 46;
+const char F5 = 56;
+const char F6 = 66;
+const char F7 = 76;
+const char F8 = 86;
 
-const short H1 = 18;
-const short H2 = 28;
-const short H3 = 38;
-const short H4 = 48;
-const short H5 = 58;
-const short H6 = 68;
-const short H7 = 78;
-const short H8 = 88;
+const char G1 = 17;
+const char G2 = 27;
+const char G3 = 37;
+const char G4 = 47;
+const char G5 = 57;
+const char G6 = 67;
+const char G7 = 77;
+const char G8 = 87;
+
+const char H1 = 18;
+const char H2 = 28;
+const char H3 = 38;
+const char H4 = 48;
+const char H5 = 58;
+const char H6 = 68;
+const char H7 = 78;
+const char H8 = 88;
 
 #pragma endregion
 

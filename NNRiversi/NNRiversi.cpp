@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Board.h"
 #include "Player.h"
+#include "const.h"
 #include "CPU.h"
 #include <stdlib.h>
 #include <string.h>
@@ -46,7 +47,7 @@ int main()
 							printf("çï Put (%d, %d)\n", x, y);
 						}
 						turn = getOppStone(turn);
-						NegaMaxSearch(mainBoard, turn, 0, &cpuPut);
+						NegaMaxSearch(mainBoard, FALSE, turn, 0, &cpuPut);
 						if (turn == WHITE) {
 							x = getX(cpuPut);
 							y = getY(cpuPut);

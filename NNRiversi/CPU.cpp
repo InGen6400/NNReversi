@@ -3,9 +3,10 @@
 #include "const.h"
 #include "CPU.h"
 
-unsigned int NegaMaxSearch(Board *board, char color, char depth, char *PutPos) {
+int NegaMaxSearch(Board *board, char isPassed, char color, char depth, char *PutPos) {
 	char x, y;
-	unsigned int best=-1000000, tmp;
+	int best=-1000000, tmp;
+	char move;
 
 	if (depth >= MAX_DEPTH) {
 		return Evaluation(board, color);
@@ -15,7 +16,7 @@ unsigned int NegaMaxSearch(Board *board, char color, char depth, char *PutPos) {
 		for (x = 1; x <= BOARD_SIZE; x++) {
 			if (Board_CanFlip(board, color, x, y)) {
 				Board_Flip(board, color, x, y);
-				tmp = -NegaMaxSearch(board, getOppStone(color), depth+1, PutPos);
+				tmp = -NegaMaxSearch(board, FALSE, getOppStone(color), depth+1, &move);
 				Board_Undo(board);
 				if (best < tmp) {
 					best = tmp;
@@ -28,6 +29,6 @@ unsigned int NegaMaxSearch(Board *board, char color, char depth, char *PutPos) {
 	return best;
 }
 
-unsigned int Evaluation(Board *board, char color) {
+int Evaluation(Board *board, char color) {
 	return Board_CountStone(board, color) - Board_CountStone(board, getOppStone(color));
 }

@@ -25,7 +25,7 @@ int main()
 		if (tmp[0] == 'b') {
 			if (*(mainBoard->Sp-1) != -2) {
 				Board_Undo(mainBoard);
-				turn = getOppStone(turn);
+				Board_Undo(mainBoard);
 				system("cls");
 				printf("–ß‚µ‚Ü‚µ‚½\n");
 				Board_Draw(mainBoard);

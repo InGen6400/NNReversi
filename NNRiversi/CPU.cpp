@@ -5,7 +5,7 @@
 
 int NegaMaxSearch(Board *board, char isPassed, char color, char depth, char *PutPos) {
 	char x, y;
-	int best=-1000000, tmp;
+	int best=-VALUE_MAX, tmp;
 	char move;
 
 	if (depth >= MAX_DEPTH) {
@@ -26,7 +26,7 @@ int NegaMaxSearch(Board *board, char isPassed, char color, char depth, char *Put
 		}
 	}
 
-	if (best != -1000000)return best;
+	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return Evaluation(board, color);
 	else {
 		tmp = NegaMaxSearch(board, TRUE, getOppStone(color), depth+1, &move);

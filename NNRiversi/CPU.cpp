@@ -26,7 +26,13 @@ int NegaMaxSearch(Board *board, char isPassed, char color, char depth, char *Put
 		}
 	}
 
-	return best;
+	if (best != -1000000)return best;
+	else if (isPassed == TRUE)return Evaluation(board, color);
+	else {
+		tmp = NegaMaxSearch(board, TRUE, getOppStone(color), depth+1, &move);
+		return tmp;
+	}
+	
 }
 
 int Evaluation(Board *board, char color) {

@@ -6,6 +6,7 @@
 #include "Board.h"
 #include "const.h"
 #include "Container.h"
+#include "CPU.h"
 
 //ボード生成
 Board *Board_New(void) {
@@ -287,12 +288,10 @@ char Board_FlipLine(Board *board, char color, char pos, char vec) {
 }
 
 char Board_CanPlay(Board *board, char color) {
-	int x, y;
-	for (y = 1; y <= BOARD_SIZE; y++) {
-		for (x = 1; x <= BOARD_SIZE; x++) {
-			if (Board_CanFlip(board, color, x, y)) {
-				return TRUE;
-			}
+	int i;
+	for (i = 0; i < BOARD_SIZE*BOARD_SIZE; i++) {
+		if (Board_CanFlip(board, color, poslist[i])) {
+			return TRUE;
 		}
 	}
 	return FALSE;
@@ -323,9 +322,7 @@ char Board_CanFlipLine(const Board *board, char color, char pos, char vec) {
 	pos += vec;
 
 	if (board->Stone[pos] != oppColor)return 0;
-
 	pos += vec;
-
 	if (board->Stone[pos] == oppColor) {
 		pos += vec;
 		if (board->Stone[pos] == oppColor) {

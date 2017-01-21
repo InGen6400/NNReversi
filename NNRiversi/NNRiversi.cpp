@@ -20,6 +20,7 @@ int main()
 	char cpuTurn = -2, cpuPut = 0, turn = BLACK, flipCount = 0;
 	char endFlag = FALSE;
 	char passed = FALSE;
+	char left = 64;
 	int x, y;
 
 	printf("ê›íË\n");
@@ -46,6 +47,7 @@ int main()
 	mainBoard = Board_New();
 	cpu = CPU_Init(mainBoard);
 	cpu2 = CPU_Init(mainBoard);
+	left = 60;
 	Board_Draw(mainBoard);
 	while (!endFlag) {
 		if (turn == cpuTurn) {
@@ -55,7 +57,7 @@ int main()
 				printf("CPU Thinking...");
 				cpu->node = 0;
 				cpu->start = timeGetTime();
-				CPU_PUT(cpu, &cpuPut, turn);
+				CPU_PUT(cpu, &cpuPut, turn, left);
 				cpu->end = timeGetTime();
 				x = getX(cpuPut);
 				y = getY(cpuPut);
@@ -116,7 +118,7 @@ int main()
 				printf("CPU2 Thinking...");
 				cpu2->node = 0;
 				cpu2->start = timeGetTime();
-				CPU_PUT(cpu2, &cpuPut, turn);
+				CPU_PUT(cpu2, &cpuPut, turn, left);
 				cpu2->end = timeGetTime();
 				x = getX(cpuPut);
 				y = getY(cpuPut);
@@ -145,9 +147,11 @@ int main()
 			if (flipCount = Board_Flip(mainBoard, turn, ConvertPos(x,y)) >= 1) {
 				if (turn == cpuTurn) {
 					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+					left--;
 				}
 				else {
 					printf("You Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+					left--;
 				}
 				printf("ó†ï‘ÇµÇΩêŒêî:%d\n", flipCount);
 				turn = getOppStone(turn);

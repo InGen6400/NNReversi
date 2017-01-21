@@ -5,6 +5,7 @@
 #include <string.h>
 #include "Board.h"
 #include "const.h"
+#include "Container.h"
 
 //ボード生成
 Board *Board_New(void) {
@@ -46,8 +47,39 @@ void Board_Reset(Board *board) {
 	board->White = 2;
 	board->Black = 2;
 
+	Board_EmptyListInit(board);
+
 	board->Sp = board->Stack;
 	Stack_PUSH(board, STACK_STOP);
+}
+
+void Board_EmptyListInit(Board *board) {
+	char poslist[] = {
+		A1, A8, H8, H1,
+		D3, D6, E3, E6, C4, C5, F4, F5,
+		C3, C6, F3, F6,
+		D2, D7, E2, E7, B4, B5, G4, G5,
+		C2, C7, F2, F7, B3, B6, G3, G6,
+		D1, D8, E1, E8, A4, A5, H4, H5,
+		C1, C8, F1, F8, A3, A6, H3, H6,
+		B2, B7, G2, G7,
+		B1, B8, G1, G8, A2, A7, H2, H7,
+		D4, D5, E4, E5
+	};
+	int i = 0;
+	charNode *node = board->isEmpty;
+	node->value = NOMOVE;
+	node->prev = NULL;
+	node->next = NULL;
+	for (i = 0; i <= BOARD_SIZE*BOARD_SIZE; i++) {
+		if (board->Stone[poslist[i]] == NONE) {
+			node[1].value = poslist[i];
+			node[1].prev = node;
+			node[1].next = NULL;
+			node->next = &node[1];
+			node++;
+		}
+	}
 }
 
 //盤面の描画

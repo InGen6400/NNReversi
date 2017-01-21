@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="Board.h" />
     <ClInclude Include="const.h" />
+    <ClInclude Include="Container.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="stdafx.h" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Container.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="NNRiversi.cpp" />
     <ClCompile Include="Player.cpp" />

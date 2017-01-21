@@ -1,4 +1,5 @@
 #pragma once
+#include "Container.h"
 
 const char BOARD_SIZE = 8;
 const char NUM_STONE = BOARD_SIZE * BOARD_SIZE;
@@ -97,16 +98,20 @@ const char H8 = 88;
 struct _Board
 {
 	char Stone[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
+	charNode isEmpty[BOARD_SIZE * BOARD_SIZE];
 	char Stack[((BOARD_SIZE - 2) * 3 + 3)*BOARD_SIZE*BOARD_SIZE];
 	char White, Black;
 	char *Sp;
 }typedef Board;
+
 
 Board *Board_New(void);
 
 void Board_Delete(Board *board);
 
 void Board_Reset(Board *board);
+
+void Board_EmptyListInit(Board *board);
 
 void Board_Draw(Board *board);
 
@@ -122,7 +127,7 @@ char Board_CanFlip(const Board *board, char color, char x, char y);
 
 char Board_CanFlipLine(const Board *board, char color, char x, char y, char vec_x, char vec_y);
 
-char Board_CountFlips(const Board *board, char in_color, char in_pos);
+//char Board_CountFlips(const Board *board, char in_color, char in_pos);
 
 char ConvertPos(char x, char y);
 

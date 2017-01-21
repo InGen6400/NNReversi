@@ -8,12 +8,15 @@
 #include "CPU.h"
 #include <stdlib.h>
 #include <string.h>
-
+#include <Windows.h>
+#pragma comment(lib, "winmm.lib")
 
 int main()
 {
 	char tmp[50] = "";
 	Board *mainBoard;
+	CPU *cpu;
+	CPU *cpu2;
 	char cpuTurn = -2, cpuPut = 0, turn = BLACK, flipCount = 0;
 	char endFlag = FALSE;
 	int x, y;
@@ -40,17 +43,35 @@ int main()
 
 	system("cls");
 	mainBoard = Board_New();
+	cpu = CPU_Init(mainBoard);
+	cpu2 = CPU_Init(mainBoard);
 	Board_Draw(mainBoard);
 	while (!endFlag) {
 		if (turn == cpuTurn) {
 			//CPUのターン
 			printf("CPU Thinking...");
-			NegaMaxSearch(mainBoard, FALSE, turn, 0, &cpuPut);
+			cpu->node = 0;
+			cpu->start = timeGetTime();
+			NegaAlphaSearch(cpu, FALSE, turn, 0, &cpuPut, VALUE_MAX);
+			cpu->end = timeGetTime();
 			x = getX(cpuPut);
 			y = getY(cpuPut);
+			/*printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
+			printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+			cpu->start = timeGetTime();
+			cpu->node = 0;
+			cpu->start = timeGetTime();
+			NegaMaxSearch(cpu, FALSE, turn, 0, &cpuPut);
+			cpu->end = timeGetTime();
+			x = getX(cpuPut);
+			y = getY(cpuPut);
+			printf("NegaMax: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
+			printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+			scanf("%c", &tmp);*/
 		}
 		else {
 			//プレイヤーのターン
+				/*
 			while (1) {
 				fgets(tmp, sizeof(tmp), stdin);
 				if (tmp[0] == 'q') {
@@ -75,7 +96,14 @@ int main()
 					continue;
 				}
 				break;
-			}
+			}*/
+			printf("CPU2 Thinking...");
+			cpu2->node = 0;
+			cpu2->start = timeGetTime();
+			NegaAlphaSearch(cpu2, FALSE, turn, 0, &cpuPut, VALUE_MAX);
+			cpu2->end = timeGetTime();
+			x = getX(cpuPut);
+			y = getY(cpuPut);
 		}
 
 		if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
@@ -96,18 +124,6 @@ int main()
 			Board_Draw(mainBoard);
 
 		}
-		/*
-		else 
-		{
-			if (Player_Input(tmp, &x, &y)) {
-				
-				}
-				else {
-					printf("You Can't Place that position\n");
-				}
-			}
-			
-		}*/
 	}
 	Board_Delete(mainBoard);
     return 0;

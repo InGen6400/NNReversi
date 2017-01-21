@@ -48,26 +48,30 @@ int main()
 	Board_Draw(mainBoard);
 	while (!endFlag) {
 		if (turn == cpuTurn) {
-			//CPUのターン
-			printf("CPU Thinking...");
-			cpu->node = 0;
-			cpu->start = timeGetTime();
-			NegaAlphaSearch(cpu, FALSE, turn, 0, &cpuPut, VALUE_MAX);
-			cpu->end = timeGetTime();
-			x = getX(cpuPut);
-			y = getY(cpuPut);
-			/*printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
-			printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
-			cpu->start = timeGetTime();
-			cpu->node = 0;
-			cpu->start = timeGetTime();
-			NegaMaxSearch(cpu, FALSE, turn, 0, &cpuPut);
-			cpu->end = timeGetTime();
-			x = getX(cpuPut);
-			y = getY(cpuPut);
-			printf("NegaMax: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
-			printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
-			scanf("%c", &tmp);*/
+			if (Board_CanPlay(mainBoard, turn) == TRUE) {
+
+				//CPUのターン
+				printf("CPU Thinking...");
+				cpu->node = 0;
+				cpu->start = timeGetTime();
+				//EmptyListInit(cpu);
+				NegaAlphaSearch(cpu, FALSE, turn, 0, &cpuPut, VALUE_MAX);
+				cpu->end = timeGetTime();
+				x = getX(cpuPut);
+				y = getY(cpuPut);/*
+				printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
+				printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+				cpu->start = timeGetTime();
+				cpu->node = 0;
+				cpu->start = timeGetTime();
+				NegaMaxSearch(cpu, FALSE, turn, 0, &cpuPut);
+				cpu->end = timeGetTime();
+				x = getX(cpuPut);
+				y = getY(cpuPut);
+				printf("NegaMax: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
+				printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+	scanf("%c", &tmp);*/
+			}
 		}
 		else {
 			//プレイヤーのターン
@@ -97,16 +101,26 @@ int main()
 				}
 				break;
 			}*/
-			printf("CPU2 Thinking...");
-			cpu2->node = 0;
-			cpu2->start = timeGetTime();
-			NegaAlphaSearch(cpu2, FALSE, turn, 0, &cpuPut, VALUE_MAX);
-			cpu2->end = timeGetTime();
-			x = getX(cpuPut);
-			y = getY(cpuPut);
+			if (Board_CanPlay(mainBoard, turn) == TRUE) {
+				printf("CPU2 Thinking...");
+				cpu2->node = 0;
+				cpu2->start = timeGetTime();
+				CPU_PUT(cpu, &cpuPut, turn);
+				cpu2->end = timeGetTime();
+				x = getX(cpuPut);
+				y = getY(cpuPut);
+			}
 		}
+		if (x == -1) {
+			turn = getOppStone(turn);
+			if (turn == cpuTurn) {
+				printf("CPU pass\n");
+			}
+			else {
+				printf("You pass\n");
+			}
 
-		if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
+		}else if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
 			system("cls");
 			if (flipCount = Board_Flip(mainBoard, turn, x, y) >= 1) {
 				if (turn == cpuTurn) {

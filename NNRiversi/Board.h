@@ -98,7 +98,6 @@ const char H8 = 88;
 struct _Board
 {
 	char Stone[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
-	charNode isEmpty[BOARD_SIZE * BOARD_SIZE];
 	char Stack[((BOARD_SIZE - 2) * 3 + 3)*BOARD_SIZE*BOARD_SIZE];
 	char White, Black;
 	char *Sp;
@@ -122,6 +121,8 @@ char Board_Flip(Board *board, char color, char x, char y);
 char Board_FlipLine(Board *board, char color, char x, char y, char vec_x, char vec_y);
 
 void Board_Undo(Board *board);
+
+char Board_CanPlay(Board *board, char color);
 
 char Board_CanFlip(const Board *board, char color, char x, char y);
 

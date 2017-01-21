@@ -61,30 +61,31 @@ int NegaMaxSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos)
 }
 
 int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha) {
-	char x, y;
+	//char x, y;
 	int best = -VALUE_MAX, tmp;
 	char move;
-	//charNode *node;
+	charNode *node;
+	charNode *remNode;
 
 	if (depth >= MAX_DEPTH) {
 		cpu->node++;
 		return Evaluation(cpu->board, color);
 	}
-	for (y = 1; y <= BOARD_SIZE; y++) {
-		for (x = 1; x <= BOARD_SIZE; x++) {
-			if (Board_Flip(cpu->board, color, x, y)) {
-				//Ä‹A
-				tmp = -NegaAlphaSearch(cpu, FALSE, getOppStone(color), depth + 1, &move, -best);
-				Board_Undo(cpu->board);
-				if (best < tmp) {
-					best = tmp;
-					*PutPos = ConvertPos(x, y);
-				}
-				//Ž}Š ‚è
-				if (best >= alpha)break;
+	for (node = cpu->isEmpty->next; node; node = node->next)
+		if (Board_Flip(cpu->board, color, getX(node->value), getY(node->value))) {
+			remNode = node;
+			removeNode(remNode);
+			//Ä‹A
+			tmp = -NegaAlphaSearch(cpu, FALSE, getOppStone(color), depth + 1, &move, -best);
+			Board_Undo(cpu->board);
+			addNode(remNode);
+			if (best < tmp) {
+				best = tmp;
+				*PutPos = node->value;
 			}
+			//Ž}Š ‚è
+			if (best >= alpha)break;
 		}
-	}
 	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return Evaluation(cpu->board, color);
 	else {
@@ -117,7 +118,7 @@ void EmptyListInit(CPU *cpu) {
 	node->value = NOMOVE;
 	node->prev = NULL;
 	node->next = NULL;
-	for (i = 0; i <= BOARD_SIZE*BOARD_SIZE; i++) {
+	for (i = 0; i < BOARD_SIZE*BOARD_SIZE; i++) {
 		if (cpu->board->Stone[poslist[i]] == NONE) {
 			node[1].value = poslist[i];
 			node[1].prev = node;

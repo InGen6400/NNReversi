@@ -19,6 +19,7 @@ int main()
 	CPU *cpu2;
 	char cpuTurn = -2, cpuPut = 0, turn = BLACK, flipCount = 0;
 	char endFlag = FALSE;
+	char passed = FALSE;
 	int x, y;
 
 	printf("Ý’è\n");
@@ -49,18 +50,18 @@ int main()
 	while (!endFlag) {
 		if (turn == cpuTurn) {
 			if (Board_CanPlay(mainBoard, turn) == TRUE) {
-
+				passed = false;
 				//CPU‚Ìƒ^[ƒ“
 				printf("CPU Thinking...");
 				cpu->node = 0;
 				cpu->start = timeGetTime();
-				//EmptyListInit(cpu);
-				NegaAlphaSearch(cpu, FALSE, turn, 0, &cpuPut, VALUE_MAX);
+				CPU_PUT(cpu, &cpuPut, turn);
 				cpu->end = timeGetTime();
 				x = getX(cpuPut);
-				y = getY(cpuPut);/*
+				y = getY(cpuPut);
 				printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
 				printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+				/*
 				cpu->start = timeGetTime();
 				cpu->node = 0;
 				cpu->start = timeGetTime();
@@ -69,8 +70,17 @@ int main()
 				x = getX(cpuPut);
 				y = getY(cpuPut);
 				printf("NegaMax: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
-				printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
-	scanf("%c", &tmp);*/
+				printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);*/
+				//scanf("%c", &tmp);
+			}
+			else {
+				x = -1;
+				if (passed) {
+					endFlag = true;
+				}
+				else {
+					passed = true;
+				}
 			}
 		}
 		else {
@@ -102,13 +112,23 @@ int main()
 				break;
 			}*/
 			if (Board_CanPlay(mainBoard, turn) == TRUE) {
+				passed = false;
 				printf("CPU2 Thinking...");
 				cpu2->node = 0;
 				cpu2->start = timeGetTime();
-				CPU_PUT(cpu, &cpuPut, turn);
+				CPU_PUT(cpu2, &cpuPut, turn);
 				cpu2->end = timeGetTime();
 				x = getX(cpuPut);
 				y = getY(cpuPut);
+			}
+			else {
+				x = -1;
+				if (passed) {
+					endFlag = true;
+				}
+				else {
+					passed = true;
+				}
 			}
 		}
 		if (x == -1) {

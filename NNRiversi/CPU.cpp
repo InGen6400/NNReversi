@@ -22,7 +22,7 @@ void CPU_Reset(CPU *cpu, Board *board) {
 
 void CPU_PUT(CPU *cpu, char *PutPos, char color) {
 	EmptyListInit(cpu);
-	NegaAlphaSearch(cpu, FALSE, color, 0, PutPos, VALUE_MAX);
+	NegaAlphaSearch(cpu, FALSE, color, MAX_DEPTH, PutPos, VALUE_MAX);
 	//NegaMaxSearch(cpu, FALSE, color, 0, PutPos);
 }
 
@@ -33,15 +33,15 @@ int NegaMaxSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos)
 	charNode *node;
 	charNode *remNode;
 
-	if (depth >= MAX_DEPTH) {
+	if (depth <= 0) {
 		cpu->node++;
 		return Evaluation(cpu->board, color);
 	}
-	
+	/*
 	for (y = 1; y <= BOARD_SIZE; y++) {
 		for (x = 1; x <= BOARD_SIZE; x++) {
-			if (Board_Flip(cpu->board, color, x, y)) {
-				tmp = -NegaMaxSearch(cpu, FALSE, getOppStone(color), depth+1, &move);
+			if (Board_Flip(cpu->board, color, )) {
+				tmp = -NegaMaxSearch(cpu, FALSE, getOppStone(color), depth-1, &move);
 				Board_Undo(cpu->board);
 				if (best < tmp) {
 					best = tmp;
@@ -49,12 +49,12 @@ int NegaMaxSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos)
 				}
 			}
 		}
-	}
+	}*/
 
 	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return Evaluation(cpu->board, color);
 	else {
-		tmp = -NegaMaxSearch(cpu, TRUE, getOppStone(color), depth+1, &move);
+		tmp = -NegaMaxSearch(cpu, TRUE, getOppStone(color), depth-1, &move);
 		return tmp;
 	}
 	
@@ -67,16 +67,16 @@ int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPo
 	charNode *node;
 	charNode *remNode;
 
-	if (depth >= MAX_DEPTH) {
+	if (depth <= 0) {
 		cpu->node++;
 		return Evaluation(cpu->board, color);
 	}
 	for (node = cpu->isEmpty->next; node; node = node->next)
-		if (Board_Flip(cpu->board, color, getX(node->value), getY(node->value))) {
+		if (Board_Flip(cpu->board, color, node->value)) {
 			remNode = node;
 			removeNode(remNode);
 			//Ä‹A
-			tmp = -NegaAlphaSearch(cpu, FALSE, getOppStone(color), depth + 1, &move, -best);
+			tmp = -NegaAlphaSearch(cpu, FALSE, getOppStone(color), depth - 1, &move, -best);
 			Board_Undo(cpu->board);
 			addNode(remNode);
 			if (best < tmp) {
@@ -89,7 +89,7 @@ int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPo
 	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return Evaluation(cpu->board, color);
 	else {
-		tmp = -NegaAlphaSearch(cpu, TRUE, getOppStone(color), depth + 1, &move, -best);
+		tmp = -NegaAlphaSearch(cpu, TRUE, getOppStone(color), depth - 1, &move, -best);
 		return tmp;
 	}
 }

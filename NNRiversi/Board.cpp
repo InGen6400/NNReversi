@@ -88,25 +88,120 @@ void Board_Draw(Board *board) {
 }
 
 //着手
-char Board_Flip(Board *board, char color, char x, char y) {
+char Board_Flip(Board *board, char color, char pos) {
 
 	char flipCount=0;
 
-	if (x <= 0 || y <= 0 || x > BOARD_SIZE || y > BOARD_SIZE)return 0;
-	if (board->Stone[ConvertPos(x, y)] != NONE)return 0;
+	if (board->Stone[pos] != NONE)return 0;
 
-	flipCount += Board_FlipLine(board, color, x, y, 1, 0);
-	flipCount += Board_FlipLine(board, color, x, y, 1, 1);
-	flipCount += Board_FlipLine(board, color, x, y, 0, 1);
-	flipCount += Board_FlipLine(board, color, x, y, -1, 1);
-	flipCount += Board_FlipLine(board, color, x, y, -1, 0);
-	flipCount += Board_FlipLine(board, color, x, y, -1, -1);
-	flipCount += Board_FlipLine(board, color, x, y, 0, -1);
-	flipCount += Board_FlipLine(board, color, x, y, 1, -1);
+#pragma region dirSelectswitch
+
+	switch (pos) {
+	case C1:
+	case C2:
+	case D1:
+	case D2:
+	case E1:
+	case E2:
+	case F1:
+	case F2:
+		flipCount += Board_FlipLine(board, color, pos, DIR_L);
+		flipCount += Board_FlipLine(board, color, pos, DIR_R);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_D);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DR);
+		break;
+	case C8:
+	case C7:
+	case D8:
+	case D7:
+	case E8:
+	case E7:
+	case F8:
+	case F7:
+		flipCount += Board_FlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_U);
+		flipCount += Board_FlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_FlipLine(board, color, pos, DIR_L);
+		flipCount += Board_FlipLine(board, color, pos, DIR_R);
+		break;
+	case A3:
+	case A4:
+	case A5:
+	case A6:
+	case B3:
+	case B4:
+	case B5:
+	case B6:
+		flipCount += Board_FlipLine(board, color, pos, DIR_U);
+		flipCount += Board_FlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_FlipLine(board, color, pos, DIR_R);
+		flipCount += Board_FlipLine(board, color, pos, DIR_D);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DR);
+		break;
+	case H3:
+	case H4:
+	case H5:
+	case H6:
+	case G3:
+	case G4:
+	case G5:
+	case G6:
+		flipCount += Board_FlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_U);
+		flipCount += Board_FlipLine(board, color, pos, DIR_L);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_D);
+		break;
+	case A1:
+	case A2:
+	case B1:
+	case B2:
+		flipCount += Board_FlipLine(board, color, pos, DIR_R);
+		flipCount += Board_FlipLine(board, color, pos, DIR_D);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DR);
+		break;
+	case A8:
+	case A7:
+	case B8:
+	case B7:
+		flipCount += Board_FlipLine(board, color, pos, DIR_U);
+		flipCount += Board_FlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_FlipLine(board, color, pos, DIR_R);
+		break;
+	case H1:
+	case H2:
+	case G1:
+	case G2:
+		flipCount += Board_FlipLine(board, color, pos, DIR_L);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_D);
+		break;
+	case H8:
+	case H7:
+	case G8:
+	case G7:
+		flipCount += Board_FlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_U);
+		flipCount += Board_FlipLine(board, color, pos, DIR_L);
+		break;
+	default:
+		flipCount += Board_FlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_U);
+		flipCount += Board_FlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_FlipLine(board, color, pos, DIR_L);
+		flipCount += Board_FlipLine(board, color, pos, DIR_R);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_FlipLine(board, color, pos, DIR_D);
+		flipCount += Board_FlipLine(board, color, pos, DIR_DR);
+		break;
+	}
+
+#pragma endregion
 
 	if (flipCount>0) {
-		board->Stone[ConvertPos(x, y)] = color;
-		Stack_PUSH(board, ConvertPos(x, y));
+		board->Stone[pos] = color;
+		Stack_PUSH(board, pos);
 		Stack_PUSH(board, flipCount);
 		Stack_PUSH(board, color);
 
@@ -124,39 +219,75 @@ char Board_Flip(Board *board, char color, char x, char y) {
 }
 
 //直線を裏返す
-char Board_FlipLine(Board *board, char color, char x, char y, char vec_x, char vec_y) {
+char Board_FlipLine(Board *board, char color, char pos, char vec) {
 	char oppColor = getOppStone(color);
-	char flips[10];
 	char flipCount = 0;
-	char i;
 
-	x += vec_x;
-	y += vec_y;
+	pos += vec;
 
-	if (x <= 0 || y <= 0 || x > BOARD_SIZE || y > BOARD_SIZE)return 0;
-	if (board->Stone[ConvertPos(x, y)] != oppColor)return 0;
-	flips[flipCount] = ConvertPos(x, y);
-	flipCount++;
+	if (board->Stone[pos] != oppColor)return 0;
 
-	x += vec_x;
-	y += vec_y;
+	pos += vec;
 
-	while (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
-		if (board->Stone[ConvertPos(x, y)] == NONE)return 0;
-		if (board->Stone[ConvertPos(x, y)] == color) {
-			//実際に裏返す
-			for (i = 0; i < flipCount; i++) {
-				board->Stone[flips[i]] = color;
-				Stack_PUSH(board, flips[i]);
+	if (board->Stone[pos] == oppColor) {
+		pos += vec;
+		if (board->Stone[pos] == oppColor) {
+			pos += vec;
+			if (board->Stone[pos] == oppColor) {
+				pos += vec;
+				if (board->Stone[pos] == oppColor) {
+					pos += vec;
+					if (board->Stone[pos] == oppColor) {
+						pos += vec;
+						if (board->Stone[pos] != color) {
+							return 0;
+						}
+						pos -= vec;
+						flipCount++;
+						board->Stone[pos] = color;
+						Stack_PUSH(board, pos);
+					}
+					else if (board->Stone[pos] != color) {
+						return 0;
+					}
+					pos -= vec;
+					flipCount++;
+					board->Stone[pos] = color;
+					Stack_PUSH(board, pos);
+				}
+				else if (board->Stone[pos] != color) {
+					return 0;
+				}
+				pos -= vec;
+				flipCount++;
+				board->Stone[pos] = color;
+				Stack_PUSH(board, pos);
 			}
-			return flipCount;
+			else if (board->Stone[pos] != color) {
+				return 0;
+			}
+			pos -= vec;
+			flipCount++;
+			board->Stone[pos] = color;
+			Stack_PUSH(board, pos);
 		}
-		flips[flipCount] = ConvertPos(x, y);
+		else if (board->Stone[pos] != color) {
+			return 0;
+		}
+		pos -= vec;
 		flipCount++;
-		x += vec_x;
-		y += vec_y;
+		board->Stone[pos] = color;
+		Stack_PUSH(board, pos);
 	}
-	return 0;
+	else if (board->Stone[pos] != color) {
+		return 0;
+	}
+	pos -= vec;
+	flipCount++;
+	board->Stone[pos] = color;
+	Stack_PUSH(board, pos);
+
+	return flipCount;
 }
 
 char Board_CanPlay(Board *board, char color) {

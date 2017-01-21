@@ -7,6 +7,20 @@ const char NUM_STONE = BOARD_SIZE * BOARD_SIZE;
 const char STACK_STOP = -2;
 const char STACK_BREAK = -1;
 
+#pragma region directions
+
+const char DIR_U = -(BOARD_SIZE + 2);
+const char DIR_UR = -(BOARD_SIZE + 2) + 1;
+const char DIR_R = 1;
+const char DIR_DR = (BOARD_SIZE + 2) + 1;
+const char DIR_D = (BOARD_SIZE + 2);
+const char DIR_DL = (BOARD_SIZE + 2) - 1;
+const char DIR_L = -1;
+const char DIR_UL = -(BOARD_SIZE + 2) - 1;
+
+#pragma endregion
+
+
 #pragma region piece_define
 
 const char WALL = -1;
@@ -110,15 +124,13 @@ void Board_Delete(Board *board);
 
 void Board_Reset(Board *board);
 
-void Board_EmptyListInit(Board *board);
-
 void Board_Draw(Board *board);
 
 char Board_CountStone(const Board *board, char in_color);
 
-char Board_Flip(Board *board, char color, char x, char y);
+char Board_Flip(Board *board, char color, char pos);
 
-char Board_FlipLine(Board *board, char color, char x, char y, char vec_x, char vec_y);
+char Board_FlipLine(Board *board, char color, char pos, char vec);
 
 void Board_Undo(Board *board);
 

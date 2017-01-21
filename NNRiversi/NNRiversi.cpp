@@ -142,7 +142,7 @@ int main()
 
 		}else if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
 			system("cls");
-			if (flipCount = Board_Flip(mainBoard, turn, x, y) >= 1) {
+			if (flipCount = Board_Flip(mainBoard, turn, ConvertPos(x,y)) >= 1) {
 				if (turn == cpuTurn) {
 					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
 				}

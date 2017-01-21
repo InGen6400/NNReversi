@@ -343,6 +343,10 @@ char Board_CanFlipLine(const Board *board, char color, char x, char y, char vec_
 	return FALSE;
 }
 
+char Board_CountFlips(const Board *board, char in_color, char in_pos) {
+	return 0;
+}
+
 //一手戻す
 void Board_Undo(Board *board) {
 	char color = Stack_POP(board);
@@ -393,7 +397,7 @@ char getY(char pos) {
 
 //反転色を返す　1->2 2->1 (0->1)
 char getOppStone(char color) {
-	return color % 2 + 1;
+	return BLACK + WHITE - color;
 }
 
 char Stack_POP(Board *board) {

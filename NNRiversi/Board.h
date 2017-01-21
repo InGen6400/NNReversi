@@ -140,7 +140,7 @@ char Board_CanFlip(const Board *board, char color, char x, char y);
 
 char Board_CanFlipLine(const Board *board, char color, char x, char y, char vec_x, char vec_y);
 
-//char Board_CountFlips(const Board *board, char in_color, char in_pos);
+char Board_CountFlips(const Board *board, char in_color, char in_pos);
 
 char ConvertPos(char x, char y);
 

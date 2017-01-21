@@ -93,9 +93,7 @@ char Board_Flip(Board *board, char color, char pos) {
 	char flipCount=0;
 
 	if (board->Stone[pos] != NONE)return 0;
-
-#pragma region dirSelectswitch
-
+	
 	switch (pos) {
 	case C1:
 	case C2:
@@ -196,8 +194,6 @@ char Board_Flip(Board *board, char color, char pos) {
 		flipCount += Board_FlipLine(board, color, pos, DIR_DR);
 		break;
 	}
-
-#pragma endregion
 
 	if (flipCount>0) {
 		board->Stone[pos] = color;
@@ -303,48 +299,182 @@ char Board_CanPlay(Board *board, char color) {
 }
 
 //posに着手できるか
-char Board_CanFlip(const Board *board, char color, char x, char y) {
+char Board_CanFlip(const Board *board, char color, char pos) {
 
-	if (x <= 0 && y <= 0 && x > BOARD_SIZE && y > BOARD_SIZE)return FALSE;
-	if (board->Stone[ConvertPos(x, y)] != NONE)return FALSE;
+	if (board->Stone[pos] != NONE)return FALSE;
 
-	if(Board_CanFlipLine(board, color, x, y, 1, 0))return TRUE;
-	if(Board_CanFlipLine(board, color, x, y, 1, 1))return TRUE;
-	if(Board_CanFlipLine(board, color, x, y, 0, 1))return TRUE;
-	if(Board_CanFlipLine(board, color, x, y, -1, 1))return TRUE;
-	if(Board_CanFlipLine(board, color, x, y, -1, 0))return TRUE;
-	if(Board_CanFlipLine(board, color, x, y, -1, -1))return TRUE;
-	if(Board_CanFlipLine(board, color, x, y, 0, -1))return TRUE;
-	if(Board_CanFlipLine(board, color, x, y, 1, -1))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_U))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_UR))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_R))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_DR))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_D))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_DL))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_D))return TRUE;
+	if(Board_CanFlipLine(board, color, pos, DIR_UL))return TRUE;
 
 	return FALSE;
 }
 
 //Board_CanFlipの補助
-char Board_CanFlipLine(const Board *board, char color, char x, char y, char vec_x, char vec_y) {
+char Board_CanFlipLine(const Board *board, char color, char pos, char vec) {
 	char oppColor = getOppStone(color);
+	char count = 0;
+	
+	pos += vec;
 
-	x += vec_x;
-	y += vec_y;
+	if (board->Stone[pos] != oppColor)return 0;
 
-	if (x <= 0 && y <= 0 && x > BOARD_SIZE && y > BOARD_SIZE)return FALSE;
-	if (board->Stone[ConvertPos(x, y)] == NONE)return FALSE;
-	if (board->Stone[ConvertPos(x, y)] == color)return FALSE;
+	pos += vec;
 
-	x += vec_x;
-	y += vec_y;
-
-	while (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
-		if (board->Stone[ConvertPos(x, y)] == NONE)return FALSE;
-		if (board->Stone[ConvertPos(x, y)] == color)return TRUE;
-		x += vec_x;
-		y += vec_y;
+	if (board->Stone[pos] == oppColor) {
+		pos += vec;
+		if (board->Stone[pos] == oppColor) {
+			pos += vec;
+			if (board->Stone[pos] == oppColor) {
+				pos += vec;
+				if (board->Stone[pos] == oppColor) {
+					pos += vec;
+					if (board->Stone[pos] == oppColor) {
+						pos += vec;
+						if (board->Stone[pos] != color) {
+							return 0;
+						}
+						count++;
+					}
+					else if (board->Stone[pos] != color) {
+						return 0;
+					}
+					count++;
+				}
+				else if (board->Stone[pos] != color) {
+					return 0;
+				}
+				count++;
+			}
+			else if (board->Stone[pos] != color) {
+				return 0;
+			}
+			count++;
+		}
+		else if (board->Stone[pos] != color) {
+			return 0;
+		}
+		count++;
 	}
-	return FALSE;
+	else if (board->Stone[pos] != color) {
+		return 0;
+	}
+	count++;
+	return count;
 }
 
-char Board_CountFlips(const Board *board, char in_color, char in_pos) {
-	return 0;
+char Board_CountFlips(const Board *board, char color, char pos) {
+	char flipCount = 0;
+
+	if (board->Stone[pos] != NONE)return 0;
+
+	switch (pos) {
+	case C1:
+	case C2:
+	case D1:
+	case D2:
+	case E1:
+	case E2:
+	case F1:
+	case F2:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_L);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_R);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_D);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DR);
+		break;
+	case C8:
+	case C7:
+	case D8:
+	case D7:
+	case E8:
+	case E7:
+	case F8:
+	case F7:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_U);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_L);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_R);
+		break;
+	case A3:
+	case A4:
+	case A5:
+	case A6:
+	case B3:
+	case B4:
+	case B5:
+	case B6:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_U);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_R);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_D);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DR);
+		break;
+	case H3:
+	case H4:
+	case H5:
+	case H6:
+	case G3:
+	case G4:
+	case G5:
+	case G6:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_U);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_L);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_D);
+		break;
+	case A1:
+	case A2:
+	case B1:
+	case B2:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_R);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_D);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DR);
+		break;
+	case A8:
+	case A7:
+	case B8:
+	case B7:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_U);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_R);
+		break;
+	case H1:
+	case H2:
+	case G1:
+	case G2:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_L);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_D);
+		break;
+	case H8:
+	case H7:
+	case G8:
+	case G7:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_U);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_L);
+		break;
+	default:
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_U);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_UR);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_L);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_R);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DL);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_D);
+		flipCount += Board_CanFlipLine(board, color, pos, DIR_DR);
+		break;
+	}
+
+	return flipCount;
 }
 
 //一手戻す

@@ -35,6 +35,8 @@ int NegaMaxSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos)
 
 int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha);
 
+int NegaEndSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha);
+
 int Evaluation(Board *board, char color);
 
 void EmptyListInit(CPU *cpu);

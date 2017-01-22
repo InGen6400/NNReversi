@@ -17,7 +17,7 @@ int main()
 	Board *mainBoard;
 	CPU *cpu;
 	CPU *cpu2;
-	char cpuTurn = -2, cpuPut = 0, turn = BLACK, flipCount = 0;
+	char cpuTurn = NOMOVE, cpuPut = 0, turn = BLACK, flipCount = 0;
 	char endFlag = FALSE;
 	char passed = FALSE;
 	char left = 64;

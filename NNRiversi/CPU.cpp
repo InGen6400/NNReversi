@@ -22,11 +22,12 @@ void CPU_Reset(CPU *cpu, Board *board) {
 
 void CPU_PUT(CPU *cpu, char *PutPos, char color, char left) {
 	EmptyListInit(cpu);
-	if (left > MAX_DEPTH) {
-		left = MAX_DEPTH;
+	if (left <= 10) {
+		NegaEndSearch(cpu, FALSE, color, left, PutPos, VALUE_MAX);
 	}
-	NegaAlphaSearch(cpu, FALSE, color, left, PutPos, VALUE_MAX);
-	//NegaMaxSearch(cpu, FALSE, color, 0, PutPos);
+	else {
+		NegaAlphaSearch(cpu, FALSE, color, MAX_DEPTH, PutPos, VALUE_MAX);
+	}
 }
 
 int NegaMaxSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos) {
@@ -70,7 +71,42 @@ int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPo
 	charNode *node;
 	charNode *remNode;
 	
+	if (depth <= 0) {
+		cpu->node++;
+		return Evaluation(cpu->board, color);
+	}
+	for (node = cpu->isEmpty->next; node; node = node->next)
+		if (Board_Flip(cpu->board, color, node->value)) {
+			remNode = node;
+			removeNode(remNode);
+			//Ä‹A
+			tmp = -NegaAlphaSearch(cpu, FALSE, getOppStone(color), depth - 1, &move, -best);
+			Board_Undo(cpu->board);
+			addNode(remNode);
+			if (best < tmp) {
+				best = tmp;
+				*PutPos = node->value;
+			}
+			//Ž}Š ‚è
+			if (best >= alpha)break;
+		}
+	if (best != -VALUE_MAX)return best;
+	else if (isPassed == TRUE)return Evaluation(cpu->board, color);
+	else {
+		tmp = -NegaAlphaSearch(cpu, TRUE, getOppStone(color), depth - 1, &move, -best);
+		return tmp;
+	}
+}
+
+int NegaEndSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha) {
+	//char x, y;
+	int best = -VALUE_MAX, tmp;
+	char move;
+	charNode *node;
+	charNode *remNode;
+
 	if (depth == 1) {
+		printf("last\n");
 		cpu->node++;
 		node = cpu->isEmpty->next;
 		tmp = Board_CountFlips(cpu->board, color, node->value);
@@ -88,8 +124,8 @@ int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPo
 		return best;
 	}
 	/*if (depth <= 0) {
-		cpu->node++;
-		return Evaluation(cpu->board, color);
+	cpu->node++;
+	return Evaluation(cpu->board, color);
 	}*/
 	for (node = cpu->isEmpty->next; node; node = node->next)
 		if (Board_Flip(cpu->board, color, node->value)) {

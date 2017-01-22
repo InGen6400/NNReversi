@@ -83,9 +83,13 @@ void Board_Draw(Board *board) {
 			}
 			printf("%s｜", icon);
 		}
+		if (y != 0 && y != 9) {
+			printf(" %d", y);
+		}
 		putchar('\n');
 		printf(" 　＋―＋―＋―＋―＋―＋―＋―＋―＋―＋―＋\n");
 	}
+	printf(" 　　　　Ａ  Ｂ  Ｃ  Ｄ  Ｅ  Ｆ  Ｇ  Ｈ\n");
 }
 
 //着手

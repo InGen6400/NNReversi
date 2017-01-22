@@ -30,6 +30,40 @@ void CPU_PUT(CPU *cpu, char *PutPos, char color, char left) {
 	}
 }
 
+int NegaMaxSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos) {
+	char x, y;
+	int best=-VALUE_MAX, tmp;
+	char move;
+	charNode *node;
+	charNode *remNode;
+
+	if (depth <= 0) {
+		cpu->node++;
+		return Evaluation(cpu->board, color);
+	}
+	/*
+	for (y = 1; y <= BOARD_SIZE; y++) {
+		for (x = 1; x <= BOARD_SIZE; x++) {
+			if (Board_Flip(cpu->board, color, )) {
+				tmp = -NegaMaxSearch(cpu, FALSE, getOppStone(color), depth-1, &move);
+				Board_Undo(cpu->board);
+				if (best < tmp) {
+					best = tmp;
+					*PutPos = ConvertPos(x, y);
+				}
+			}
+		}
+	}*/
+
+	if (best != -VALUE_MAX)return best;
+	else if (isPassed == TRUE)return Evaluation(cpu->board, color);
+	else {
+		tmp = -NegaMaxSearch(cpu, TRUE, getOppStone(color), depth-1, &move);
+		return tmp;
+	}
+	
+}
+
 int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha) {
 	//char x, y;
 	int best = -VALUE_MAX, tmp;

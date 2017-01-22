@@ -31,6 +31,8 @@ void CPU_PUT(CPU *cpu, char *PutPos, char color, char left);
 
 void CPU_Reset(CPU *cpu, Board *board);
 
+int NegaMaxSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos);
+
 int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha);
 
 int NegaEndSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha);

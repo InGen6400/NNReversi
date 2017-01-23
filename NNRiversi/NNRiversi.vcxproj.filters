@@ -59,7 +59,7 @@
     <ClCompile Include="CPU.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="E:\NNRiversi\Container.cpp">
+    <ClCompile Include="Container.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

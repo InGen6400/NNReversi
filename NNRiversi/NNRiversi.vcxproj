@@ -160,8 +160,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="Container.cpp" />
     <ClCompile Include="CPU.cpp" />
-    <ClCompile Include="E:\NNRiversi\Container.cpp" />
     <ClCompile Include="NNRiversi.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -9,4 +9,4 @@ const int POW3_6 = 3 * 3 * 3 * 3 * 3 * 3;
 const int POW3_5 = 3 * 3 * 3 * 3 * 3;
 const int POW3_4 = 3 * 3 * 3 * 3;
 const int POW3_3 = 3 * 3 * 3;
-const int POW3_3 = 3 * 3;
+const int POW3_2 = 3 * 3;

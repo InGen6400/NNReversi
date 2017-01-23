@@ -21,13 +21,12 @@ const char DIR_UL = -(BOARD_SIZE + 2) - 1;
 
 #pragma endregion
 
-
 #pragma region piece_define
 
 const char WALL = -1;
-const char NONE = 0;
-const char WHITE = 1;
-const char BLACK  = 2;
+const char NONE = 2;
+const char WHITE = 0;
+const char BLACK  = 1;
 
 #pragma endregion
 
@@ -110,7 +109,7 @@ const char H8 = 88;
 
 #pragma endregion
 
-struct FlipData
+struct _FlipData
 {
 	char filpCount;
 	char flipPos[6];

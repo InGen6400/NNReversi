@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Board.h"
+
 const char MAX_DEPTH = 6;
 
 const int VALUE_MAX = 100000000;

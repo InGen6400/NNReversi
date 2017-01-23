@@ -113,10 +113,16 @@ struct _Board
 {
 	char Stone[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
 	char Stack[((BOARD_SIZE - 2) * 3 + 3)*BOARD_SIZE*BOARD_SIZE];
+	FlipData flipData[][];
 	char White, Black;
 	char *Sp;
 }typedef Board;
 
+struct FlipData
+{
+	char filpCount;
+	char flipPos[6];
+}typedef FlipData;
 
 Board *Board_New(void);
 

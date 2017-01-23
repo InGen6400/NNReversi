@@ -1,5 +1,6 @@
 #pragma once
 #include "Container.h"
+#include "const.h"
 
 const char BOARD_SIZE = 8;
 const char NUM_STONE = BOARD_SIZE * BOARD_SIZE;
@@ -117,6 +118,12 @@ struct _Board
 	char *Sp;
 }typedef Board;
 
+struct FlipData{
+	char flipcount;
+	char flipPos[6];
+}typedef FlipData;
+
+FlipData flipData[POW_3_8][8];
 
 Board *Board_New(void);
 

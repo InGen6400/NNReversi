@@ -25,7 +25,7 @@ void BitBoard_Delete(BitBoard *bitboard) {
 
 //盤面の初期化
 void BitBoard_Reset(BitBoard *bitboard) {
-	bitboard->white = 0x8042201008040201;//真ん中二つ以外0
+	bitboard->white = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->black = 0x0000000810000000;//真ん中二つ以外0
 }
 

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Board.h"
+#include "BitBoard.h"
 #include "Player.h"
 #include "const.h"
 #include "CPU.h"
@@ -45,6 +46,12 @@ int main()
 		}
 	}
 
+	BitBoard *bitboard;
+
+	bitboard = BitBoard_New();
+	BitBoard_Draw(bitboard);
+
+	/*
 	if (mode == BATTLE) {
 		//CPU‚ÌFÝ’è
 		while (cpuTurn == -2)
@@ -247,6 +254,7 @@ int main()
 		mainBoard = Board_New();
 		cpu = CPU_Init(mainBoard);
 		cpu2 = CPU_Init(mainBoard);
+		cpu->start = timeGetTime();
 		left = 60;
 		Board_Draw(mainBoard);
 		while (!endFlag) {
@@ -256,14 +264,9 @@ int main()
 					//CPU‚Ìƒ^[ƒ“
 					printf("CPU Thinking...");
 					cpu->node = 0;
-					cpu->start = timeGetTime();
 					CPU_PUT(cpu, &cpuPut, turn, left);
-					cpu->end = timeGetTime();
 					x = getX(cpuPut);
 					y = getY(cpuPut);
-					printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
-					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
-					scanf("%c", &tmp);
 				}
 				else {
 					x = -1;
@@ -280,9 +283,7 @@ int main()
 					passed = false;
 					printf("CPU2 Thinking...");
 					cpu2->node = 0;
-					cpu2->start = timeGetTime();
 					CPU_PUT(cpu2, &cpuPut, turn, left);
-					cpu2->end = timeGetTime();
 					x = getX(cpuPut);
 					y = getY(cpuPut);
 				}
@@ -324,8 +325,12 @@ int main()
 
 			}
 		}
+		cpu->end = timeGetTime();
+		printf("\nNegaAlpha: time:%d\n", cpu->end - cpu->start);
 	}
-	Board_Delete(mainBoard);
+	*/
+	//Board_Delete(mainBoard);
+BitBoard_Delete(bitboard);
     return 0;
 }
 

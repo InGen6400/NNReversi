@@ -1,5 +1,6 @@
 #pragma once
 #include "Container.h"
+#include "const.h"
 
 const char BOARD_SIZE = 8;
 const char NUM_STONE = BOARD_SIZE * BOARD_SIZE;
@@ -20,13 +21,12 @@ const char DIR_UL = -(BOARD_SIZE + 2) - 1;
 
 #pragma endregion
 
-
 #pragma region piece_define
 
 const char WALL = -1;
-const char NONE = 0;
-const char WHITE = 1;
-const char BLACK  = 2;
+const char NONE = 2;
+const char WHITE = 0;
+const char BLACK  = 1;
 
 #pragma endregion
 
@@ -109,14 +109,20 @@ const char H8 = 88;
 
 #pragma endregion
 
+struct _FlipData
+{
+	char filpCount;
+	char flipPos[6];
+}typedef FlipData;
+
 struct _Board
 {
 	char Stone[(BOARD_SIZE + 2) * (BOARD_SIZE + 2)];
 	char Stack[((BOARD_SIZE - 2) * 3 + 3)*BOARD_SIZE*BOARD_SIZE];
+	FlipData flipData[POW3_8][8];
 	char White, Black;
 	char *Sp;
 }typedef Board;
-
 
 Board *Board_New(void);
 

@@ -25,8 +25,8 @@ void BitBoard_Delete(BitBoard *bitboard) {
 
 //盤面の初期化
 void BitBoard_Reset(BitBoard *bitboard) {
-	bitboard->white = 0x0000001008000000;//真ん中二つ以外0
-	bitboard->black = 0x0000000810000000;//真ん中二つ以外0
+	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
+	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外0
 }
 
 //盤面の描画
@@ -43,14 +43,14 @@ void BitBoard_Draw(const BitBoard *bitboard) {
 
 
 
-	for (x = 0; x < BitBOARD_SIZE * BitBOARD_SIZE; x++, cpyBoard.white<<=1, cpyBoard.black<<=1) {
+	for (x = 0; x < BitBOARD_SIZE * BitBOARD_SIZE; x++, cpyBoard.stone[WHITE]<<=1, cpyBoard.stone[BLACK]<<=1) {
 		if (x%8 == 0) {
 			printf(" %d ｜＃｜", x/8+1);
 		}
-		if (cpyBoard.white & 0x8000000000000000) {
+		if (cpyBoard.stone[WHITE] & 0x8000000000000000) {
 			printf("●｜");
 		}
-		else if (cpyBoard.black & 0x8000000000000000) {
+		else if (cpyBoard.stone[BLACK] & 0x8000000000000000) {
 			printf("〇｜");
 		}
 		else {
@@ -70,8 +70,13 @@ void BitBoard_Draw(const BitBoard *bitboard) {
 }
 
 //colorの石数を返す
-char BitBoard_CountStone(const BitBoard *bitboard, char in_color) {
-	return 0;
+char BitBoard_CountStone(uint64 bits) {
+	bits = bits - (bits>>1 & 0x5555555555555555);
+	bits = (bits & 0x3333333333333333) + (bits >> 2 & 0x3333333333333333);
+	bits = (bits & 0x0F0F0F0F0F0F0F0F) + (bits >> 4 & 0x0F0F0F0F0F0F0F0F);
+	bits = (bits & 0x00FF00FF00FF00FF) + (bits >> 8 & 0x00FF00FF00FF00FF);
+	bits = (bits & 0x0000FFFF0000FFFF) + (bits >> 16 & 0x0000FFFF0000FFFF);
+	return (bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);
 }
 
 //着手

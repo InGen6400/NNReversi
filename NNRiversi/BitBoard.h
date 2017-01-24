@@ -15,8 +15,8 @@ struct bitFlipData
 
 struct _BitBoard
 {
-	uint64 white;
-	uint64 black;
+	//color index
+	uint64 stone[2];
 }typedef BitBoard;
 
 BitBoard *BitBoard_New(void);
@@ -27,7 +27,7 @@ void BitBoard_Reset(BitBoard *bitboard);
 
 void BitBoard_Draw(const BitBoard *bitboard);
 
-char BitBoard_CountStone(const BitBoard *bitboard, char in_color);
+char BitBoard_CountStone(uint64 bits);
 
 char BitBoard_Flip(BitBoard *bitboard, char color, char pos);
 

@@ -17,6 +17,8 @@ struct _BitBoard
 {
 	//color index
 	uint64 stone[2];
+	uint64 Stack[BitBOARD_SIZE * BitBOARD_SIZE];
+	uint64 *Sp;
 }typedef BitBoard;
 
 BitBoard *BitBoard_New(void);

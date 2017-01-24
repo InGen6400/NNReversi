@@ -80,11 +80,20 @@ char BitBoard_CountStone(uint64 bits) {
 }
 
 //’…Žè
-char BitBoard_Flip(BitBoard *bitboard, char color, char pos) {
+char BitBoard_Flip(uint64 *white, uint64 *black, uint64 pos) {
+	uint64 reverse;
+	
 
-	char flipCount = 0;
+}
 
-	return flipCount;
+uint64 getReverseBits(const uint64 *white, const uint64 *black, const uint64 pos) {
+	
+	if (((*black | *white) & pos) != 0)return 0;
+	uint64 revBits = 0;
+	const uint64 wh = *white & 0x7E7E7E7E7E7E7E7E;
+
+	revBits = (pos >> 1) & wh & ((*black << 1) | ((wh & (*black << 1)) << 1));
+
 }
 
 //’¼ü‚ð— •Ô‚·

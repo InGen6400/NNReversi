@@ -41,7 +41,7 @@ void BitBoard_Undo(BitBoard *bitboard);
 
 uint64 BitBoard_getMobility(BitBoard *bitboard, char color);
 
-char BitBoard_CanFlip(const BitBoard *bitboard, char color, char pos);
+char BitBoard_CanFlip(const BitBoard *bitboard, char color, uint64 pos);
 
 char BitBoard_CanFlipLine(const BitBoard *bitboard, char color, char pos, char vec);
 

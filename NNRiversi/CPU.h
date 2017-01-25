@@ -23,7 +23,7 @@ const char poslist[] = {
 struct CPU_ {
 	int node;
 	int start, end;
-	Board *board;
+	BitBoard *bitboard;
 	charNode isEmpty[BOARD_SIZE * BOARD_SIZE];
 }typedef CPU;
 
@@ -39,4 +39,4 @@ int NegaEndSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos,
 
 int Evaluation(Board *board, char color);
 
-void EmptyListInit(CPU *cpu);
+void EmptyListInit(CPU *cpu, char color);

@@ -291,7 +291,7 @@ uint64 BitBoard_getMobility(BitBoard *bitboard, char color) {
 }
 
 //pos‚É’…Žè‚Å‚«‚é‚©
-char BitBoard_CanFlip(const uint64 me, const uint64 ene, char pos) {
+char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos) {
 
 	uint64 reverse = getReverseBits(&me, &ene, pos);
 

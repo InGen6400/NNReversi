@@ -18,6 +18,8 @@ const char LEARN = 1;
 const char TIME = 2;
 const char PVP = 3;
 
+void Game_PVP(char showMobility);
+
 int main()
 {
 	char tmp[50] = "";
@@ -57,8 +59,6 @@ int main()
 			printf("そのようなモードは存じておりません\n");
 		}
 	}
-
-	BitBoard *bitboard;
 	/*
 	bitboard = BitBoard_New();
 	fgets(tmp, sizeof(tmp), stdin);
@@ -72,96 +72,7 @@ int main()
 	BitBoard_Draw(bitboard);
 	*/
 	if (mode == PVP) {
-		system("cls");
-		bitboard = BitBoard_New();
-		left = 60;
-		BitBoard_Draw(bitboard, showMobility);
-		cpuTurn = BLACK;
-		while (!endFlag) {
-			if (turn == cpuTurn) {
-				//プレイヤーのターン
-				while (1) {
-					fgets(tmp, sizeof(tmp), stdin);
-					if (tmp[0] == 'q') {
-						endFlag = TRUE;
-						break;
-					}
-					else if (tmp[0] == '.' && tmp[1] == '.') {
-						if (*(bitboard->Sp - 1) != -2) {
-							BitBoard_Undo(bitboard);
-							BitBoard_Undo(bitboard);
-							system("cls");
-							printf("戻しました\n");
-							BitBoard_Draw(bitboard, showMobility);
-						}
-						else {
-							printf("これ以上戻せません\n");
-						}
-						continue;
-					}
-					else if (Player_Input(tmp, &x, &y) == FALSE) {
-						printf("おっと、危うく停止するところでした。\n変な文字は入れないでくださいね\n");
-						continue;
-					}
-					break;
-				}
-			}
-			else {
-				//プレイヤーのターン
-				while (1) {
-					fgets(tmp, sizeof(tmp), stdin);
-					if (tmp[0] == 'q') {
-						endFlag = TRUE;
-						break;
-					}
-					else if (tmp[0] == '.' && tmp[1] == '.') {
-						if (*(bitboard->Sp - 1) != -2) {
-							BitBoard_Undo(bitboard);
-							BitBoard_Undo(bitboard);
-							system("cls");
-							printf("戻しました\n");
-							BitBoard_Draw(bitboard, showMobility);
-						}
-						else {
-							printf("これ以上戻せません\n");
-						}
-						continue;
-					}
-					else if (Player_Input(tmp, &x, &y) == FALSE) {
-						printf("おっと、危うく停止するところでした。\n変な文字は入れないでくださいね\n");
-						continue;
-					}
-					break;
-				}
-			}
-			if (x == -1) {
-				turn = oppColor(turn);
-				if (turn == cpuTurn) {
-					printf("You pass\n");
-				}
-				else {
-					printf("You pass\n");
-				}
-
-			}
-			else if (x >= 0 && y >= 0 && x <= BITBOARD_SIZE && y <= BITBOARD_SIZE) {
-				system("cls");
-				if (flipCount = BitBoard_Flip(bitboard, turn, getBitPos(x, y)) >= 1) {
-					if (turn == cpuTurn) {
-						printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
-						left--;
-					}
-					else {
-						printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
-						left--;
-					}
-					printf("裏返した石数:%d\n", flipCount);
-					turn = oppColor(turn);
-				}
-				BitBoard_Draw(bitboard, showMobility);
-
-			}
-		}
+		Game_PVP(showMobility);
 	}else if (mode == BATTLE) {
 		//CPUの色設定
 		while (cpuTurn == -2)
@@ -440,7 +351,66 @@ int main()
 	}
 	
 	//Board_Delete(mainBoard);
-BitBoard_Delete(bitboard);
+	//BitBoard_Delete(bitboard);
     return 0;
 }
 
+void Game_PVP(char showMobility) {
+	BitBoard *bitboard;
+	char endFlag = FALSE;
+	int turn = BLACK;
+	int x, y;
+	char tmp[10];
+
+	system("cls");
+	bitboard = BitBoard_New();
+	BitBoard_Draw(bitboard, showMobility);
+	while (!endFlag) {
+		while (1) {
+			if (BitBoard_getMobility(bitboard, turn) > 0) {
+				fgets(tmp, sizeof(tmp), stdin);
+				if (tmp[0] == 'q') {
+					endFlag = TRUE;
+					break;
+				}
+				else if (tmp[0] == '.' && tmp[1] == '.') {
+					if (*(bitboard->Sp - 1) != -2) {
+						BitBoard_Undo(bitboard);
+						BitBoard_Undo(bitboard);
+						system("cls");
+						printf("戻しました\n");
+						BitBoard_Draw(bitboard, showMobility);
+					}
+					else {
+						printf("これ以上戻せません\n");
+					}
+					continue;
+				}
+				else if (Player_Input(tmp, &x, &y) == FALSE) {
+					printf("おっと、危うく停止するところでした。\n変な文字は入れないでくださいね\n");
+					continue;
+				}
+			}
+			else {
+				printf("Player passed");
+				turn = oppColor(turn);
+			}
+			break;
+		}
+
+		if (x >= 0 && y >= 0 && x <= BITBOARD_SIZE && y <= BITBOARD_SIZE) {
+			system("cls");
+			if (BitBoard_Flip(bitboard, turn, getBitPos(x, y)) >= 1) {
+				if (turn == BLACK) {
+					printf("BLACK Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+				}
+				else {
+					printf("WHITE Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+				}
+				turn = oppColor(turn);
+			}
+			BitBoard_Draw(bitboard, showMobility);
+
+		}
+	}
+}

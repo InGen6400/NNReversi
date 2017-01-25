@@ -158,12 +158,12 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 p
 	revBits |= (pos << 6) & (wh << 5) & (wh << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & (*me >> 1);
 
 	//上探索6マス
-	revBits |= (pos << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40) | (*me >> 48));
-	revBits |= (pos << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40));
-	revBits |= (pos << 24) & (wh << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32));
-	revBits |= (pos << 32) & (wh << 24) & (wh << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24));
-	revBits |= (pos << 40) & (wh << 32) & (wh << 24) & (wh << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16));
-	revBits |= (pos << 48) & (wh << 40) & (wh << 32) & (wh << 24) & (wh << 16) & (wh << 8) & wh & (*me >> 8);
+	revBits |= (pos << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40) | (*me >> 48));
+	revBits |= (pos << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40));
+	revBits |= (pos << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32));
+	revBits |= (pos << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24));
+	revBits |= (pos << 40) & (wv << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16));
+	revBits |= (pos << 48) & (wv << 40) & (wv << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & (*me >> 8);
 
 	//右上探索6マス
 	revBits |= (pos << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28) | (*me >> 35) | (*me >> 42));

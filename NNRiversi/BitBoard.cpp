@@ -83,7 +83,7 @@ char BitBoard_CountStone(uint64 bits) {
 char BitBoard_Flip(uint64 *white, uint64 *black, uint64 pos) {
 	uint64 reverse;
 	
-
+	return 0;
 }
 
 uint64 getReverseBits(const uint64 *white, const uint64 *black, const uint64 pos) {

@@ -45,13 +45,13 @@ int main()
 			mode = TIME;
 		}
 	}
-
+	/*
 	BitBoard *bitboard;
 
 	bitboard = BitBoard_New();
 	BitBoard_Draw(bitboard);
-
-	/*
+	*/
+	
 	if (mode == BATTLE) {
 		//CPU‚ÌFÝ’è
 		while (cpuTurn == -2)
@@ -328,9 +328,9 @@ int main()
 		cpu->end = timeGetTime();
 		printf("\nNegaAlpha: time:%d\n", cpu->end - cpu->start);
 	}
-	*/
+	
 	//Board_Delete(mainBoard);
-BitBoard_Delete(bitboard);
+//BitBoard_Delete(bitboard);
     return 0;
 }
 

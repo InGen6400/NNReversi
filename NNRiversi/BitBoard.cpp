@@ -142,6 +142,7 @@ char BitBoard_CountFlips(const BitBoard *bitboard, char color, char pos) {
 	return flipCount;
 }
 
+//x,y座標からビットボード座標に変換
 uint64 getBitPos(char x, char y) {
 	return (uint64)1 << (x + y * BOARD_SIZE);
 }

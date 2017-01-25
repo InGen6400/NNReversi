@@ -11,7 +11,7 @@ int main()
 {
 
 	unsigned char PAT[POW2_8][POW2_8][8] = {0};
-	unsigned char me, enm;
+	unsigned int me, enm;
 	unsigned char pos;
 	unsigned char mask;
 	unsigned char result = 0;
@@ -26,8 +26,9 @@ int main()
 				}
 			}
 			else {
+				printf("%d,%d\n", me, enm);
 				//8ƒ}ƒX‚·‚×‚Ä‚É‘Î‚µ‚Ä
-				//for (pos = 0; pos < 8; pos++) {
+				for (pos = 0; pos < 8; pos++){
 					result = 0;
 					//’…ŽèêŠ‚ª‹ó‚¢‚Ä‚¢‚È‚¢‚Æ‚¢‚¯‚È‚¢
 					if (((me | enm) & (1<<pos)) == 0) {
@@ -71,6 +72,7 @@ int main()
 			}
 		}
 	}
+
     return 0;
 }
 

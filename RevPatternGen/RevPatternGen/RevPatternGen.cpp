@@ -10,11 +10,11 @@ typedef unsigned long long uint64;
 int main()
 {
 
-	char PAT[POW2_8][POW2_8][8] = {0};
-	const char me = 0x87, enm = 0x70;
-	char pos;
-	char mask;
-	char result = 0;
+	unsigned char PAT[POW2_8][POW2_8][8] = {0};
+	const unsigned char me = 0x87, enm = 0x70;
+	unsigned char pos;
+	unsigned char mask;
+	unsigned char result = 0;
 	//8マスの全パターンループ
 	/*for (me = 0; me < POW2_8; me++) {
 		for (enm = 0; enm < POW2_8; enm++) {
@@ -26,7 +26,7 @@ int main()
 				}
 			}
 			else {*/
-	pos = 4;//00001000
+	pos = 3;//00001000
 				//8マスすべてに対して
 				//for (pos = 0; pos < 8; pos++) {
 					result = 0;
@@ -72,6 +72,7 @@ int main()
 		/*}
 	}*/
 					printf("%x\n", PAT[me][enm][pos]);
+					scanf("%s", &result);
 
     return 0;
 }

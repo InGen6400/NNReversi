@@ -40,10 +40,10 @@ void Board_Reset(Board *board) {
 		}
 	}
 
-	board->Stone[D4] = BLACK;
-	board->Stone[E5] = BLACK;
-	board->Stone[E4] = WHITE;
-	board->Stone[D5] = WHITE;
+	board->Stone[E4] = BLACK;
+	board->Stone[D5] = BLACK;
+	board->Stone[D4] = WHITE;
+	board->Stone[E5] = WHITE;
 
 	board->White = 2;
 	board->Black = 2;

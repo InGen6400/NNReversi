@@ -16,6 +16,7 @@ const char NODEF_MODE = -1;
 const char BATTLE = 0;
 const char LEARN = 1;
 const char TIME = 2;
+const char PVP = 3;
 
 int main()
 {
@@ -28,12 +29,13 @@ int main()
 	char passed = FALSE;
 	char mode = -1;
 	char left = 64;
+	char showMobility = FALSE;
 	int x, y;
 
 	printf("設定\n");
-
+	
 	while (mode == NODEF_MODE) {
-		printf("モード(B:battle or L:Learning or T:Time):");
+		printf("モード(B:battle or L:Learning or T:Time P:PVP):");
 		fgets(tmp, sizeof(tmp), stdin);
 		if (tmp[0] == 'B' || tmp[0] == 'b') {
 			mode = BATTLE;
@@ -44,15 +46,123 @@ int main()
 		else if (tmp[0] == 'T' || tmp[0] == 't') {
 			mode = TIME;
 		}
+		else if (tmp[0] == 'P' || tmp[0] == 'p') {
+			mode = PVP;
+		}
+		else if (tmp[0] == '.') {
+			showMobility = TRUE;
+			printf("着手可能な場所を表示します\n");
+		}
+		else {
+			printf("そのようなモードは存じておりません\n");
+		}
 	}
 
 	BitBoard *bitboard;
-
-	bitboard = BitBoard_New();
-	BitBoard_Draw(bitboard);
-
 	/*
-	if (mode == BATTLE) {
+	bitboard = BitBoard_New();
+	fgets(tmp, sizeof(tmp), stdin);
+	if (Player_Input(tmp, &x, &y) == FALSE) {
+		printf("おっと、危うく停止するところでした。\n変な文字は入れないでくださいね\n");
+	}
+	else {
+		printf("x:%d, y:%d\n", x, y);
+		BitBoard_Flip(bitboard, WHITE, getBitPos(x, y));
+	}
+	BitBoard_Draw(bitboard);
+	*/
+	if (mode == PVP) {
+		system("cls");
+		bitboard = BitBoard_New();
+		left = 60;
+		BitBoard_Draw(bitboard, showMobility);
+		cpuTurn = BLACK;
+		while (!endFlag) {
+			if (turn == cpuTurn) {
+				//プレイヤーのターン
+				while (1) {
+					fgets(tmp, sizeof(tmp), stdin);
+					if (tmp[0] == 'q') {
+						endFlag = TRUE;
+						break;
+					}
+					else if (tmp[0] == '.' && tmp[1] == '.') {
+						if (*(bitboard->Sp - 1) != -2) {
+							BitBoard_Undo(bitboard);
+							BitBoard_Undo(bitboard);
+							system("cls");
+							printf("戻しました\n");
+							BitBoard_Draw(bitboard, showMobility);
+						}
+						else {
+							printf("これ以上戻せません\n");
+						}
+						continue;
+					}
+					else if (Player_Input(tmp, &x, &y) == FALSE) {
+						printf("おっと、危うく停止するところでした。\n変な文字は入れないでくださいね\n");
+						continue;
+					}
+					break;
+				}
+			}
+			else {
+				//プレイヤーのターン
+				while (1) {
+					fgets(tmp, sizeof(tmp), stdin);
+					if (tmp[0] == 'q') {
+						endFlag = TRUE;
+						break;
+					}
+					else if (tmp[0] == '.' && tmp[1] == '.') {
+						if (*(bitboard->Sp - 1) != -2) {
+							BitBoard_Undo(bitboard);
+							BitBoard_Undo(bitboard);
+							system("cls");
+							printf("戻しました\n");
+							BitBoard_Draw(bitboard, showMobility);
+						}
+						else {
+							printf("これ以上戻せません\n");
+						}
+						continue;
+					}
+					else if (Player_Input(tmp, &x, &y) == FALSE) {
+						printf("おっと、危うく停止するところでした。\n変な文字は入れないでくださいね\n");
+						continue;
+					}
+					break;
+				}
+			}
+			if (x == -1) {
+				turn = oppColor(turn);
+				if (turn == cpuTurn) {
+					printf("You pass\n");
+				}
+				else {
+					printf("You pass\n");
+				}
+
+			}
+			else if (x >= 0 && y >= 0 && x <= BITBOARD_SIZE && y <= BITBOARD_SIZE) {
+				system("cls");
+				if (flipCount = BitBoard_Flip(bitboard, turn, getBitPos(x, y)) >= 1) {
+					if (turn == cpuTurn) {
+						printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+						left--;
+					}
+					else {
+						printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+						left--;
+					}
+					printf("裏返した石数:%d\n", flipCount);
+					turn = oppColor(turn);
+				}
+				BitBoard_Draw(bitboard, showMobility);
+
+			}
+		}
+	}else if (mode == BATTLE) {
 		//CPUの色設定
 		while (cpuTurn == -2)
 		{
@@ -88,10 +198,10 @@ int main()
 					cpu->start = timeGetTime();
 					CPU_PUT(cpu, &cpuPut, turn, left);
 					cpu->end = timeGetTime();
-					x = getX(cpuPut);
-					y = getY(cpuPut);
+					x = getX(cpuPut) - 1;
+					y = getY(cpuPut) - 1;
 					printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
-					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
 				}
 				else {
 					x = -1;
@@ -143,20 +253,20 @@ int main()
 			}
 			else if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
 				system("cls");
-				if (flipCount = Board_Flip(mainBoard, turn, ConvertPos(x, y)) >= 1) {
+				if (flipCount = Board_Flip(mainBoard, turn, ConvertPos(x+1, y+1)) >= 1) {
 					if (turn == cpuTurn) {
-						printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+						printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
 						left--;
 					}
 					else {
-						printf("You Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+						printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
 						left--;
 					}
 					printf("裏返した石数:%d\n", flipCount);
-					turn = getOppStone(turn);
+					turn = oppColor(turn);
 				}
 				else {
-					printf("You Can't Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+					printf("You Can't Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
 				}
 				Board_Draw(mainBoard);
 
@@ -230,18 +340,18 @@ int main()
 				system("cls");
 				if (flipCount = Board_Flip(mainBoard, turn, ConvertPos(x, y)) >= 1) {
 					if (turn == cpuTurn) {
-						printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+						printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x ], "12345678"[y]);
 						left--;
 					}
 					else {
-						printf("You Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+						printf("You Put (%c, %c)\n", "ABCDEFGH"[x ], "12345678"[y]);
 						left--;
 					}
 					printf("裏返した石数:%d\n", flipCount);
 					turn = getOppStone(turn);
 				}
 				else {
-					printf("You Can't Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
+					printf("You Can't Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
 				}
 				Board_Draw(mainBoard);
 
@@ -328,7 +438,7 @@ int main()
 		cpu->end = timeGetTime();
 		printf("\nNegaAlpha: time:%d\n", cpu->end - cpu->start);
 	}
-	*/
+	
 	//Board_Delete(mainBoard);
 BitBoard_Delete(bitboard);
     return 0;

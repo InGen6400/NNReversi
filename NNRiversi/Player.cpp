@@ -14,10 +14,10 @@ int Player_Input(char *Input, int *x, int *y) {
 	if (strlen(cpy) == 4) {
 		tmp = strtok(cpy, " ,.-\t/:;");
 		if ((tmp[0] >= 'a' && tmp[0] <= 'h') || (tmp[0] >= 'A' && tmp[0] <= 'H')) {
-			*x = CharToPos(tmp[0]);
+			*x = CharToPos(tmp[0])-1;
 		}
 		else if (tmp[0] >= '1' && tmp[0] <= '8') {
-			*y = tmp[0] - '0';
+			*y = tmp[0] - '0'-1;
 		}
 		else {
 			return FALSE;
@@ -27,10 +27,10 @@ int Player_Input(char *Input, int *x, int *y) {
 			return FALSE;
 		}
 		if ((tmp[0] >= 'a' && tmp[0] <= 'h') || (tmp[0] >= 'A' && tmp[0] <= 'H')) {
-			*x = CharToPos(tmp[0]);
+			*x = CharToPos(tmp[0])-1;
 		}
 		else if (tmp[0] >= '1' && tmp[0] <= '8') {
-			*y = tmp[0] - '0';
+			*y = tmp[0] - '0'-1;
 		}
 		else {
 			return FALSE;

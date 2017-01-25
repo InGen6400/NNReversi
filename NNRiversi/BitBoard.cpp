@@ -27,31 +27,40 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//^‚ñ’†“ñ‚ÂˆÈŠO0
 	bitboard->stone[BLACK] = 0x0000000810000000;//^‚ñ’†“ñ‚ÂˆÈŠO0
+	//bitboard->stone[WHITE] = 0x007e7e7e6e7e7e00;//^‚ñ’†“ñ‚ÂˆÈŠO0
+	//bitboard->stone[BLACK] = 0xFF818181818181FF;//^‚ñ’†“ñ‚ÂˆÈŠO0
 }
 
 //”Õ–Ê‚Ì•`‰æ
-void BitBoard_Draw(const BitBoard *bitboard) {
+void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
 	char x, y;
 
 	BitBoard cpyBoard = *bitboard;
 
+	uint64 mobility_w = BitBoard_getMobility(&cpyBoard, WHITE);
+	uint64 mobility_b = BitBoard_getMobility(&cpyBoard, BLACK);
+
 	printf("\n\n");
-	printf(" @@@@‚`  ‚a  ‚b  ‚c  ‚d  ‚e  ‚f  ‚g                        •:  vs  ”’:\n"/*, board->Black, board->White*/);
+	printf(" @@@@‚`  ‚a  ‚b  ‚c  ‚d  ‚e  ‚f  ‚g                        •:%d  vs  ”’:%d\n", BitBoard_CountStone(bitboard->stone[BLACK]), BitBoard_CountStone(bitboard->stone[WHITE]));
 	printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
 	printf(" @b”b”b”b”b”b”b”b”b”b”b\n");
 	printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
 
-
-
-	for (x = 0; x < BitBOARD_SIZE * BitBOARD_SIZE; x++, cpyBoard.stone[WHITE]<<=1, cpyBoard.stone[BLACK]<<=1) {
+	for (x = 0; x < BITBOARD_SIZE * BITBOARD_SIZE; x++, cpyBoard.stone[WHITE]>>=1, cpyBoard.stone[BLACK]>>=1, mobility_w >>= 1, mobility_b >>= 1) {
 		if (x%8 == 0) {
 			printf(" %d b”b", x/8+1);
 		}
-		if (cpyBoard.stone[WHITE] & 0x8000000000000000) {
+		if (cpyBoard.stone[WHITE] & 1) {
 			printf("œb");
 		}
-		else if (cpyBoard.stone[BLACK] & 0x8000000000000000) {
+		else if (cpyBoard.stone[BLACK] & 1) {
 			printf("Zb");
+		}
+		else if ((mobility_w & 1) && isMob) {
+			printf("Db");
+		}
+		else if ((mobility_b & 1) && isMob) {
+			printf("Bb");
 		}
 		else {
 			printf("@b");
@@ -69,7 +78,7 @@ void BitBoard_Draw(const BitBoard *bitboard) {
 
 }
 
-//color‚ÌÎ”‚ğ•Ô‚·
+//color‚ÌÎ”‚ğ•Ô‚·(—§‚Á‚Ä‚¢‚éƒrƒbƒg”‚ğ•Ô‚·)
 char BitBoard_CountStone(uint64 bits) {
 	bits = bits - (bits>>1 & 0x5555555555555555);
 	bits = (bits & 0x3333333333333333) + (bits >> 2 & 0x3333333333333333);
@@ -79,31 +88,100 @@ char BitBoard_CountStone(uint64 bits) {
 	return (bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);
 }
 
-//’…è
-char BitBoard_Flip(uint64 *white, uint64 *black, uint64 pos) {
+//pos‚É’…è‚·‚é
+char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 	uint64 reverse;
-	
+	uint64 *me = &bitboard->stone[color];
+	uint64 *ene = &bitboard->stone[(color+1)&1];
 
+	reverse = getReverseBits(me, ene, pos);
+	//drawBits(pos);
+
+	if (reverse != 0) {
+		*me ^= pos | reverse;
+		*ene ^= reverse;
+		return 1;
+	}
+	else {
+		printf("iligal position\n");
+	}
+
+	return 0;
 }
 
-uint64 getReverseBits(const uint64 *white, const uint64 *black, const uint64 pos) {
+//”½“]‚·‚éƒrƒbƒg‚ğ•Ô‚·
+inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos) {
 	
-	if (((*black | *white) & pos) != 0)return 0;
+	if (((*ene | *me) & pos) != 0)return 0;
 	uint64 revBits = 0;
-	const uint64 wh = *white & 0x7E7E7E7E7E7E7E7E;
+	const uint64 wh = *ene & 0x7E7E7E7E7E7E7E7E;
+	const uint64 wv = *ene & 0x00FFFFFFFFFFFF00;
 
-	revBits = (pos >> 1) & wh & ((*black << 1) | ((wh & (*black << 1)) << 1));
+	//‰E’Tõ6ƒ}ƒX   
+	revBits |= (pos >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5) | (*me << 6));
+	revBits |= (pos >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5));
+	revBits |= (pos >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4));
+	revBits |= (pos >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3));
+	revBits |= (pos >> 5) & (wh >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2));
+	revBits |= (pos >> 6) & (wh >> 5) & (wh >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & (*me << 1);
 
-}
+	//‰º’Tõ6ƒ}ƒX
+	revBits |= (pos >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32) | (*me << 40) | (*me << 48));
+	revBits |= (pos >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32) | (*me << 40));
+	revBits |= (pos >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32));
+	revBits |= (pos >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24));
+	revBits |= (pos >> 40) & (wv >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16));
+	revBits |= (pos >> 48) & (wv >> 40) & (wv >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & (*me << 8);
 
-//’¼ü‚ğ— •Ô‚·
-char BitBoard_FlipLine(BitBoard *bitboard, char color, char pos, char vec) {
-	char oppColor = getOppStone(color);
-	char flipCount = 0;
+	//‰E‰º’Tõ6ƒ}ƒX
+	revBits |= (pos >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45) | (*me << 54));
+	revBits |= (pos >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45));
+	revBits |= (pos >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36));
+	revBits |= (pos >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27));
+	revBits |= (pos >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18));
+	revBits |= (pos >> 54) & (wh >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & (*me << 9);
 
-	pos += vec;
+	//¶‰º’Tõ6ƒ}ƒX
+	revBits |= (pos >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35) | (*me << 42));
+	revBits |= (pos >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35));
+	revBits |= (pos >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28));
+	revBits |= (pos >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21));
+	revBits |= (pos >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14));
+	revBits |= (pos >> 42) & (wh >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & (*me << 7);
 
-	return flipCount;
+	//¶’Tõ6ƒ}ƒX
+	revBits |= (pos << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4) | (*me >> 5) | (*me >> 6));
+	revBits |= (pos << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4) | (*me >> 5));
+	revBits |= (pos << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4));
+	revBits |= (pos << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3));
+	revBits |= (pos << 5) & (wh << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2));
+	revBits |= (pos << 6) & (wh << 5) & (wh << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & (*me >> 1);
+
+	//ã’Tõ6ƒ}ƒX
+	revBits |= (pos << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40) | (*me >> 48));
+	revBits |= (pos << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40));
+	revBits |= (pos << 24) & (wh << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32));
+	revBits |= (pos << 32) & (wh << 24) & (wh << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16) | (*me >> 24));
+	revBits |= (pos << 40) & (wh << 32) & (wh << 24) & (wh << 16) & (wh << 8) & wh & ((*me >> 8) | (*me >> 16));
+	revBits |= (pos << 48) & (wh << 40) & (wh << 32) & (wh << 24) & (wh << 16) & (wh << 8) & wh & (*me >> 8);
+
+	//‰Eã’Tõ6ƒ}ƒX
+	revBits |= (pos << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28) | (*me >> 35) | (*me >> 42));
+	revBits |= (pos << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28) | (*me >> 35));
+	revBits |= (pos << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28));
+	revBits |= (pos << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21));
+	revBits |= (pos << 35) & (wh << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14));
+	revBits |= (pos << 42) & (wh << 35) & (wh << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & (*me >> 7);
+
+	//¶ã’Tõ6ƒ}ƒX
+	revBits |= (pos << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36) | (*me >> 45) | (*me >> 54));
+	revBits |= (pos << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36) | (*me >> 45));
+	revBits |= (pos << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36));
+	revBits |= (pos << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27));
+	revBits |= (pos << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18));
+	revBits |= (pos << 54) & (wh << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & (*me >> 9);
+
+	return revBits;
 }
 
 //ˆêè–ß‚·
@@ -111,27 +189,117 @@ void BitBoard_Undo(BitBoard *bitboard) {
 	char pos;
 }
 
-//’…è‚Å‚«‚é‚©
-char BitBoard_CanPlay(BitBoard *bitboard, char color) {
-	int i;
+uint64 BitBoard_getMobility(BitBoard *bitboard, char color) {
+	uint64 me = bitboard->stone[color];
+	uint64 ene = bitboard->stone[(color + 1) & 1];
 
-	return FALSE;
+	uint64 blank = ~(me | ene);
+
+	uint64 mobility;
+
+	uint64 mask = ene & 0x7e7e7e7e7e7e7e7e;
+
+	//¶
+	uint64 t = mask & (me << 1);
+
+	t |= mask & (t << 1);
+	t |= mask & (t << 1);
+	t |= mask & (t << 1);
+	t |= mask & (t << 1);
+	t |= mask & (t << 1);
+
+	mobility = blank & (t << 1);
+
+	//‰E
+	t = mask & (me >> 1);
+
+	t |= mask & (t >> 1);
+	t |= mask & (t >> 1);
+	t |= mask & (t >> 1);
+	t |= mask & (t >> 1);
+	t |= mask & (t >> 1);
+
+	mobility |= blank & (t >> 1);
+
+	//‰º
+	t = mask & (me >> 8);
+
+	t |= mask & (t >> 8);
+	t |= mask & (t >> 8);
+	t |= mask & (t >> 8);
+	t |= mask & (t >> 8);
+	t |= mask & (t >> 8);
+
+	mobility |= blank & (t >> 8);
+
+	//ã
+	t = mask & (me << 8);
+
+	t |= mask & (t << 8);
+	t |= mask & (t << 8);
+	t |= mask & (t << 8);
+	t |= mask & (t << 8);
+	t |= mask & (t << 8);
+
+	mobility |= blank & (t << 8);
+
+	//‰E‰º
+	t = mask & (me >> 9);
+
+	t |= mask & (t >> 9);
+	t |= mask & (t >> 9);
+	t |= mask & (t >> 9);
+	t |= mask & (t >> 9);
+	t |= mask & (t >> 9);
+
+	mobility |= blank & (t >> 9);
+
+	//¶‰º
+	t = mask & (me >> 7);
+
+	t |= mask & (t >> 7);
+	t |= mask & (t >> 7);
+	t |= mask & (t >> 7);
+	t |= mask & (t >> 7);
+	t |= mask & (t >> 7);
+
+	mobility |= blank & (t >> 7);
+
+	//‰Eã
+	t = mask & (me << 9);
+
+	t |= mask & (t << 9);
+	t |= mask & (t << 9);
+	t |= mask & (t << 9);
+	t |= mask & (t << 9);
+	t |= mask & (t << 9);
+
+	mobility |= blank & (t << 9);
+
+	//¶ã
+	t = mask & (me << 7);
+
+	t |= mask & (t << 7);
+	t |= mask & (t << 7);
+	t |= mask & (t << 7);
+	t |= mask & (t << 7);
+	t |= mask & (t << 7);
+
+	mobility |= blank & (t << 7);
+
+	return mobility;
 }
 
 //pos‚É’…è‚Å‚«‚é‚©
-char BitBoard_CanFlip(const BitBoard *bitboard, char color, char pos) {
+char BitBoard_CanFlip(const uint64 me, const uint64 ene, char pos) {
 
+	uint64 reverse = getReverseBits(&me, &ene, pos);
 
+	if (reverse != 0) {
+		return true;
+	}
 
 	return FALSE;
-}
-
-//Board_CanFlip‚Ì•â•
-char BitBoard_CanFlipLine(const BitBoard *bitboard, char color, char pos, char vec) {
-	char oppColor = getOppStone(color);
-	char count = 0;
-
-	return count;
 }
 
 //”½“]”‚ğ•Ô‚·
@@ -142,10 +310,41 @@ char BitBoard_CountFlips(const BitBoard *bitboard, char color, char pos) {
 	return flipCount;
 }
 
+void drawBits(uint64 bits) {
+	int x;	
+	printf(" @@@@‚`  ‚a  ‚b  ‚c  ‚d  ‚e  ‚f  ‚g  \n");
+	printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
+	printf(" @b”b”b”b”b”b”b”b”b”b”b\n");
+	printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
+	for (x = 0; x < BITBOARD_SIZE * BITBOARD_SIZE; x++, bits >>= 1) {
+		if (x % 8 == 0) {
+			printf(" %d b”b", x / 8 + 1);
+		}
+		if (bits & 1) {
+			printf("œb");
+		}
+		else {
+			printf("@b");
+		}
+		if (x % 8 == 7) {
+
+			printf("”b %d", x / 8 + 1);
+			putchar('\n');
+			printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
+		}
+	}
+	printf(" @b”b”b”b”b”b”b”b”b”b”b\n");
+	printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
+	printf(" @@@@‚`  ‚a  ‚b  ‚c  ‚d  ‚e  ‚f  ‚g\n");
+
+}
+
 //x,yÀ•W‚©‚çƒrƒbƒgƒ{[ƒhÀ•W‚É•ÏŠ·
 uint64 getBitPos(char x, char y) {
 	return (uint64)1 << (x + y * BOARD_SIZE);
 }
 
-
-
+//color‚Ì”½‘ÎF
+char oppColor(char color) {
+	return (color + 1) & 0x01;
+}

@@ -3,7 +3,7 @@
 #include "BitBoard.h"
 #include "Board.h"
 
-const char MAX_DEPTH = 10;
+const char MAX_DEPTH = 8;
 
 const int VALUE_MAX = 100000000;
 

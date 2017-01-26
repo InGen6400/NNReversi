@@ -342,7 +342,14 @@ uint64 getBitPos(char x, char y) {
 	return (uint64)1 << (x + y * BOARD_SIZE);
 }
 
+void getXY(uint64 pos, int *x, int *y) {
+	pos = (-pos & pos) - 1;
+	*y = BitBoard_CountStone(pos);
+	*x = *y % 8;
+	*y = *y / 8;
+}
+
 //color‚Ì”½‘ÎF
 char oppColor(char color) {
-	return (color + 1) & 0x01;
+	return WHITE + BLACK - color;
 }

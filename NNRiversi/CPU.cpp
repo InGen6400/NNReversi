@@ -35,18 +35,22 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 	int best = -VALUE_MAX, tmp;
 	uint64 move;
 	uint64 mobility;
-	uint64 pos;
+	uint64 pos = 0;
 	uint64 rev;
 
 	if (depth <= 0) {
 		return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	}
 
-	for (mobility = BitBoard_getMobility(me, ene); pos > 0; pos = (-mobility & mobility), mobility ^= pos) {
+	mobility = BitBoard_getMobility(me, ene);
+	while (mobility != 0) {
+
+		pos = ((-mobility) & mobility);
+		mobility ^= pos;
 		//çƒãA
 		rev = getReverseBits(&me, &ene, pos);
 
-		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, getOppStone(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, &move, -best);
 
 		if (best < tmp) {
 			best = tmp;
@@ -58,7 +62,7 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	else {
-		tmp = -NegaAlphaSearch(me, ene, TRUE, getOppStone(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(me, ene, TRUE, oppColor(color), depth - 1, &move, -best);
 		return tmp;
 	}
 }
@@ -92,11 +96,15 @@ int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, 
 	cpu->node++;
 	return Evaluation(cpu->bitboard, color);
 	}*/
-	for (mobility = BitBoard_getMobility(me, ene); pos > 0; pos = (-mobility & mobility), mobility ^= pos) {
+	mobility = BitBoard_getMobility(me, ene);
+	while (mobility != 0) {
+
+		pos = ((-mobility) & mobility);
+		mobility ^= pos;
 		//çƒãA
 		rev = getReverseBits(&me, &ene, pos);
 
-		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, getOppStone(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, &move, -best);
 
 		if (best < tmp) {
 			best = tmp;
@@ -108,7 +116,7 @@ int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, 
 	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	else {
-		tmp = -NegaAlphaSearch(me, ene, TRUE, getOppStone(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(me, ene, TRUE, oppColor(color), depth - 1, &move, -best);
 		return tmp;
 	}
 }

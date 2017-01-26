@@ -130,4 +130,6 @@ void drawBits(uint64 bits);
 
 uint64 getBitPos(char x, char y);
 
+void getXY(uint64 pos, int *x, int *y);
+
 char oppColor(char color);

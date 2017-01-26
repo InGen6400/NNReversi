@@ -528,7 +528,7 @@ char getY(char pos) {
 
 //反転色を返す　1->2 2->1 (0->1)
 char getOppStone(char color) {
-	return BLACK + WHITE - color;
+	return  WHITE + BLACK - color;
 }
 
 char Stack_POP(Board *board) {

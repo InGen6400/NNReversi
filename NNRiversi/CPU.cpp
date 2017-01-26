@@ -20,68 +20,67 @@ void CPU_Reset(CPU *cpu, BitBoard *bitboard) {
 	cpu->bitboard = bitboard;
 }
 
-void CPU_PUT(CPU *cpu, char *PutPos, char color, char left) {
+void CPU_PUT(CPU *cpu, uint64 *PutPos, char color, char left) {
 	EmptyListInit(cpu, color);
 	if (left <= 10) {
-		NegaEndSearch(cpu, FALSE, color, left, PutPos, VALUE_MAX);
+		NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MAX_DEPTH, PutPos, VALUE_MAX);
 	}
 	else {
-		NegaAlphaSearch(cpu, FALSE, color, MAX_DEPTH, PutPos, VALUE_MAX);
+		NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MAX_DEPTH, PutPos, VALUE_MAX);
 	}
 }
 
-int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha) {
+int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha) {
 	//char x, y;
 	int best = -VALUE_MAX, tmp;
-	char move;
-	charNode *node;
-	charNode *remNode;
-	
+	uint64 move;
+	uint64 mobility;
+	uint64 pos;
+	uint64 rev;
+
 	if (depth <= 0) {
-		cpu->node++;
-		return Evaluation(cpu->bitboard, color);
+		return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	}
-	for (node = cpu->isEmpty->next; node; node = node->next)
-		if (BitBoard_Flip(cpu->bitboard, color, node->value)) {
-			remNode = node;
-			removeNode(remNode);
-			//çƒãA
-			tmp = -NegaAlphaSearch(cpu, FALSE, getOppStone(color), depth - 1, &move, -best);
-			BitBoard_Undo(cpu->bitboard);
-			addNode(remNode);
-			if (best < tmp) {
-				best = tmp;
-				*PutPos = node->value;
-			}
-			//é}ä†ÇË
-			if (best >= alpha)break;
+
+	for (mobility = BitBoard_getMobility(me, ene); pos > 0; pos = (-mobility & mobility), mobility ^= pos) {
+		//çƒãA
+		rev = getReverseBits(&me, &ene, pos);
+
+		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, getOppStone(color), depth - 1, &move, -best);
+
+		if (best < tmp) {
+			best = tmp;
+			*PutPos = pos;
 		}
+		//é}ä†ÇË
+		if (best >= alpha)break;
+	}
 	if (best != -VALUE_MAX)return best;
-	else if (isPassed == TRUE)return Evaluation(cpu->bitboard, color);
+	else if (isPassed == TRUE)return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	else {
-		tmp = -NegaAlphaSearch(cpu, TRUE, getOppStone(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(me, ene, TRUE, getOppStone(color), depth - 1, &move, -best);
 		return tmp;
 	}
 }
 
-int NegaEndSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha) {
+int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha) {
 	//char x, y;
 	int best = -VALUE_MAX, tmp;
-	char move;
-	charNode *node;
-	charNode *remNode;
+	uint64 move;
+	uint64 mobility;
+	uint64 pos;
+	uint64 rev;
 
 	if (depth == 1) {
 		printf("last\n");
-		cpu->node++;
-		node = cpu->isEmpty->next;
-		tmp = BitBoard_CountFlips(cpu->bitboard, color, node->value);
-		best = Evaluation(cpu->bitboard, color);
+		pos = BitBoard_getMobility(me, ene);
+		tmp = BitBoard_CountFlips(me, ene, pos);
+		best = BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 		if (tmp > 0) {
-			*PutPos = node->value;
+			*PutPos = pos;
 			return best + tmp + tmp + 1;
 		}
-		tmp = BitBoard_CountFlips(cpu->bitboard, getOppStone(color), cpu->isEmpty->next->value);
+		tmp = BitBoard_CountFlips(ene, me, pos);
 		if (tmp > 0) {
 			*PutPos = PASS;
 			return best - tmp - tmp - 1;
@@ -93,25 +92,23 @@ int NegaEndSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos,
 	cpu->node++;
 	return Evaluation(cpu->bitboard, color);
 	}*/
-	for (node = cpu->isEmpty->next; node; node = node->next)
-		if (BitBoard_Flip(cpu->bitboard, color, node->value)) {
-			remNode = node;
-			removeNode(remNode);
-			//çƒãA
-			tmp = -NegaAlphaSearch(cpu, FALSE, getOppStone(color), depth - 1, &move, -best);
-			BitBoard_Undo(cpu->bitboard);
-			addNode(remNode);
-			if (best < tmp) {
-				best = tmp;
-				*PutPos = node->value;
-			}
-			//é}ä†ÇË
-			if (best >= alpha)break;
+	for (mobility = BitBoard_getMobility(me, ene); pos > 0; pos = (-mobility & mobility), mobility ^= pos) {
+		//çƒãA
+		rev = getReverseBits(&me, &ene, pos);
+
+		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, getOppStone(color), depth - 1, &move, -best);
+
+		if (best < tmp) {
+			best = tmp;
+			*PutPos = pos;
 		}
+		//é}ä†ÇË
+		if (best >= alpha)break;
+	}
 	if (best != -VALUE_MAX)return best;
-	else if (isPassed == TRUE)return Evaluation(cpu->bitboard, color);
+	else if (isPassed == TRUE)return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	else {
-		tmp = -NegaAlphaSearch(cpu, TRUE, getOppStone(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(me, ene, TRUE, getOppStone(color), depth - 1, &move, -best);
 		return tmp;
 	}
 }
@@ -127,7 +124,7 @@ void EmptyListInit(CPU *cpu, char color) {
 	node->prev = NULL;
 	node->next = NULL;
 	for (i = 0; i < BITBOARD_SIZE*BITBOARD_SIZE; i++) {
-		if (BitBoard_CanFlip(cpu->bitboard, color,1<<i)) {
+		if (BitBoard_CanFlip(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)],1<<i)) {
 			node[1].value = poslist[i];
 			node[1].prev = node;
 			node[1].next = NULL;

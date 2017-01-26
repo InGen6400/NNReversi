@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BitBoard.h"
 #include "Board.h"
 
 const char MAX_DEPTH = 6;
@@ -24,19 +25,19 @@ struct CPU_ {
 	int node;
 	int start, end;
 	BitBoard *bitboard;
-	charNode isEmpty[BOARD_SIZE * BOARD_SIZE];
+	charNode isEmpty[BITBOARD_SIZE * BITBOARD_SIZE];
 }typedef CPU;
 
-CPU *CPU_Init(Board *board);
+CPU *CPU_Init(BitBoard *bitboard);
 
-void CPU_PUT(CPU *cpu, char *PutPos, char color, char left);
+void CPU_PUT(CPU *cpu, uint64 *PutPos, char color, char left);
 
-void CPU_Reset(CPU *cpu, Board *board);
+void CPU_Reset(CPU *cpu, BitBoard *bitboard);
 
-int NegaAlphaSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha);
+int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha);
 
-int NegaEndSearch(CPU *cpu, char isPassed, char color, char depth, char *PutPos, int alpha);
+int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha);
 
-int Evaluation(Board *board, char color);
+int Evaluation(BitBoard *bitboard, char color);
 
 void EmptyListInit(CPU *cpu, char color);

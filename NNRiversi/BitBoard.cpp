@@ -37,8 +37,8 @@ void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
 
 	BitBoard cpyBoard = *bitboard;
 
-	uint64 mobility_w = BitBoard_getMobility(&cpyBoard, WHITE);
-	uint64 mobility_b = BitBoard_getMobility(&cpyBoard, BLACK);
+	uint64 mobility_w = BitBoard_getMobility(cpyBoard.stone[WHITE], cpyBoard.stone[BLACK]);
+	uint64 mobility_b = BitBoard_getMobility(cpyBoard.stone[BLACK], cpyBoard.stone[WHITE]);
 
 	printf("\n\n");
 	printf(" @@@@‚`  ‚a  ‚b  ‚c  ‚d  ‚e  ‚f  ‚g                        •:%d  vs  ”’:%d\n", BitBoard_CountStone(bitboard->stone[BLACK]), BitBoard_CountStone(bitboard->stone[WHITE]));
@@ -189,9 +189,7 @@ void BitBoard_Undo(BitBoard *bitboard) {
 	char pos;
 }
 
-uint64 BitBoard_getMobility(BitBoard *bitboard, char color) {
-	uint64 me = bitboard->stone[color];
-	uint64 ene = bitboard->stone[(color + 1) & 1];
+uint64 BitBoard_getMobility(uint64 me, uint64 ene) {
 
 	uint64 blank = ~(me | ene);
 
@@ -303,11 +301,11 @@ char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos) {
 }
 
 //”½“]”‚ğ•Ô‚·
-char BitBoard_CountFlips(const BitBoard *bitboard, char color, char pos) {
-	char flipCount = 0;
+char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos) {
 
+	uint64 reverse = getReverseBits(&me, &ene, pos);
 
-	return flipCount;
+	return BitBoard_CountStone(reverse);
 }
 
 void drawBits(uint64 bits) {

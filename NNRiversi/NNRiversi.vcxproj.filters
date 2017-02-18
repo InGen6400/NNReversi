@@ -45,6 +45,9 @@
     <ClInclude Include="BitBoard.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Pattern.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -66,6 +69,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="BitBoard.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Pattern.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

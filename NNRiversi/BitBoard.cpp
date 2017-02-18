@@ -1,4 +1,6 @@
 
+//2017.02.16  1405 +- 5
+
 #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +9,7 @@
 #include "const.h"
 #include "Container.h"
 #include "CPU.h"
+#include <intrin.h>
 
 //ボード生成
 BitBoard *BitBoard_New(void) {
@@ -80,12 +83,12 @@ void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
 
 //colorの石数を返す(立っているビット数を返す)
 char BitBoard_CountStone(uint64 bits) {
-	bits = bits - (bits>>1 & 0x5555555555555555);
+	/*bits = bits - (bits>>1 & 0x5555555555555555);
 	bits = (bits & 0x3333333333333333) + (bits >> 2 & 0x3333333333333333);
 	bits = (bits & 0x0F0F0F0F0F0F0F0F) + (bits >> 4 & 0x0F0F0F0F0F0F0F0F);
 	bits = (bits & 0x00FF00FF00FF00FF) + (bits >> 8 & 0x00FF00FF00FF00FF);
-	bits = (bits & 0x0000FFFF0000FFFF) + (bits >> 16 & 0x0000FFFF0000FFFF);
-	return (bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);
+	bits = (bits & 0x0000FFFF0000FFFF) + (bits >> 16 & 0x0000FFFF0000FFFF);*/
+	return _mm_popcnt_u64(bits);//(bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);
 }
 
 //posに着手する
@@ -116,6 +119,8 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 p
 	uint64 revBits = 0;
 	const uint64 wh = *ene & 0x7E7E7E7E7E7E7E7E;
 	const uint64 wv = *ene & 0x00FFFFFFFFFFFF00;
+
+	clz
 
 	//右探索6マス   
 	revBits |= (pos >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5) | (*me << 6));

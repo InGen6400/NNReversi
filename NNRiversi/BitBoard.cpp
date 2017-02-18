@@ -25,7 +25,7 @@ void BitBoard_Delete(BitBoard *bitboard) {
 
 //盤面の初期化
 void BitBoard_Reset(BitBoard *bitboard) {
-	bitboard->stone[WHITE] = 0x0000001008000000;//0x8040201008040200;//真ん中二つ以外0
+	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外0
 	//bitboard->stone[WHITE] = 0x007e7e7e6e7e7e00;//真ん中二つ以外0
 	//bitboard->stone[BLACK] = 0xFF818181818181FF;//真ん中二つ以外0

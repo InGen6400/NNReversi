@@ -100,11 +100,12 @@ void Game_PVP(char showMobility) {
 
 	system("cls");
 	bitboard = BitBoard_New();
+	//bitboard->stone[WHITE] = ((bitboard->stone[WHITE] * 0x0101010101010101) >> 56)<<56;
 	BitBoard_Draw(bitboard, showMobility);
 	while (!endFlag) {
 		while (1) {
 			//置けない場合はパスになる(未確認)
-			if (BitBoard_getMobility(bitboard->stone[turn], turn) > 0) {
+			if (BitBoard_getMobility(bitboard->stone[turn], bitboard->stone[oppColor(turn)]) > 0) {
 				fgets(tmp, sizeof(tmp), stdin);
 				if (tmp[0] == 'q') {
 					endFlag = TRUE;

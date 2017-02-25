@@ -32,6 +32,7 @@ void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外0
 	//bitboard->stone[WHITE] = 0x007e7e7e6e7e7e00;//
 	//bitboard->stone[BLACK] = 0xFF818181818181FF;//
+	bitboard->Sp = bitboard->Stack;
 }
 
 //盤面の描画
@@ -105,6 +106,9 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 	if (reverse != 0) {
 		*me ^= pos | reverse;
 		*ene ^= reverse;
+		Stack_PUSH(bitboard, pos);
+		Stack_PUSH(bitboard, reverse);
+		Stack_PUSH(bitboard, color);
 		return 1;
 	}
 	else {
@@ -190,8 +194,13 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 p
 }
 
 //一手戻す(未実装)
-void BitBoard_Undo(BitBoard *bitboard) {
-
+int BitBoard_Undo(BitBoard *bitboard) {
+	if (bitboard->Sp <= bitboard->Stack)return 0;
+	char color = Stack_POP(bitboard);
+	uint64 rev = Stack_POP(bitboard);
+	bitboard->stone[color] ^= rev | Stack_POP(bitboard);
+	bitboard->stone[oppColor(color)] ^= rev;
+	return 1;
 }
 
 //着手可能位置(要高速化)
@@ -358,4 +367,12 @@ void getXY(uint64 pos, int *x, int *y) {
 //colorの反対色(いらない？)
 char oppColor(char color) {
 	return WHITE + BLACK - color;
+}
+
+uint64 Stack_POP(BitBoard *bitboard) {
+	return *(--bitboard->Sp);
+}
+
+void Stack_PUSH(BitBoard *bitboard, uint64 value) {
+	*(bitboard->Sp++) = value;
 }

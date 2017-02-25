@@ -86,17 +86,11 @@ const char BITBOARD_SIZE = 8;
 
 typedef unsigned long long uint64;
 
-struct bitFlipData
-{
-	char filpCount;
-	char flipPos[6];
-}typedef bitFlipData;
-
 struct _BitBoard
 {
 	//color index
 	uint64 stone[2];
-	uint64 Stack[BITBOARD_SIZE * BITBOARD_SIZE];
+	uint64 Stack[BITBOARD_SIZE * BITBOARD_SIZE * 3];
 	uint64 *Sp;
 }typedef BitBoard;
 
@@ -114,15 +108,11 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos);
 
 uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos);
 
-char BitBoard_FlipLine(BitBoard *bitboard, char color, char pos, char vec);
-
-void BitBoard_Undo(BitBoard *bitboard);
+int BitBoard_Undo(BitBoard *bitboard);
 
 uint64 BitBoard_getMobility(uint64 me, uint64 ene);
 
 char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos);
-
-char BitBoard_CanFlipLine(const BitBoard *bitboard, char color, char pos, char vec);
 
 char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos);
 
@@ -133,3 +123,7 @@ uint64 getBitPos(char x, char y);
 void getXY(uint64 pos, int *x, int *y);
 
 char oppColor(char color);
+
+uint64 Stack_POP(BitBoard *bitboard);
+
+void Stack_PUSH(BitBoard *bitboard, uint64 value);

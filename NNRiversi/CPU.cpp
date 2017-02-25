@@ -7,7 +7,6 @@
 #include <immintrin.h>
 
 
-
 CPU *CPU_Init(BitBoard *bitboard) {
 	CPU *ret;
 	ret = (CPU*)malloc(sizeof(CPU));
@@ -15,6 +14,13 @@ CPU *CPU_Init(BitBoard *bitboard) {
 		CPU_Reset(ret, bitboard);
 	}
 	return ret;
+}
+
+void CPU_Delete(CPU *cpu) {
+	if (cpu->bitboard) {
+		BitBoard_Delete(cpu->bitboard);
+	}
+	free(cpu);
 }
 
 void CPU_Reset(CPU *cpu, BitBoard *bitboard) {

@@ -22,6 +22,8 @@ void Game_PVP(char showMobility);
 
 void Game_Battle(char showMobility);
 
+void Game_Time(char showMobility);
+
 int main()
 {
 	char tmp[50] = "";
@@ -166,90 +168,9 @@ int main()
 		*/
 	}
 	else if (mode == TIME) {
-		/*
-		system("cls");
-		cpuTurn = BLACK;
-		mainBoard = Board_New();
-		cpu = CPU_Init(mainBoard);
-		cpu2 = CPU_Init(mainBoard);
-		cpu->start = timeGetTime();
-		left = 60;
-		Board_Draw(mainBoard);
-		while (!endFlag) {
-			if (turn == cpuTurn) {
-				if (Board_CanPlay(mainBoard, turn) == TRUE) {
-					passed = false;
-					//CPUのターン
-					printf("CPU Thinking...");
-					cpu->node = 0;
-					CPU_PUT(cpu, &cpuPut, turn, left);
-					x = getX(cpuPut);
-					y = getY(cpuPut);
-				}
-				else {
-					x = -1;
-					if (passed) {
-						endFlag = true;
-					}
-					else {
-						passed = true;
-					}
-				}
-			}
-			else {
-				if (Board_CanPlay(mainBoard, turn) == TRUE) {
-					passed = false;
-					printf("CPU2 Thinking...");
-					cpu2->node = 0;
-					CPU_PUT(cpu2, &cpuPut, turn, left);
-					x = getX(cpuPut);
-					y = getY(cpuPut);
-				}
-				else {
-					x = -1;
-					if (passed) {
-						endFlag = true;
-					}
-					else {
-						passed = true;
-					}
-				}
-			}
-			if (x == -1) {
-				turn = getOppStone(turn);
-				if (turn == cpuTurn) {
-					printf("CPU pass\n");
-				}
-				else {
-					printf("You pass\n");
-				}
-
-			}
-			else if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
-				system("cls");
-				if (flipCount = Board_Flip(mainBoard, turn, ConvertPos(x, y)) >= 1) {
-					if (turn == cpuTurn) {
-						printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
-						left--;
-					}
-					else {
-						printf("You Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
-						left--;
-					}
-					printf("裏返した石数:%d\n", flipCount);
-					turn = getOppStone(turn);
-				}
-				Board_Draw(mainBoard);
-
-			}
-		}
-		cpu->end = timeGetTime();
-		printf("\nNegaAlpha: time:%d\n", cpu->end - cpu->start);
-		*/
+		Game_Time(FALSE);
 	}
 	
-	//Board_Delete(mainBoard);
-	//BitBoard_Delete(bitboard);
     return 0;
 }
 
@@ -313,7 +234,6 @@ void Game_PVP(char showMobility) {
 		}
 	}
 }
-
 
 void Game_Battle(char showMobility) {
 
@@ -421,4 +341,81 @@ void Game_Battle(char showMobility) {
 			}
 		}
 	}
+	BitBoard_Delete(bitboard);
+	CPU_Delete(cpu);
+}
+
+void Game_Time(char showMobility) {
+
+	BitBoard *bitboard;
+	bitboard = BitBoard_New();
+
+	int turn = BLACK;
+	int x, y;
+
+	char endFlag = FALSE;
+	char tmp[10];
+	char cpuTurn = BLACK;
+	char left = 60;
+	char passed = FALSE;
+
+	uint64 put;
+
+	CPU *cpu = CPU_Init(bitboard);
+	CPU *cpu2 = CPU_Init(bitboard);
+	cpu2->start = timeGetTime();
+	cpu->start = timeGetTime();
+
+	//CPUの色設定
+	system("cls");
+	BitBoard_Draw(bitboard, showMobility);
+	while (!endFlag) {
+		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
+			passed = FALSE;
+			if (turn == cpuTurn) {
+				//CPUのターン
+				cpu->node = 0;
+				CPU_PUT(cpu, &put, turn, left);
+				getXY(put, &x, &y);
+			}
+			else {
+				//CPU2のターン
+				cpu->node = 0;
+				CPU_PUT(cpu, &put, turn, left);
+				getXY(put, &x, &y);
+			}
+
+			system("cls");
+			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
+				if (turn == cpuTurn) {
+					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					left--;
+				}
+				else {
+					printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					left--;
+				}
+				turn = oppColor(turn);
+			}
+
+			BitBoard_Draw(bitboard, showMobility);
+
+
+		}
+		else {
+			if (passed) {
+				endFlag = TRUE;
+			}
+			else {
+				passed = TRUE;
+				turn = oppColor(turn);
+			}
+		}
+	}
+	cpu2->end = timeGetTime();
+	cpu->end = timeGetTime();
+	printf("Time:%.4f", ((cpu2->end - cpu2->start))/1000.0);
+	BitBoard_Delete(bitboard);
+	CPU_Delete(cpu);
+	CPU_Delete(cpu2);
 }

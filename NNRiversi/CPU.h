@@ -30,6 +30,8 @@ struct CPU_ {
 
 CPU *CPU_Init(BitBoard *bitboard);
 
+void CPU_Delete(CPU *cpu);
+
 void CPU_PUT(CPU *cpu, uint64 *PutPos, char color, char left);
 
 void CPU_Reset(CPU *cpu, BitBoard *bitboard);

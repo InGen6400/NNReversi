@@ -30,8 +30,8 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外0
-	//bitboard->stone[WHITE] = 0x007e7e7e6e7e7e00;//真ん中二つ以外0
-	//bitboard->stone[BLACK] = 0xFF818181818181FF;//真ん中二つ以外0
+	//bitboard->stone[WHITE] = 0x007e7e7e6e7e7e00;//
+	//bitboard->stone[BLACK] = 0xFF818181818181FF;//
 }
 
 //盤面の描画
@@ -87,8 +87,9 @@ char BitBoard_CountStone(uint64 bits) {
 	bits = (bits & 0x3333333333333333) + (bits >> 2 & 0x3333333333333333);
 	bits = (bits & 0x0F0F0F0F0F0F0F0F) + (bits >> 4 & 0x0F0F0F0F0F0F0F0F);
 	bits = (bits & 0x00FF00FF00FF00FF) + (bits >> 8 & 0x00FF00FF00FF00FF);
-	bits = (bits & 0x0000FFFF0000FFFF) + (bits >> 16 & 0x0000FFFF0000FFFF);*/
-	return _mm_popcnt_u64(bits);//(bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);
+	bits = (bits & 0x0000FFFF0000FFFF) + (bits >> 16 & 0x0000FFFF0000FFFF);
+	return (bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);*/
+	return _mm_popcnt_u64(bits);
 }
 
 //posに着手する
@@ -100,6 +101,7 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 	reverse = getReverseBits(me, ene, pos);
 	//drawBits(pos);
 
+	//反転可能なら着手
 	if (reverse != 0) {
 		*me ^= pos | reverse;
 		*ene ^= reverse;
@@ -112,15 +114,13 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 	return 0;
 }
 
-//反転するビットを返す
+//反転するビットを返す(要高速化)
 inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos) {
 	
 	if (((*ene | *me) & pos) != 0)return 0;
 	uint64 revBits = 0;
 	const uint64 wh = *ene & 0x7E7E7E7E7E7E7E7E;
 	const uint64 wv = *ene & 0x00FFFFFFFFFFFF00;
-
-	clz
 
 	//右探索6マス   
 	revBits |= (pos >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5) | (*me << 6));
@@ -189,11 +189,12 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 p
 	return revBits;
 }
 
-//一手戻す
+//一手戻す(未実装)
 void BitBoard_Undo(BitBoard *bitboard) {
-	char pos;
+
 }
 
+//着手可能位置(要高速化)
 uint64 BitBoard_getMobility(uint64 me, uint64 ene) {
 
 	uint64 blank = ~(me | ene);
@@ -354,7 +355,7 @@ void getXY(uint64 pos, int *x, int *y) {
 	*y = *y / 8;
 }
 
-//colorの反対色
+//colorの反対色(いらない？)
 char oppColor(char color) {
 	return WHITE + BLACK - color;
 }

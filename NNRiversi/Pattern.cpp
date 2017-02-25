@@ -1,21 +1,26 @@
+#include "stdafx.h"
 #include "Pattern.h"
 #include <immintrin.h>
+#include <intrin.h>
 
 #define LEN 16
 
 typedef unsigned short uint16;
 
+//YMMレジスタにplayerとoppのビットをセットする
 inline void setData(__m256i *ret, const unsigned char player, const unsigned char opp) {
 
 #pragma region AVX2
+	//シフト用フィルタ
 	static const __m256i shifter = _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
 	__m256i mp = _mm256_set1_epi16(player);
 	__m256i mo = _mm256_set1_epi16(opp);
 
+	//32ビットごとにしかシフトできないのでパックする
 	*ret = _mm256_unpackhi_epi16(mp, mo);
-
+	//32ビットごとにシフト
 	*ret = _mm256_srlv_epi32(*ret, shifter);
-
+	//0001でマスク
 	*ret = _mm256_and_si256(*ret, _mm256_set1_epi16(0x0001));
 
 #pragma endregion
@@ -30,9 +35,17 @@ inline void setData(__m256i *ret, const unsigned char player, const unsigned cha
 #pragma endregion
 }
 
+//ビットを左右逆転したものを返す
+inline char getMirror(char in) {
+	char data;
+	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
+	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
+	return ((data & 0x0F) << 4) | ((data & 0xF0) >> 4);
+}
+
+//player, oppからインデックスを返す
 short getIndex(const unsigned char player, const unsigned char opp)
 {
-
 	alignas(16) static const uint16 pow_3[LEN] = { 0x1,  0x1 * 2,  0x3,  0x3 * 2,  0x9,   0x9 * 2,   0x1b,  0x1b * 2,
 		0x51, 0x51 * 2, 0xf3, 0xf3 * 2, 0x2d9, 0x2d9 * 2, 0x88b, 0x88b * 2 };//(1,3,9,27,81,243,729,2187)*2 と1,3,9,27,81,243,729,2187
 	alignas(16) uint16 y[LEN] = { 0 };

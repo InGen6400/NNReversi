@@ -46,14 +46,18 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 
 	mobility = BitBoard_getMobility(me, ene);
 	while (mobility != 0) {
-
+		//一番下に立っているビットを着手位置
 		pos = ((-mobility) & mobility);
+		//着手可能位置から消す
 		mobility ^= pos;
-		//再帰
+		//反転するビットを取得
 		rev = getReverseBits(&me, &ene, pos);
 
+		//再帰
 		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, &move, -best);
-
+		/*
+		引数にて反転したビットボードを渡すことで着手をもとに戻さなくてもいい
+		*/
 		if (best < tmp) {
 			best = tmp;
 			*PutPos = pos;

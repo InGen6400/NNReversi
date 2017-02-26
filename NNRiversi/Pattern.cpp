@@ -7,6 +7,11 @@
 
 typedef unsigned short uint16;
 
+inline char delta_swap(char bits, char mask, char delta) {
+	char x = (bits ^ (bits >> delta)) & mask;
+	return bits ^ x ^ (x << delta);
+}
+
 //YMMレジスタにplayerとoppのビットをセットする
 inline void setData(__m256i *ret, const unsigned char player, const unsigned char opp) {
 
@@ -36,11 +41,22 @@ inline void setData(__m256i *ret, const unsigned char player, const unsigned cha
 }
 
 //ビットを左右逆転したものを返す
-inline char getMirror(char in) {
+inline char getMirrorLine(char in) {
 	char data;
 	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
 	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
 	return ((data & 0x0F) << 4) | ((data & 0xF0) >> 4);
+}
+
+//対角線で軸対象
+inline char getMirrorCorner(char in) {
+	in = delta_swap(in, 0b00000001, 2);//6,8
+	in = delta_swap(in, 0b00010000, 2);//2,4
+	return delta_swap(in, 0b00000010, 4);//3,7
+}
+
+inline char getCornerBit() {
+
 }
 
 //player, oppからインデックスを返す

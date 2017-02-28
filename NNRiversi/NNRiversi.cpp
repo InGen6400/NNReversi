@@ -63,18 +63,6 @@ int main()
 			printf("そのようなモードは存じておりません\n");
 		}
 	}
-	/*
-	bitboard = BitBoard_New();
-	fgets(tmp, sizeof(tmp), stdin);
-	if (Player_Input(tmp, &x, &y) == FALSE) {
-		printf("おっと、危うく停止するところでした。\n変な文字は入れないでくださいね\n");
-	}
-	else {
-		printf("x:%d, y:%d\n", x, y);
-		BitBoard_Flip(bitboard, WHITE, getBitPos(x, y));
-	}
-	BitBoard_Draw(bitboard);
-	*/
 	if (mode == PVP) {
 		Game_PVP(showMobility);
 	}else if (mode == BATTLE) {
@@ -415,6 +403,82 @@ void Game_Time(char showMobility) {
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();
 	printf("Time:%.4f", ((cpu2->end - cpu2->start))/1000.0);
+	BitBoard_Delete(bitboard);
+	CPU_Delete(cpu);
+	CPU_Delete(cpu2);
+}
+
+void MODE_Test(char showMobility) {
+
+	BitBoard *bitboard;
+	bitboard = BitBoard_New();
+
+	int turn = BLACK;
+	int x, y;
+
+	char endFlag = FALSE;
+	char tmp[10];
+	char cpuTurn = BLACK;
+	char left = 60;
+	char passed = FALSE;
+
+	uint64 put;
+
+	CPU *cpu = CPU_Init(bitboard);
+	CPU *cpu2 = CPU_Init(bitboard);
+	cpu2->start = timeGetTime();
+	cpu->start = timeGetTime();
+	/*
+	//CPUの色設定
+	system("cls");
+	BitBoard_Draw(bitboard, showMobility);
+	while (!endFlag) {
+		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
+			passed = FALSE;
+			if (turn == cpuTurn) {
+				//CPUのターン
+				cpu->node = 0;
+				CPU_PUT(cpu, &put, turn, left);
+				getXY(put, &x, &y);
+			}
+			else {
+				//CPU2のターン
+				cpu->node = 0;
+				CPU_PUT(cpu, &put, turn, left);
+				getXY(put, &x, &y);
+			}
+
+			system("cls");
+			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
+				if (turn == cpuTurn) {
+					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					left--;
+				}
+				else {
+					printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					left--;
+				}
+				turn = oppColor(turn);
+			}
+
+			BitBoard_Draw(bitboard, showMobility);
+
+
+		}
+		else {
+			if (passed) {
+				endFlag = TRUE;
+			}
+			else {
+				passed = TRUE;
+				turn = oppColor(turn);
+			}
+		}
+	}
+	*/
+	cpu2->end = timeGetTime();
+	cpu->end = timeGetTime();
+	printf("Time:%.4f", ((cpu2->end - cpu2->start)) / 1000.0);
 	BitBoard_Delete(bitboard);
 	CPU_Delete(cpu);
 	CPU_Delete(cpu2);

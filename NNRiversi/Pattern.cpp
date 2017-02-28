@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Pattern.h"
+#include "BitBoard.h"
 #include <immintrin.h>
 #include <intrin.h>
 
@@ -55,12 +56,12 @@ inline char getMirrorCorner(char in) {
 	return delta_swap(in, 0b00000010, 4);//3,7
 }
 
-inline char getCornerBit() {
-
+short getCornerIndexUL(BitBoard *bitboard, char color) {
+	return getIndex(_pext_u64(bitboard->stone[color],0xe0e0c00000000000),_pext_u64(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
 }
 
 //player, oppからインデックスを返す
-short getIndex(const unsigned char player, const unsigned char opp)
+inline short getIndex(const unsigned char player, const unsigned char opp)
 {
 	alignas(16) static const uint16 pow_3[LEN] = { 0x1,  0x1 * 2,  0x3,  0x3 * 2,  0x9,   0x9 * 2,   0x1b,  0x1b * 2,
 		0x51, 0x51 * 2, 0xf3, 0xf3 * 2, 0x2d9, 0x2d9 * 2, 0x88b, 0x88b * 2 };//(1,3,9,27,81,243,729,2187)*2 と1,3,9,27,81,243,729,2187

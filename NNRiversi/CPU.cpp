@@ -17,8 +17,8 @@ CPU *CPU_Init(BitBoard *bitboard) {
 }
 
 void CPU_Delete(CPU *cpu) {
-	if (cpu->bitboard) {
-		BitBoard_Delete(cpu->bitboard);
+	if (cpu->bitboard != NULL) {
+		//BitBoard_Delete(cpu->bitboard);
 	}
 	free(cpu);
 }

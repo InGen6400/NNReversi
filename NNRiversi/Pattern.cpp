@@ -56,10 +56,6 @@ inline char getMirrorCorner(char in) {
 	return delta_swap(in, 0b00000010, 4);//3,7
 }
 
-short getCornerIndexUL(BitBoard *bitboard, char color) {
-	return getIndex(_pext_u64(bitboard->stone[color],0xe0e0c00000000000),_pext_u64(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
-}
-
 //player, oppからインデックスを返す
 inline short getIndex(const unsigned char player, const unsigned char opp)
 {
@@ -83,4 +79,8 @@ inline short getIndex(const unsigned char player, const unsigned char opp)
 	*mmz = _mm256_hadd_epi32(*mmz, *mmz);
 	//0バイト目と8バイト目がそれぞれの出力になる
 	return z[0] + z[8];
+}
+
+short getCornerIndexUL(BitBoard *bitboard, char color) {
+	return getIndex(_pext_u64(bitboard->stone[color],0xe0e0c00000000000),_pext_u64(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
 }

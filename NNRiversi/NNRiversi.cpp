@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "const.h"
 #include "CPU.h"
+#include "Pattern.h"
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
@@ -17,6 +18,7 @@ const char BATTLE = 0;
 const char LEARN = 1;
 const char TIME = 2;
 const char PVP = 3;
+const char DEBUG = 4;
 
 void Game_PVP(char showMobility);
 
@@ -24,17 +26,20 @@ void Game_Battle(char showMobility);
 
 void Game_Time(char showMobility);
 
+void MODE_DEBUG();
+
 int main()
 {
 	char tmp[50] = "";
+	/*
 	Board *mainBoard;
 	CPU *cpu;
 	CPU *cpu2;
 	char cpuTurn = NOMOVE, cpuPut = 0, turn = BLACK, flipCount = 0;
 	char endFlag = FALSE;
 	char passed = FALSE;
+	char left = 64;*/
 	char mode = -1;
-	char left = 64;
 	char showMobility = FALSE;
 	int x, y;
 
@@ -58,6 +63,9 @@ int main()
 		else if (tmp[0] == '.') {
 			showMobility = TRUE;
 			printf("着手可能な場所を表示します\n");
+		}
+		else if (tmp[0] == '@' && tmp[1] == 'D') {
+			mode = DEBUG;
 		}
 		else {
 			printf("そのようなモードは存じておりません\n");
@@ -157,6 +165,9 @@ int main()
 	}
 	else if (mode == TIME) {
 		Game_Time(FALSE);
+	}
+	else if (mode == DEBUG) {
+		MODE_DEBUG();
 	}
 	
     return 0;
@@ -408,10 +419,9 @@ void Game_Time(char showMobility) {
 	CPU_Delete(cpu2);
 }
 
-void MODE_Test(char showMobility) {
+void MODE_DEBUG() {
 
 	BitBoard *bitboard;
-	bitboard = BitBoard_New();
 
 	int turn = BLACK;
 	int x, y;
@@ -424,6 +434,7 @@ void MODE_Test(char showMobility) {
 
 	uint64 put;
 
+	bitboard = BitBoard_New();
 	CPU *cpu = CPU_Init(bitboard);
 	CPU *cpu2 = CPU_Init(bitboard);
 	cpu2->start = timeGetTime();
@@ -431,7 +442,7 @@ void MODE_Test(char showMobility) {
 	/*
 	//CPUの色設定
 	system("cls");
-	BitBoard_Draw(bitboard, showMobility);
+	BitBoard_Draw(bitboard, FALSE);
 	while (!endFlag) {
 		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
 			passed = FALSE;
@@ -461,7 +472,7 @@ void MODE_Test(char showMobility) {
 				turn = oppColor(turn);
 			}
 
-			BitBoard_Draw(bitboard, showMobility);
+			BitBoard_Draw(bitboard, FALSE);
 
 
 		}
@@ -474,8 +485,8 @@ void MODE_Test(char showMobility) {
 				turn = oppColor(turn);
 			}
 		}
-	}
-	*/
+	}*/
+	getCornerIndexUL(bitboard, BLACK);
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();
 	printf("Time:%.4f", ((cpu2->end - cpu2->start)) / 1000.0);

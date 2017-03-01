@@ -439,7 +439,7 @@ void MODE_DEBUG() {
 	CPU *cpu2 = CPU_Init(bitboard);
 	cpu2->start = timeGetTime();
 	cpu->start = timeGetTime();
-	/*
+	
 	//CPU‚ÌFİ’è
 	system("cls");
 	BitBoard_Draw(bitboard, FALSE);
@@ -485,8 +485,8 @@ void MODE_DEBUG() {
 				turn = oppColor(turn);
 			}
 		}
-	}*/
-	getCornerIndexUL(bitboard, BLACK);
+	}
+	printf("%d\n",getCornerIndexUL(bitboard, BLACK));
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();
 	printf("Time:%.4f", ((cpu2->end - cpu2->start)) / 1000.0);

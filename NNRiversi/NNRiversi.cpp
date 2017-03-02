@@ -439,7 +439,7 @@ void MODE_DEBUG() {
 	CPU *cpu2 = CPU_Init(bitboard);
 	cpu2->start = timeGetTime();
 	cpu->start = timeGetTime();
-	
+	/*
 	//CPU‚ÌFÝ’è
 	system("cls");
 	BitBoard_Draw(bitboard, FALSE);
@@ -486,6 +486,7 @@ void MODE_DEBUG() {
 			}
 		}
 	}
+	*/
 	printf("%d\n",getCornerIndexUL(bitboard, BLACK));
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();

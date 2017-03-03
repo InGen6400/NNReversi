@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
+#include <intrin.h>
 #pragma comment(lib, "winmm.lib")
 
 const char NODEF_MODE = -1;
@@ -42,6 +43,15 @@ int main()
 	char mode = -1;
 	char showMobility = FALSE;
 	int x, y;
+
+	int CPUInfo[4];
+	__cpuid(CPUInfo, 1);
+	if (CPUInfo[1] & (1 << 5)) {
+		printf("AVX2が利用可能です。\n高速モードで起動します。\n");
+	}
+	else {
+		printf("AVX2は利用'不'可能です。\n低速モードで起動します。\n");
+	}
 
 	printf("設定\n");
 	

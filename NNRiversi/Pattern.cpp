@@ -8,6 +8,12 @@
 
 typedef unsigned short uint16;
 
+uint64 bitGather(uint64 in, uint64 mask) {
+	//AVX2
+	return _pext_u64(in, mask);
+
+}
+
 inline char delta_swap(char bits, char mask, char delta) {
 	char x = (bits ^ (bits >> delta)) & mask;
 	return bits ^ x ^ (x << delta);
@@ -82,5 +88,5 @@ inline short getIndex(const unsigned char player, const unsigned char opp)
 }
 
 short getCornerIndexUL(BitBoard *bitboard, char color) {
-	return getIndex(_pext_u64(bitboard->stone[color],0xe0e0c00000000000),_pext_u64(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
+	return getIndex(bitGather(bitboard->stone[color], 0xe0e0c00000000000),bitGather(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
 }

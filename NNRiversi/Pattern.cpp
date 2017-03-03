@@ -8,10 +8,35 @@
 
 typedef unsigned short uint16;
 
-uint64 bitGather(uint64 in, uint64 mask) {
+uint64(*bitGather)(uint64 in, uint64 mask);
+
+//AVX2に対応している場合
+uint64 bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2
 	return _pext_u64(in, mask);
+}
 
+//AVX2未対応の場合
+uint64 bitGather_Normal(uint64 in, uint64 mask) {
+	int i, count=0;
+	uint64 out=0;
+	for (i = 0; i < 64; mask >> 1, in >> 1, i++) {
+		if ((mask & 1) == 1) {
+			out |= (in & 1) << count;
+			count++;
+		}
+	}
+	return out;
+}
+
+//関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
+void setAVX(char AVX2_FLAG) {
+	if (AVX2_FLAG) {
+		bitGather = bitGatherAVX2;
+	}
+	else {
+		bitGather = bitGather_Normal;
+	}
 }
 
 inline char delta_swap(char bits, char mask, char delta) {

@@ -21,6 +21,8 @@ const char TIME = 2;
 const char PVP = 3;
 const char DEBUG = 4;
 
+char AVX2_FLAG;
+
 void Game_PVP(char showMobility);
 
 void Game_Battle(char showMobility);
@@ -48,9 +50,11 @@ int main()
 	__cpuidex(CPUInfo, 7, 0);
 	if (CPUInfo[1] & (1 << 5)) {
 		printf("AVX2が利用可能です。\n高速モードで起動します。\n%d\n", CPUInfo[1]);
+		AVX2_FLAG = TRUE;
 	}
 	else {
 		printf("AVX2は利用'不'可能です。\n低速モードで起動します。\n%d\n", CPUInfo[1]);
+		AVX2_FLAG = FALSE;
 	}
 
 	printf("設定\n");

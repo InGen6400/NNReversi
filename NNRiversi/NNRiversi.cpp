@@ -45,7 +45,7 @@ int main()
 	int x, y;
 
 	int CPUInfo[4];
-	__cpuid(CPUInfo, 1);
+	__cpuidex(CPUInfo, 7, 0);
 	if (CPUInfo[1] & (1 << 5)) {
 		printf("AVX2が利用可能です。\n高速モードで起動します。\n%d\n", CPUInfo[1]);
 	}

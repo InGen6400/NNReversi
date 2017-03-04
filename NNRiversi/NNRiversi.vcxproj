@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
+    <ClInclude Include="bitTest.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="Container.h" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BitBoard.cpp" />
+    <ClCompile Include="bitTester.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="CPU.cpp" />

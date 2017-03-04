@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Pattern.h"
 #include "BitBoard.h"
+#include "bitTest.h"
 #include <immintrin.h>
 #include <intrin.h>
 
@@ -34,6 +35,7 @@ void setAVX(char AVX2_FLAG) {
 //AVX2に対応している場合
 uint64 bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2
+	printf("asd%d\n", mask);
 	return _pext_u64(in, mask);
 }
 
@@ -41,12 +43,14 @@ uint64 bitGatherAVX2(uint64 in, uint64 mask) {
 uint64 bitGather_Normal(uint64 in, uint64 mask) {
 	int i, count=0;
 	uint64 out=0;
+	printf("asd%d\n", mask);
 	for (i = 0; i < 64; mask >> 1, in >> 1, i++) {
-		if ((mask & 1) == 1) {
+		if ((mask & 1)) {
 			out |= (in & 1) << count;
 			count++;
 		}
 	}
+	printBit(mask);
 	return out;
 }
 
@@ -70,10 +74,10 @@ inline void setData_Normal(__m128i *ret1, __m128i *ret2, const unsigned char pla
 
 	//この部分はAVX2で高速化可能だがメインPCがAVX(1)なので断念
 	*ret1 = _mm_set_epi16(player >> 7, player >> 6, player >> 5, player >> 4, player >> 3, player >> 2, player >> 1, player);
-	*ret1 = _mm_and_si128(*ret1, _mm_set1_epi16(0x0001));
+	*ret1 = _mm_and_si128(*ret1, _mm_set1_epi16(1));
 
 	*ret2 = _mm_set_epi16(opp >> 7, opp >> 6, opp >> 5, opp >> 4, opp >> 3, opp >> 2, opp >> 1, opp);
-	*ret2 = _mm_and_si128(*ret2, _mm_set1_epi16(0x0001));
+	*ret2 = _mm_and_si128(*ret2, _mm_set1_epi16(1));
 
 }
 
@@ -138,7 +142,6 @@ short getIndex_Normal(const unsigned char player, const unsigned char opp)
 
 	//データの整形
 	setData_Normal(mmy1, mmy2, player, opp);
-	printf("asd%d\n", y2[0]);
 
 	__m128i *mmx = (__m128i *)pow_3;
 	__m128i *mmz = (__m128i *)z1;

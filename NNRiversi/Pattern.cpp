@@ -8,7 +8,28 @@
 
 typedef unsigned short uint16;
 
+uint64 bitGatherAVX2(uint64 in, uint64 mask);
+uint64 bitGather_Normal(uint64 in, uint64 mask);
+short getIndex_AVX2(const unsigned char player, const unsigned char opp);
+short getIndex_Normal(const unsigned char player, const unsigned char opp);
+
+short (*getIndex)(const unsigned char player, const unsigned char opp);
+
 uint64(*bitGather)(uint64 in, uint64 mask);
+
+//関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
+void setAVX(char AVX2_FLAG) {
+	if (AVX2_FLAG) {
+		printf("set AVX2\n");
+		bitGather = bitGatherAVX2;
+		getIndex = getIndex_AVX2;
+	}
+	else{
+		printf("set Normal\n");
+		bitGather = bitGather_Normal;
+		getIndex = getIndex_Normal;
+	}
+}
 
 //AVX2に対応している場合
 uint64 bitGatherAVX2(uint64 in, uint64 mask) {
@@ -29,25 +50,9 @@ uint64 bitGather_Normal(uint64 in, uint64 mask) {
 	return out;
 }
 
-//関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
-void setAVX(char AVX2_FLAG) {
-	if (AVX2_FLAG) {
-		bitGather = bitGatherAVX2;
-	}
-	else {
-		bitGather = bitGather_Normal;
-	}
-}
-
-inline char delta_swap(char bits, char mask, char delta) {
-	char x = (bits ^ (bits >> delta)) & mask;
-	return bits ^ x ^ (x << delta);
-}
-
 //YMMレジスタにplayerとoppのビットをセットする
-inline void setData(__m256i *ret, const unsigned char player, const unsigned char opp) {
+inline void setData_AVX2(__m256i *ret, const unsigned char player, const unsigned char opp) {
 
-#pragma region AVX2
 	//シフト用フィルタ
 	static const __m256i shifter = _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
 	__m256i mp = _mm256_set1_epi16(player);
@@ -59,17 +64,22 @@ inline void setData(__m256i *ret, const unsigned char player, const unsigned cha
 	*ret = _mm256_srlv_epi32(*ret, shifter);
 	//0001でマスク
 	*ret = _mm256_and_si256(*ret, _mm256_set1_epi16(0x0001));
+}
 
-#pragma endregion
+inline void setData_Normal(__m128i *ret1, __m128i *ret2, const unsigned char player, const unsigned char opp) {
 
-#pragma region AVX1
-	/*
 	//この部分はAVX2で高速化可能だがメインPCがAVX(1)なので断念
-	*ret = _mm256_set_epi16(me >> 7, me >> 6, me >> 5, me >> 4, me >> 3, me >> 2, me >> 1, me,
-	opp >> 7, opp >> 6, opp >> 5, opp >> 4, opp >> 3, opp >> 2, opp >> 1, opp);
-	*ret = _mm256_and_si256(*ret, _mm256_set1_epi16(0x0001));
-	*/
-#pragma endregion
+	*ret1 = _mm_set_epi16(player >> 7, player >> 6, player >> 5, player >> 4, player >> 3, player >> 2, player >> 1, player);
+	*ret1 = _mm_and_si128(*ret1, _mm_set1_epi16(0x0001));
+
+	*ret2 = _mm_set_epi16(opp >> 7, opp >> 6, opp >> 5, opp >> 4, opp >> 3, opp >> 2, opp >> 1, opp);
+	*ret2 = _mm_and_si128(*ret2, _mm_set1_epi16(0x0001));
+
+}
+
+inline char delta_swap(char bits, char mask, char delta) {
+	char x = (bits ^ (bits >> delta)) & mask;
+	return bits ^ x ^ (x << delta);
 }
 
 //ビットを左右逆転したものを返す
@@ -88,7 +98,7 @@ inline char getMirrorCorner(char in) {
 }
 
 //player, oppからインデックスを返す
-inline short getIndex(const unsigned char player, const unsigned char opp)
+short getIndex_AVX2(const unsigned char player, const unsigned char opp)
 {
 	alignas(16) static const uint16 pow_3[LEN] = { 0x1,  0x1 * 2,  0x3,  0x3 * 2,  0x9,   0x9 * 2,   0x1b,  0x1b * 2,
 		0x51, 0x51 * 2, 0xf3, 0xf3 * 2, 0x2d9, 0x2d9 * 2, 0x88b, 0x88b * 2 };//(1,3,9,27,81,243,729,2187)*2 と1,3,9,27,81,243,729,2187
@@ -101,7 +111,7 @@ inline short getIndex(const unsigned char player, const unsigned char opp)
 	__m256i *mmz = (__m256i *)z;
 
 	//データの整形
-	setData(mmy, player, opp);
+	setData_AVX2(mmy, player, opp);
 
 	//それぞれの積の和
 	*mmz = _mm256_madd_epi16(*mmx, *mmy);
@@ -111,6 +121,46 @@ inline short getIndex(const unsigned char player, const unsigned char opp)
 	//0バイト目と8バイト目がそれぞれの出力になる
 	return z[0] + z[8];
 }
+
+short getIndex_Normal(const unsigned char player, const unsigned char opp)
+{
+	alignas(16) static const uint16 pow_3[LEN/2] = { 0x1, 0x3, 0x9, 0x1b, 0x51, 0xf3, 0x2d9, 0x88b };//1,3,9,27,81,243,729,2187
+	alignas(16) static const uint16 pow_3_2[LEN/2] = { 0x1*2, 0x3*2, 0x9*2, 0x1b*2, 0x51*2, 0xf3*2, 0x2d9*2, 0x88b*2 };//(1,3,9,27,81,243,729,2187)*2
+
+	alignas(16) uint16 y1[LEN/2] = { 0 };
+	alignas(16) uint16 y2[LEN/2] = { 0 };
+	alignas(16) uint16 z1[LEN/2] = { 0 };
+	alignas(16) uint16 z2[LEN/2] = { 0 };
+
+	//レジストリに登録
+	__m128i *mmy1 = (__m128i *)y1;
+	__m128i *mmy2 = (__m128i *)y2;
+
+	//データの整形
+	setData_Normal(mmy1, mmy2, player, opp);
+	printf("asd%d\n", y2[0]);
+
+	__m128i *mmx = (__m128i *)pow_3;
+	__m128i *mmz = (__m128i *)z1;
+	//それぞれの積の和
+	*mmz = _mm_madd_epi16(*mmx, *mmy1);
+	//16bitx16bit=32bit
+	*mmz = _mm_hadd_epi32(*mmz, *mmz);
+	*mmz = _mm_hadd_epi32(*mmz, *mmz);
+
+	//
+	mmx = (__m128i *)pow_3_2;
+	mmz = (__m128i *)z2;
+
+	//それぞれの積の和
+	*mmz = _mm_madd_epi16(*mmx, *mmy2);
+	//16bitx16bit=32bit
+	*mmz = _mm_hadd_epi32(*mmz, *mmz);
+	*mmz = _mm_hadd_epi32(*mmz, *mmz);
+	//0バイト目と8バイト目がそれぞれの出力になる
+	return z1[0] + z2[0];
+}
+
 
 short getCornerIndexUL(BitBoard *bitboard, char color) {
 	return getIndex(bitGather(bitboard->stone[color], 0xe0e0c00000000000),bitGather(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));

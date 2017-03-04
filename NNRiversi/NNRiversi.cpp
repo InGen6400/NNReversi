@@ -57,6 +57,8 @@ int main()
 		AVX2_FLAG = FALSE;
 	}
 
+	setAVX(AVX2_FLAG);
+
 	printf("ê›íË\n");
 	
 	while (mode == NODEF_MODE) {

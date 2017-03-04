@@ -21,12 +21,12 @@ uint64(*bitGather)(uint64 in, uint64 mask);
 //関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
 void setAVX(char AVX2_FLAG) {
 	if (AVX2_FLAG) {
-		printf("set AVX2\n");
+		printf(">>Set AVX2 Mode\n");
 		bitGather = bitGatherAVX2;
 		getIndex = getIndex_AVX2;
 	}
 	else{
-		printf("set Normal\n");
+		printf("\n>>Set Normal Mode\n");
 		bitGather = bitGather_Normal;
 		getIndex = getIndex_Normal;
 	}
@@ -160,7 +160,6 @@ short getIndex_Normal(const unsigned char player, const unsigned char opp)
 	//0バイト目と8バイト目がそれぞれの出力になる
 	return z1[0] + z2[0];
 }
-
 
 short getCornerIndexUL(BitBoard *bitboard, char color) {
 	return getIndex(bitGather(bitboard->stone[color], 0xe0e0c00000000000),bitGather(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));

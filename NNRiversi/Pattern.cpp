@@ -35,7 +35,6 @@ void setAVX(char AVX2_FLAG) {
 //AVX2‚É‘Î‰‚µ‚Ä‚¢‚éê‡
 uint64 bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2
-	printf("asd%d\n", mask);
 	return _pext_u64(in, mask);
 }
 
@@ -43,14 +42,12 @@ uint64 bitGatherAVX2(uint64 in, uint64 mask) {
 uint64 bitGather_Normal(uint64 in, uint64 mask) {
 	int i, count=0;
 	uint64 out=0;
-	printf("asd%d\n", mask);
-	for (i = 0; i < 64; mask >> 1, in >> 1, i++) {
-		if ((mask & 1)) {
+	for (i = 0; i < 64; mask >>= 1, in >>= 1, i++) {
+		if (mask & 1) {
 			out |= (in & 1) << count;
 			count++;
 		}
 	}
-	printBit(mask);
 	return out;
 }
 

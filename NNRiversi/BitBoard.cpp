@@ -30,7 +30,7 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//^‚ñ’†“ñ‚ÂˆÈŠO0
 	bitboard->stone[BLACK] = 0x0000000810000000;//^‚ñ’†“ñ‚ÂˆÈŠO0
-	//bitboard->stone[WHITE] = 0xc000800000000000;//
+	//bitboard->stone[WHITE] = 0xc000800000000001;//
 	//bitboard->stone[BLACK] = 0x00c0400000000000;//
 	//Šp‚ÌƒCƒ“ƒfƒbƒNƒX‚ª22011021‚É‚È‚é‚Í‚¸
 	bitboard->Sp = bitboard->Stack;
@@ -51,26 +51,26 @@ void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
 	printf(" @b”b”b”b”b”b”b”b”b”b”b\n");
 	printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
 
-	for (x = 0; x < BITBOARD_SIZE * BITBOARD_SIZE; x++, cpyBoard.stone[WHITE]>>=1, cpyBoard.stone[BLACK]>>=1, mobility_w >>= 1, mobility_b >>= 1) {
-		if (x%8 == 0) {
-			printf(" %d b”b", x/8+1);
+	for (x = BITBOARD_SIZE * BITBOARD_SIZE - 1; x >= 0; x--) {
+		if ((x+1)%8 == 0) {
+			printf(" %d b”b", 8-x/8);
 		}
-		if (cpyBoard.stone[WHITE] & 1) {
+		if ((cpyBoard.stone[WHITE]>>x) & 1) {
 			printf("œb");
 		}
-		else if (cpyBoard.stone[BLACK] & 1) {
+		else if ((cpyBoard.stone[BLACK]>>x) & 1) {
 			printf("Zb");
 		}
-		else if ((mobility_w & 1) && isMob) {
+		else if (((mobility_w>>x) & 1) && isMob) {
 			printf("Db");
 		}
-		else if ((mobility_b & 1) && isMob) {
+		else if (((mobility_b>>x) & 1) && isMob) {
 			printf("Bb");
 		}
 		else {
 			printf("@b");
 		}
-		if (x % 8 == 7) {
+		if ((x+1) % 8 == 1) {
 
 			printf("”b %d", x / 8+1);
 			putchar('\n');

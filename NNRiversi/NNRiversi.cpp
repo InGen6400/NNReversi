@@ -264,14 +264,17 @@ void Game_PVP(char showMobility) {
 			system("cls");
 			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
 				if (turn == player2Turn) {
-					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
 					left--;
 				}
 				else {
-					printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					printf("You Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
 					left--;
 				}
 				turn = oppColor(turn);
+			}
+			else {
+				printf("Can't put (%d,%d)\n", x-8, y-8);
 			}
 
 			BitBoard_Draw(bitboard, showMobility);

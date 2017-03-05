@@ -548,7 +548,7 @@ void MODE_DEBUG() {
 		}
 	}
 	*/
-	printf("%d\n",getCornerIndexDR(bitboard, WHITE));
+	printf("%d\n", getEdgeIndexDR_U(bitboard));
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();
 	printf("Time:%.4f", ((cpu2->end - cpu2->start)) / 1000.0);

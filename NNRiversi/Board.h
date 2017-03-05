@@ -20,7 +20,7 @@ const char DIR_L = -1;
 const char DIR_UL = -(BOARD_SIZE + 2) - 1;
 
 #pragma endregion
-
+/*
 #pragma region piece_define
 
 const char WALL = -1;
@@ -29,7 +29,7 @@ const char WHITE = 0;
 const char BLACK  = 1;
 
 #pragma endregion
-
+*/
 #pragma region POS_define
 
 const char NOMOVE = -2;

@@ -1,12 +1,26 @@
 #pragma once
 #include "BitBoard.h"
 
-void Pattern_setAVX(char AVX2_FLAG);
+void Pattern_setAVX(unsigned char AVX2_FLAG);
 
-short getCornerIndexUL(BitBoard *bitboard, char color);
+unsigned short getCornerIndexUL(BitBoard *bitboard);
 
-short getCornerIndexUR(BitBoard *bitboard, char color);
+unsigned short getCornerIndexUR(BitBoard *bitboard);
 
-short getCornerIndexDL(BitBoard *bitboard, char color);
+unsigned short getCornerIndexDL(BitBoard *bitboard);
 
-short getCornerIndexDR(BitBoard *bitboard, char color);
+unsigned short getCornerIndexDR(BitBoard *bitboard);
+
+unsigned short getLineIndex(BitBoard *bitboard, uint64 mask);
+
+unsigned short getEdgeIndexUL_R(BitBoard *bitboard);
+
+unsigned short getEdgeIndexUL_D(BitBoard *bitboard);
+
+unsigned short getEdgeIndexUR_L(BitBoard *bitboard);
+
+unsigned short getEdgeIndexUR_D(BitBoard *bitboard);
+
+unsigned short getEdgeIndexDR_U(BitBoard *bitboard);
+
+unsigned short getEdgeIndexDR_L(BitBoard *bitboard);

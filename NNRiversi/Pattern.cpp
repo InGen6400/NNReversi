@@ -9,17 +9,17 @@
 
 typedef unsigned short uint16;
 
-char bitGatherAVX2(uint64 in, uint64 mask);
-char bitGather_Normal(uint64 in, uint64 mask);
-short getIndex_AVX2(const unsigned char player, const unsigned char opp);
-short getIndex_Normal(const unsigned char player, const unsigned char opp);
+unsigned char bitGatherAVX2(uint64 in, uint64 mask);
+unsigned char bitGather_Normal(uint64 in, uint64 mask);
+unsigned short getIndex_AVX2(const unsigned char player, const unsigned char opp);
+unsigned short getIndex_Normal(const unsigned char player, const unsigned char opp);
 
-short (*getIndex)(const unsigned char player, const unsigned char opp);
+unsigned short (*getIndex)(const unsigned char player, const unsigned char opp);
 
-char(*bitGather)(uint64 in, uint64 mask);
+unsigned char(*bitGather)(uint64 in, uint64 mask);
 
 //関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
-void Pattern_setAVX(char AVX2_FLAG) {
+void Pattern_setAVX(unsigned char AVX2_FLAG) {
 	if (AVX2_FLAG) {
 		printf(">>Set AVX2 Mode\n");
 		bitGather = bitGatherAVX2;
@@ -33,13 +33,13 @@ void Pattern_setAVX(char AVX2_FLAG) {
 }
 
 //AVX2に対応している場合
-char bitGatherAVX2(uint64 in, uint64 mask) {
+unsigned char bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2
 	return _pext_u64(in, mask);
 }
 
 //AVX2未対応の場合
-char bitGather_Normal(uint64 in, uint64 mask) {
+unsigned char bitGather_Normal(uint64 in, uint64 mask) {
 	int i, count=0;
 	uint64 out=0;
 	for (i = 0; i < 64; mask >>= 1, in >>= 1, i++) {
@@ -78,35 +78,35 @@ inline void setData_Normal(__m128i *ret1, __m128i *ret2, const unsigned char pla
 
 }
 
-inline char delta_swap(char bits, char mask, char delta) {
-	char x = (bits ^ (bits >> delta)) & mask;
+inline unsigned char delta_swap(unsigned char bits, unsigned char mask, unsigned char delta) {
+	unsigned char x = (bits ^ (bits >> delta)) & mask;
 	return bits ^ x ^ (x << delta);
 }
 
 //ビットを左右逆転したものを返す
-inline char getMirrorLine(char in) {
-	char data;
+inline unsigned char getMirrorLine(unsigned char in) {
+	unsigned char data;
 	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
 	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
 	return ((data & 0x0F) << 4) | ((data & 0xF0) >> 4);
 }
 
 //対角線で軸対象
-inline char getMirrorCorner_Diag(char in) {
+inline unsigned char getMirrorCorner_Diag(unsigned char in) {
 	in = delta_swap(in, 0b00000001, 2);//6,8
 	in = delta_swap(in, 0b00010000, 2);//2,4
 	return delta_swap(in, 0b00000010, 4);//3,7
 }
 
 //角のインデックスを左右反転
-inline char getMirrorCorner_LR(char in) {
+inline unsigned char getMirrorCorner_LR(unsigned char in) {
 	in = delta_swap(in, 0b00100000, 2);//1,3
 	in = delta_swap(in, 0b00000100, 2);//3,6
 	return delta_swap(in, 0b00000001, 1);//7,8
 }
 
 //player, oppからインデックスを返す
-short getIndex_AVX2(const unsigned char player, const unsigned char opp)
+unsigned short getIndex_AVX2(const unsigned char player, const unsigned char opp)
 {
 	alignas(16) static const uint16 pow_3[LEN] = { 0x1,  0x1 * 2,  0x3,  0x3 * 2,  0x9,   0x9 * 2,   0x1b,  0x1b * 2,
 		0x51, 0x51 * 2, 0xf3, 0xf3 * 2, 0x2d9, 0x2d9 * 2, 0x88b, 0x88b * 2 };//(1,3,9,27,81,243,729,2187)*2 と1,3,9,27,81,243,729,2187
@@ -130,7 +130,7 @@ short getIndex_AVX2(const unsigned char player, const unsigned char opp)
 	return z[0] + z[8];
 }
 
-short getIndex_Normal(const unsigned char player, const unsigned char opp)
+unsigned short getIndex_Normal(const unsigned char player, const unsigned char opp)
 {
 	alignas(16) static const uint16 pow_3[LEN/2] = { 0x1, 0x3, 0x9, 0x1b, 0x51, 0xf3, 0x2d9, 0x88b };//1,3,9,27,81,243,729,2187
 	alignas(16) static const uint16 pow_3_2[LEN/2] = { 0x1*2, 0x3*2, 0x9*2, 0x1b*2, 0x51*2, 0xf3*2, 0x2d9*2, 0x88b*2 };//(1,3,9,27,81,243,729,2187)*2
@@ -168,18 +168,22 @@ short getIndex_Normal(const unsigned char player, const unsigned char opp)
 	return z1[0] + z2[0];
 }
 
-short getCornerIndexUL(BitBoard *bitboard, char color) {
-	return getIndex(bitGather(bitboard->stone[color], 0xe0e0c00000000000), bitGather(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
+unsigned short getCornerIndexUL(BitBoard *bitboard) {
+	return getIndex(bitGather(bitboard->stone[BLACK], 0xe0e0c00000000000), bitGather(bitboard->stone[WHITE], 0xe0e0c00000000000));
 }
 
-short getCornerIndexUR(BitBoard *bitboard, char color) {
-	return getIndex(getMirrorCorner_LR(bitGather(bitboard->stone[color], 0x0707030000000000)), getMirrorCorner_LR(bitGather(bitboard->stone[oppColor(color)], 0x0707030000000000)));
+unsigned short getCornerIndexUR(BitBoard *bitboard) {
+	return getIndex(getMirrorCorner_LR(bitGather(bitboard->stone[BLACK], 0x0707030000000000)), getMirrorCorner_LR(bitGather(bitboard->stone[WHITE], 0x0707030000000000)));
 }
 
-short getCornerIndexDL(BitBoard *bitboard, char color) {
-	return getIndex(getMirrorCorner_LR(getMirrorLine(bitGather(bitboard->stone[color], 0x0000000000C0E0E0))),getMirrorCorner_LR(getMirrorLine(bitGather(bitboard->stone[oppColor(color)], 0x0000000000C0E0E0))));
+unsigned short getCornerIndexDL(BitBoard *bitboard) {
+	return getIndex(getMirrorCorner_LR(getMirrorLine(bitGather(bitboard->stone[BLACK], 0x0000000000C0E0E0))),getMirrorCorner_LR(getMirrorLine(bitGather(bitboard->stone[WHITE], 0x0000000000C0E0E0))));
 }
 
-short getCornerIndexDR(BitBoard *bitboard, char color) {
-	return getIndex(getMirrorLine(bitGather(bitboard->stone[color], 0x0000000000030707)), getMirrorLine(bitGather(bitboard->stone[oppColor(color)], 0x0000000000030707)));
+unsigned short getCornerIndexDR(BitBoard *bitboard) {
+	return getIndex(getMirrorLine(bitGather(bitboard->stone[BLACK], 0x0000000000030707)), getMirrorLine(bitGather(bitboard->stone[WHITE], 0x0000000000030707)));
+}
+
+unsigned inline short getLineIndex(BitBoard *bitboard, uint64 mask) {
+	return getIndex(bitGather(bitboard->stone[BLACK], mask), bitGather(bitboard->stone[WHITE], mask));
 }

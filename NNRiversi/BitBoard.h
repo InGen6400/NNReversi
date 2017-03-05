@@ -82,6 +82,11 @@ const char H8 = 88;
 
 #pragma endregion
 */
+const char WALL = -1;
+const char NONE = 2;
+const char WHITE = 0;
+const char BLACK = 1;
+
 const char BITBOARD_SIZE = 8;
 
 typedef unsigned long long uint64;

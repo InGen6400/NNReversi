@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "Board.h"
 #include "BitBoard.h"
 #include "Player.h"
 #include "const.h"

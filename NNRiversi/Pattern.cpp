@@ -9,14 +9,14 @@
 
 typedef unsigned short uint16;
 
-uint64 bitGatherAVX2(uint64 in, uint64 mask);
-uint64 bitGather_Normal(uint64 in, uint64 mask);
+char bitGatherAVX2(uint64 in, uint64 mask);
+char bitGather_Normal(uint64 in, uint64 mask);
 short getIndex_AVX2(const unsigned char player, const unsigned char opp);
 short getIndex_Normal(const unsigned char player, const unsigned char opp);
 
 short (*getIndex)(const unsigned char player, const unsigned char opp);
 
-uint64(*bitGather)(uint64 in, uint64 mask);
+char(*bitGather)(uint64 in, uint64 mask);
 
 //関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
 void setAVX(char AVX2_FLAG) {
@@ -33,13 +33,13 @@ void setAVX(char AVX2_FLAG) {
 }
 
 //AVX2に対応している場合
-uint64 bitGatherAVX2(uint64 in, uint64 mask) {
+char bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2
 	return _pext_u64(in, mask);
 }
 
 //AVX2未対応の場合
-uint64 bitGather_Normal(uint64 in, uint64 mask) {
+char bitGather_Normal(uint64 in, uint64 mask) {
 	int i, count=0;
 	uint64 out=0;
 	for (i = 0; i < 64; mask >>= 1, in >>= 1, i++) {
@@ -92,10 +92,17 @@ inline char getMirrorLine(char in) {
 }
 
 //対角線で軸対象
-inline char getMirrorCorner(char in) {
+inline char getMirrorCorner_Diag(char in) {
 	in = delta_swap(in, 0b00000001, 2);//6,8
 	in = delta_swap(in, 0b00010000, 2);//2,4
 	return delta_swap(in, 0b00000010, 4);//3,7
+}
+
+//角のインデックスを左右反転
+inline char getMirrorCorner_LR(char in) {
+	in = delta_swap(in, 0b00100000, 2);//1,3
+	in = delta_swap(in, 0b00000100, 2);//3,6
+	return delta_swap(in, 0b00000001, 1);//7,8
 }
 
 //player, oppからインデックスを返す
@@ -162,5 +169,17 @@ short getIndex_Normal(const unsigned char player, const unsigned char opp)
 }
 
 short getCornerIndexUL(BitBoard *bitboard, char color) {
-	return getIndex(bitGather(bitboard->stone[color], 0xe0e0c00000000000),bitGather(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
+	return getIndex(bitGather(bitboard->stone[color], 0xe0e0c00000000000), bitGather(bitboard->stone[oppColor(color)], 0xe0e0c00000000000));
+}
+
+short getCornerIndexUR(BitBoard *bitboard, char color) {
+	return getIndex(getMirrorCorner_LR(bitGather(bitboard->stone[color], 0x0707030000000000)), getMirrorCorner_LR(bitGather(bitboard->stone[oppColor(color)], 0x0707030000000000)));
+}
+
+short getCornerIndexDL(BitBoard *bitboard, char color) {
+	return getIndex(getMirrorCorner_LR(getMirrorLine(bitGather(bitboard->stone[color], 0x0000000000C0E0E0))),getMirrorCorner_LR(getMirrorLine(bitGather(bitboard->stone[oppColor(color)], 0x0000000000C0E0E0))));
+}
+
+short getCornerIndexDR(BitBoard *bitboard, char color) {
+	return getIndex(getMirrorLine(bitGather(bitboard->stone[color], 0x0000000000030707)), getMirrorLine(bitGather(bitboard->stone[oppColor(color)], 0x0000000000030707)));
 }

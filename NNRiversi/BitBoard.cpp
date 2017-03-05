@@ -28,10 +28,10 @@ void BitBoard_Delete(BitBoard *bitboard) {
 
 //盤面の初期化
 void BitBoard_Reset(BitBoard *bitboard) {
-	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
-	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外0
-	//bitboard->stone[WHITE] = 0xc000800000000001;//
-	//bitboard->stone[BLACK] = 0x00c0400000000000;//
+	//bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
+	//bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外0
+	bitboard->stone[WHITE] = 0x0607010000030606;//
+	bitboard->stone[BLACK] = 0x0100000000000101;//
 	//角のインデックスが22011021になるはず
 	bitboard->Sp = bitboard->Stack;
 }

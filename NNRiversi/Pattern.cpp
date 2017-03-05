@@ -19,7 +19,7 @@ short (*getIndex)(const unsigned char player, const unsigned char opp);
 char(*bitGather)(uint64 in, uint64 mask);
 
 //関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
-void setAVX(char AVX2_FLAG) {
+void Pattern_setAVX(char AVX2_FLAG) {
 	if (AVX2_FLAG) {
 		printf(">>Set AVX2 Mode\n");
 		bitGather = bitGatherAVX2;

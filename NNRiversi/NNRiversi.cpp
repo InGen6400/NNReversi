@@ -38,6 +38,7 @@ int main()
 	char showMobility = FALSE;
 	int x, y;
 
+#pragma region CAN_USE_AVX2
 	int CPUInfo[4];
 	__cpuidex(CPUInfo, 7, 0);
 	if (CPUInfo[1] & (1 << 5)) {
@@ -49,7 +50,8 @@ int main()
 		AVX2_FLAG = FALSE;
 	}
 
-	setAVX(AVX2_FLAG);
+	Pattern_setAVX(AVX2_FLAG);
+#pragma endregion
 
 	printf("Ý’è\n");
 	

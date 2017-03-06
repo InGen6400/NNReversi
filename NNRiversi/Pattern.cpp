@@ -38,7 +38,7 @@ unsigned char bitGatherAVX2(uint64 in, uint64 mask) {
 	return _pext_u64(in, mask);
 }
 
-//AVX2未対応の場合(AVX2で動作することが前提なので雑なつくり)
+//AVX2未対応の場合_メインでとりあえず動かすため(AVX2で動作することが前提なので雑なつくり)
 unsigned char bitGather_Normal(uint64 in, uint64 mask) {
 	int i, count=0;
 	uint64 out=0;
@@ -84,6 +84,8 @@ inline unsigned char delta_swap(unsigned char bits, unsigned char mask, unsigned
 	unsigned char x = (bits ^ (bits >> delta)) & mask;
 	return bits ^ x ^ (x << delta);
 }
+
+#pragma region getMirror
 
 //ビットを左右逆転したものを返す
 inline unsigned char getMirrorLine8(unsigned char in) {
@@ -135,6 +137,8 @@ inline unsigned char getMirrorCorner_LR(unsigned char in) {
 	in = delta_swap(in, 0b00000100, 2);//3,6
 	return delta_swap(in, 0b00000001, 1);//7,8
 }
+
+#pragma endregion
 
 //player, oppからインデックスを返す
 unsigned short getIndex_AVX2(const unsigned char player, const unsigned char opp)
@@ -200,6 +204,8 @@ unsigned short getIndex_Normal(const unsigned char player, const unsigned char o
 	return z1[0] + z2[0];
 }
 
+#pragma region GetIndexFunctions
+
 //左上のインデックス
 inline unsigned short getCornerIndexUL(BitBoard *bitboard) {
 	return getIndex(bitGather(bitboard->stone[BLACK], 0xe0e0c00000000000), bitGather(bitboard->stone[WHITE], 0xe0e0c00000000000));
@@ -212,7 +218,7 @@ inline unsigned short getCornerIndexUR(BitBoard *bitboard) {
 
 //左下のインデックス
 inline unsigned short getCornerIndexDL(BitBoard *bitboard) {
-	return getIndex(getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0000000000C0E0E0))),getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0000000000C0E0E0))));
+	return getIndex(getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0000000000C0E0E0))), getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0000000000C0E0E0))));
 }
 
 //右下のインデックス
@@ -321,4 +327,5 @@ inline unsigned short getEdgeIndexDL_U(BitBoard *bitboard) {
 
 #pragma endregion
 
+#pragma endregion
 

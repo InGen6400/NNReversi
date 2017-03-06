@@ -201,91 +201,122 @@ unsigned short getIndex_Normal(const unsigned char player, const unsigned char o
 }
 
 //左上のインデックス
-unsigned short getCornerIndexUL(BitBoard *bitboard) {
+inline unsigned short getCornerIndexUL(BitBoard *bitboard) {
 	return getIndex(bitGather(bitboard->stone[BLACK], 0xe0e0c00000000000), bitGather(bitboard->stone[WHITE], 0xe0e0c00000000000));
 }
 
 //右上のインデックス
-unsigned short getCornerIndexUR(BitBoard *bitboard) {
+inline unsigned short getCornerIndexUR(BitBoard *bitboard) {
 	return getIndex(getMirrorCorner_LR(bitGather(bitboard->stone[BLACK], 0x0707030000000000)), getMirrorCorner_LR(bitGather(bitboard->stone[WHITE], 0x0707030000000000)));
 }
 
 //左下のインデックス
-unsigned short getCornerIndexDL(BitBoard *bitboard) {
+inline unsigned short getCornerIndexDL(BitBoard *bitboard) {
 	return getIndex(getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0000000000C0E0E0))),getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0000000000C0E0E0))));
 }
 
 //右下のインデックス
-unsigned short getCornerIndexDR(BitBoard *bitboard) {
+inline unsigned short getCornerIndexDR(BitBoard *bitboard) {
 	return getIndex(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0000000000030707)), getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0000000000030707)));
 }
 
 //直線のインデックスを取得
-unsigned short getLineIndex(BitBoard *bitboard, uint64 mask) {
+inline unsigned short getLineIndex(BitBoard *bitboard, uint64 mask) {
 	return getIndex(bitGather(bitboard->stone[BLACK], mask), bitGather(bitboard->stone[WHITE], mask));
 }
 
+//左上から右へのエッジ
+#pragma region UL_R
 
-#pragma region UR_L
-
-unsigned short getEdgeIndexUL_R(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUL_R(BitBoard *bitboard) {
 	return getIndex(bitGather(bitboard->stone[BLACK], 0xFE40000000000000), bitGather(bitboard->stone[WHITE], 0xFE40000000000000));
 }
 
 #pragma endregion
 
+//左上から下へのエッジ
 #pragma region UL_D
 
 inline unsigned char swap_EdgeUL_D(unsigned char in) {
 	return (((in & 0b00011111) << 1) | (in & 0b11000000) | ((in & 0b00100000) >> 5));
 }
 
-unsigned short getEdgeIndexUL_D(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUL_D(BitBoard *bitboard) {
 	return getIndex(swap_EdgeUL_D(bitGather(bitboard->stone[BLACK], 0x80C0808080808000)), swap_EdgeUL_D(bitGather(bitboard->stone[WHITE], 0x80C0808080808000)));
 }
 
 #pragma endregion
 
+//右上から左へのエッジ
 #pragma region UR_L
 
 inline unsigned char swap_EdgeUR_L(unsigned char in) {
 	return (((in & 0b01111111) << 1) | ((in & 0b10000000) >> 7));
 }
 
-unsigned short getEdgeIndexUR_L(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUR_L(BitBoard *bitboard) {
 	return getIndex(swap_EdgeUR_L(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x7F02000000000000))), swap_EdgeUR_L(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x7F02000000000000))));
 }
 
 #pragma endregion
 
+//右上から下へのエッジ
 #pragma region UR_D
 
 inline unsigned char swap_EdgeUR_D(unsigned char in) {
 	return (((in & 0b00111111) << 1) | (in & 0b10000000) | ((in & 0b01000000) >> 6));
 }
 
-unsigned short getEdgeIndexUR_D(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUR_D(BitBoard *bitboard) {
 	return getIndex(swap_EdgeUR_D(bitGather(bitboard->stone[BLACK], 0x0103010101010100)), swap_EdgeUR_D(bitGather(bitboard->stone[WHITE], 0x0103010101010100)));
 }
 
 #pragma endregion
 
+//右下から上へのエッジ
 #pragma region DR_U
 
 inline unsigned char swap_EdgeDR_U(unsigned char in) {
-	return (((in & 0b00111111) << 1) | (in & 0b10000000) | ((in & 0b01000000) >> 6));
+	return (((in & 0b00011111) << 1) | (in & 0b11000000) | ((in & 0b00100000) >> 5));
 }
 
-unsigned short getEdgeIndexDR_U(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexDR_U(BitBoard *bitboard) {
 	return getIndex(swap_EdgeDR_U(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0001010101010301))), swap_EdgeDR_U(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0001010101010301))));
 }
 
 #pragma endregion
 
+//右下から左へのエッジ
 #pragma region DR_L
 
-unsigned short getEdgeIndexDR_L(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexDR_L(BitBoard *bitboard) {
 	return getIndex(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x000000000000027F)), getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x000000000000027F)));
+}
+
+#pragma endregion
+
+//左下から右へのエッジ
+#pragma region DL_R
+
+inline unsigned char swap_EdgeDL_R(unsigned char in) {
+	return (((in & 0b01111111) << 1) | ((in & 0b10000000) >> 7));
+}
+
+inline unsigned short getEdgeIndexDL_R(BitBoard *bitboard) {
+	return getIndex(swap_EdgeDL_R(bitGather(bitboard->stone[BLACK], 0x00000000000040FE)), swap_EdgeDL_R(bitGather(bitboard->stone[WHITE], 0x00000000000040FE)));
+}
+
+#pragma endregion
+
+//左下から上へのエッジ
+#pragma region DL_U
+
+inline unsigned char swap_EdgeDL_U(unsigned char in) {
+	return (((in & 0b00111111) << 1) | (in & 0b10000000) | ((in & 0b01000000) >> 6));
+}
+
+inline unsigned short getEdgeIndexDL_U(BitBoard *bitboard) {
+	return getIndex(swap_EdgeDL_U(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x008080808080C080))), swap_EdgeDR_U(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x008080808080C080))));
 }
 
 #pragma endregion

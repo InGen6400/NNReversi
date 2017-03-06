@@ -28,10 +28,10 @@ void BitBoard_Delete(BitBoard *bitboard) {
 
 //盤面の初期化
 void BitBoard_Reset(BitBoard *bitboard) {
-	//bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
-	//bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外0
-	bitboard->stone[WHITE] = 0x0001010101010001;//
-	bitboard->stone[BLACK] = 0x0000000000000100;//
+	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
+	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外00x0000000000000000
+	//bitboard->stone[WHITE] = 0x6AA4462B921C2F8E;//
+	//bitboard->stone[BLACK] = 0x0000000000000000;//
 	//角のインデックスが22011021になるはず
 	bitboard->Sp = bitboard->Stack;
 }
@@ -201,7 +201,7 @@ int BitBoard_Undo(BitBoard *bitboard) {
 	uint64 rev = Stack_POP(bitboard);
 	bitboard->stone[color] ^= rev | Stack_POP(bitboard);
 	bitboard->stone[oppColor(color)] ^= rev;
-	return 1;
+	return color;
 }
 
 //着手可能位置(要高速化)

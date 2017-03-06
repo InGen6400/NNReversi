@@ -213,8 +213,7 @@ void Game_PVP(char showMobility) {
 					}
 					else if (tmp[0] == '.' && tmp[1] == '.') {
 						if (*(bitboard->Sp - 1) != -2) {
-							BitBoard_Undo(bitboard);
-							BitBoard_Undo(bitboard);
+							turn = BitBoard_Undo(bitboard);
 							system("cls");
 							printf("–ß‚µ‚Ü‚µ‚½\n");
 							BitBoard_Draw(bitboard, showMobility);
@@ -242,8 +241,7 @@ void Game_PVP(char showMobility) {
 					}
 					else if (tmp[0] == '.' && tmp[1] == '.') {
 						if (*(bitboard->Sp - 1) != -2) {
-							BitBoard_Undo(bitboard);
-							BitBoard_Undo(bitboard);
+							turn = BitBoard_Undo(bitboard);
 							system("cls");
 							printf("–ß‚µ‚Ü‚µ‚½\n");
 							BitBoard_Draw(bitboard, showMobility);
@@ -354,8 +352,10 @@ void Game_Battle(char showMobility) {
 					}
 					else if (tmp[0] == '.' && tmp[1] == '.') {
 						if (*(bitboard->Sp - 1) != -2) {
-							BitBoard_Undo(bitboard);
-							BitBoard_Undo(bitboard);
+							//‘O‰ñ‚ÌCPU‚Ìƒ^[ƒ“‚Ü‚Å–ß‚é
+							do {
+								turn = BitBoard_Undo(bitboard);
+							} while (turn == cpuTurn);
 							system("cls");
 							printf("–ß‚µ‚Ü‚µ‚½\n");
 							BitBoard_Draw(bitboard, showMobility);
@@ -548,7 +548,6 @@ void MODE_DEBUG() {
 		}
 	}
 	*/
-	printf("%d\n", getEdgeIndexDR_U(bitboard));
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();
 	printf("Time:%.4f", ((cpu2->end - cpu2->start)) / 1000.0);

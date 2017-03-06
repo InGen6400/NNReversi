@@ -2,7 +2,6 @@
 #include "Pattern.h"
 #include "BitBoard.h"
 #include "bitTest.h"
-#include <immintrin.h>
 #include <intrin.h>
 
 #define LEN 16

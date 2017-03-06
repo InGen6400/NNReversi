@@ -37,7 +37,7 @@ int main()
 	char showMobility = FALSE;
 	int x, y;
 
-#pragma region CAN_USE_AVX2
+//AVX2が利用可能かどうかの判定
 	int CPUInfo[4];
 	__cpuidex(CPUInfo, 7, 0);
 	if (CPUInfo[1] & (1 << 5)) {
@@ -48,9 +48,7 @@ int main()
 		printf("CPUInfo[1]:%d\nAVX2は利用'不'可能です。\n低速モードで起動します。\n", CPUInfo[1]);
 		AVX2_FLAG = FALSE;
 	}
-
 	Pattern_setAVX(AVX2_FLAG);
-#pragma endregion
 
 	printf("設定\n");
 	

@@ -252,34 +252,34 @@ unsigned short getIndex_Normal(const unsigned char player, const unsigned char o
 #pragma region GetIndexFunctions
 
 //左上のインデックス
-inline unsigned short getCornerIndexUL(BitBoard *bitboard) {
+inline unsigned short getCornerIndexUL(const BitBoard *bitboard) {
 	return getIndex(bitGather(bitboard->stone[BLACK], 0xe0e0c00000000000), bitGather(bitboard->stone[WHITE], 0xe0e0c00000000000));
 }
 
 //右上のインデックス
-inline unsigned short getCornerIndexUR(BitBoard *bitboard) {
+inline unsigned short getCornerIndexUR(const BitBoard *bitboard) {
 	return getIndex(getMirrorCorner_LR(bitGather(bitboard->stone[BLACK], 0x0707030000000000)), getMirrorCorner_LR(bitGather(bitboard->stone[WHITE], 0x0707030000000000)));
 }
 
 //左下のインデックス
-inline unsigned short getCornerIndexDL(BitBoard *bitboard) {
+inline unsigned short getCornerIndexDL(const BitBoard *bitboard) {
 	return getIndex(getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0000000000C0E0E0))), getMirrorCorner_LR(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0000000000C0E0E0))));
 }
 
 //右下のインデックス
-inline unsigned short getCornerIndexDR(BitBoard *bitboard) {
+inline unsigned short getCornerIndexDR(const BitBoard *bitboard) {
 	return getIndex(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0000000000030707)), getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0000000000030707)));
 }
 
 //直線のインデックスを取得
-inline unsigned short getLineIndex(BitBoard *bitboard, uint64 mask) {
+inline unsigned short getLineIndex(const BitBoard *bitboard, uint64 mask) {
 	return getIndex(bitGather(bitboard->stone[BLACK], mask), bitGather(bitboard->stone[WHITE], mask));
 }
 
 //左上から右へのエッジ
 #pragma region UL_R
 
-inline unsigned short getEdgeIndexUL_R(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUL_R(const BitBoard *bitboard) {
 	return getIndex(bitGather(bitboard->stone[BLACK], 0xFE40000000000000), bitGather(bitboard->stone[WHITE], 0xFE40000000000000));
 }
 
@@ -292,7 +292,7 @@ inline unsigned char swap_EdgeUL_D(unsigned char in) {
 	return (((in & 0b00011111) << 1) | (in & 0b11000000) | ((in & 0b00100000) >> 5));
 }
 
-inline unsigned short getEdgeIndexUL_D(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUL_D(const BitBoard *bitboard) {
 	return getIndex(swap_EdgeUL_D(bitGather(bitboard->stone[BLACK], 0x80C0808080808000)), swap_EdgeUL_D(bitGather(bitboard->stone[WHITE], 0x80C0808080808000)));
 }
 
@@ -305,7 +305,7 @@ inline unsigned char swap_EdgeUR_L(unsigned char in) {
 	return (((in & 0b01111111) << 1) | ((in & 0b10000000) >> 7));
 }
 
-inline unsigned short getEdgeIndexUR_L(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUR_L(const BitBoard *bitboard) {
 	return getIndex(swap_EdgeUR_L(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x7F02000000000000))), swap_EdgeUR_L(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x7F02000000000000))));
 }
 
@@ -318,7 +318,7 @@ inline unsigned char swap_EdgeUR_D(unsigned char in) {
 	return (((in & 0b00111111) << 1) | (in & 0b10000000) | ((in & 0b01000000) >> 6));
 }
 
-inline unsigned short getEdgeIndexUR_D(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexUR_D(const BitBoard *bitboard) {
 	return getIndex(swap_EdgeUR_D(bitGather(bitboard->stone[BLACK], 0x0103010101010100)), swap_EdgeUR_D(bitGather(bitboard->stone[WHITE], 0x0103010101010100)));
 }
 
@@ -331,7 +331,7 @@ inline unsigned char swap_EdgeDR_U(unsigned char in) {
 	return (((in & 0b00011111) << 1) | (in & 0b11000000) | ((in & 0b00100000) >> 5));
 }
 
-inline unsigned short getEdgeIndexDR_U(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexDR_U(const BitBoard *bitboard) {
 	return getIndex(swap_EdgeDR_U(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x0001010101010301))), swap_EdgeDR_U(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x0001010101010301))));
 }
 
@@ -340,7 +340,7 @@ inline unsigned short getEdgeIndexDR_U(BitBoard *bitboard) {
 //右下から左へのエッジ
 #pragma region DR_L
 
-inline unsigned short getEdgeIndexDR_L(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexDR_L(const BitBoard *bitboard) {
 	return getIndex(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x000000000000027F)), getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x000000000000027F)));
 }
 
@@ -353,7 +353,7 @@ inline unsigned char swap_EdgeDL_R(unsigned char in) {
 	return (((in & 0b01111111) << 1) | ((in & 0b10000000) >> 7));
 }
 
-inline unsigned short getEdgeIndexDL_R(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexDL_R(const BitBoard *bitboard) {
 	return getIndex(swap_EdgeDL_R(bitGather(bitboard->stone[BLACK], 0x00000000000040FE)), swap_EdgeDL_R(bitGather(bitboard->stone[WHITE], 0x00000000000040FE)));
 }
 
@@ -366,7 +366,7 @@ inline unsigned char swap_EdgeDL_U(unsigned char in) {
 	return (((in & 0b00111111) << 1) | (in & 0b10000000) | ((in & 0b01000000) >> 6));
 }
 
-inline unsigned short getEdgeIndexDL_U(BitBoard *bitboard) {
+inline unsigned short getEdgeIndexDL_U(const BitBoard *bitboard) {
 	return getIndex(swap_EdgeDL_U(getMirrorLine8(bitGather(bitboard->stone[BLACK], 0x008080808080C080))), swap_EdgeDR_U(getMirrorLine8(bitGather(bitboard->stone[WHITE], 0x008080808080C080))));
 }
 
@@ -374,3 +374,191 @@ inline unsigned short getEdgeIndexDL_U(BitBoard *bitboard) {
 
 #pragma endregion
 
+int getValue(const BitBoard *board, char turn) {
+	int ret = 0;
+	char black, white;
+	turn /= 4;
+	//直線
+	ret += PatternValue[turn][PATTERN_LINE4][getLineIndex(board, 0x000000FF00000000)];//y=4
+	ret += PatternValue[turn][PATTERN_LINE4][getLineIndex(board, 0x00000000FF000000)];//y=5
+	ret += PatternValue[turn][PATTERN_LINE4][getLineIndex(board, 0x0808080808080808)];//x=5
+	ret += PatternValue[turn][PATTERN_LINE4][getLineIndex(board, 0x1010101010101010)];//x=4
+
+	ret += PatternValue[turn][PATTERN_LINE3][getLineIndex(board, 0x0000FF0000000000)];//y=3
+	ret += PatternValue[turn][PATTERN_LINE3][getLineIndex(board, 0x0000000000FF0000)];//y=6
+	ret += PatternValue[turn][PATTERN_LINE3][getLineIndex(board, 0x2020202020202020)];//x=3
+	ret += PatternValue[turn][PATTERN_LINE3][getLineIndex(board, 0x0404040404040404)];//x=6
+
+	ret += PatternValue[turn][PATTERN_LINE2][getLineIndex(board, 0x00FF000000000000)];//y=2
+	ret += PatternValue[turn][PATTERN_LINE2][getLineIndex(board, 0x000000000000FF00)];//y=7
+	ret += PatternValue[turn][PATTERN_LINE2][getLineIndex(board, 0x4040404040404040)];//x=2
+	ret += PatternValue[turn][PATTERN_LINE2][getLineIndex(board, 0x0202020202020202)];//x=7
+	//斜め線
+	ret += PatternValue[turn][PATTERN_DIAG8][getLineIndex(board, 0x8040201008040201)];//UL-DR
+	ret += PatternValue[turn][PATTERN_DIAG8][getLineIndex(board, 0x0102040810204080)];//UR-DL
+
+	ret += PatternValue[turn][PATTERN_DIAG7][getLineIndex(board, 0x4020100804020100)];//2,1 - 8,7
+	ret += PatternValue[turn][PATTERN_DIAG7][getLineIndex(board, 0x0080402010080402)];//1,2 - 7,8
+	ret += PatternValue[turn][PATTERN_DIAG7][getLineIndex(board, 0x0204081020408000)];//7,1 - 1,7
+	ret += PatternValue[turn][PATTERN_DIAG7][getLineIndex(board, 0x0001020408102040)];//8,2 - 2,8
+
+	ret += PatternValue[turn][PATTERN_DIAG6][getLineIndex(board, 0x0000804020100804)];//1,3 - 6,8
+	ret += PatternValue[turn][PATTERN_DIAG6][getLineIndex(board, 0x2010080402010000)];//3,1 - 8,6
+	ret += PatternValue[turn][PATTERN_DIAG6][getLineIndex(board, 0x0408102040800000)];//6,1 - 1,6
+	ret += PatternValue[turn][PATTERN_DIAG6][getLineIndex(board, 0x0000010204081020)];//8,3 - 3,8
+
+	ret += PatternValue[turn][PATTERN_DIAG5][getLineIndex(board, 0x0000008040201008)];//1,4 - 5,8
+	ret += PatternValue[turn][PATTERN_DIAG5][getLineIndex(board, 0x1008040201000000)];//4,1 - 8,5
+	ret += PatternValue[turn][PATTERN_DIAG5][getLineIndex(board, 0x0810204080000000)];//5,1 - 1,5
+	ret += PatternValue[turn][PATTERN_DIAG5][getLineIndex(board, 0x0000000102040810)];//8,4 - 4,8
+
+	ret += PatternValue[turn][PATTERN_DIAG4][getLineIndex(board, 0x0000000080402010)];//1,5 - 4,8
+	ret += PatternValue[turn][PATTERN_DIAG4][getLineIndex(board, 0x0804020100000000)];//5,1 - 8,4
+	ret += PatternValue[turn][PATTERN_DIAG4][getLineIndex(board, 0x1020408000000000)];//4,1 - 1,4
+	ret += PatternValue[turn][PATTERN_DIAG4][getLineIndex(board, 0x0000000001020408)];//8,5 - 5,8
+	//角
+	ret += PatternValue[turn][PATTERN_CORNER][getCornerIndexUL(board)];//左上
+	ret += PatternValue[turn][PATTERN_CORNER][getCornerIndexUR(board)];//右上
+	ret += PatternValue[turn][PATTERN_CORNER][getCornerIndexDR(board)];//右下
+	ret += PatternValue[turn][PATTERN_CORNER][getCornerIndexDL(board)];//左下
+	//エッジ
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexUL_R(board)];//左上から右
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexUL_D(board)];//左上から下
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexUR_L(board)];//右上から左
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexUR_D(board)];//右上から下
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexDR_U(board)];//右下から上
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexDR_L(board)];//右下から左
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexDL_U(board)];//左下から上
+	ret += PatternValue[turn][PATTERN_EDGE][getEdgeIndexDL_R(board)];//左下から右
+	//着手可能数
+	ret += PatternValue[turn][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(board->stone[BLACK], board->stone[WHITE]))];//BLACKの着手可能位置の数
+	ret += PatternValue[turn][PATTERN_MOBILITY_W][BitBoard_CountStone(BitBoard_getMobility(board->stone[WHITE], board->stone[BLACK]))];//WHITEの着手可能位置の数
+	//石差
+	ret += PatternValue[turn][PATTERN_STONEDIFF][(black = BitBoard_CountStone(board->stone[BLACK])) - (white = BitBoard_CountStone(board->stone[WHITE]))];//BLACKから見たWHITEとの石差
+	//パリティー
+	ret += PatternValue[turn][PATTERN_PARITY][(BITBOARD_SIZE * BITBOARD_SIZE - black - white)&1];//空きます数の偶奇
+
+	return ret;
+}
+
+inline void UpdatePattern(char turn, char pattern, short index, short mirror, int diff) {
+	PatternValue[turn][pattern][index] += diff;
+	//もし反転インデックスがあるなら同じ値を代入する
+	PatternValue[turn][pattern][mirror] = PatternValue[turn][pattern][index];
+}
+
+inline void UpdatePatternEdge(char turn, char pattern, short index, int diff) {
+	PatternValue[turn][pattern][index] += diff;
+}
+
+void UpdateAllPattern(const BitBoard *board, int value, char turn) {
+	int index, diff;
+	char black, white;
+
+	diff = (int)((value - getValue(board, turn))*UPDATE_RATIO);
+
+	turn /= 4;
+	index = getLineIndex(board, 0x000000FF00000000);//y=4
+	UpdatePattern(turn, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x00000000FF000000);//y=5
+	UpdatePattern(turn, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x0808080808080808);//x=5
+	UpdatePattern(turn, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x1010101010101010);//x=4
+	UpdatePattern(turn, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+
+	index = getLineIndex(board, 0x0000FF0000000000);//y=3
+	UpdatePattern(turn, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x0000000000FF0000);//y=6
+	UpdatePattern(turn, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x2020202020202020);//x=3
+	UpdatePattern(turn, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x0404040404040404);//x=6
+	UpdatePattern(turn, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+
+	index = getLineIndex(board, 0x00FF000000000000);//y=2
+	UpdatePattern(turn, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x000000000000FF00);//y=7
+	UpdatePattern(turn, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x4040404040404040);//x=2
+	UpdatePattern(turn, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x0202020202020202);//x=7
+	UpdatePattern(turn, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+														  //斜め線
+	index = getLineIndex(board, 0x8040201008040201);//UL-DR
+	UpdatePattern(turn, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
+	index = getLineIndex(board, 0x0102040810204080);//UR-DL
+	UpdatePattern(turn, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
+	
+	index = getLineIndex(board, 0x4020100804020100);//2,1 - 8,7
+	UpdatePattern(turn, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	index = getLineIndex(board, 0x0080402010080402);//1,2 - 7,8
+	UpdatePattern(turn, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	index = getLineIndex(board, 0x0204081020408000);//7,1 - 1,7
+	UpdatePattern(turn, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	index = getLineIndex(board, 0x0001020408102040);//8,2 - 2,8
+	UpdatePattern(turn, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+
+	index = getLineIndex(board, 0x0000804020100804);//1,3 - 6,8
+	UpdatePattern(turn, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	index = getLineIndex(board, 0x2010080402010000);//3,1 - 8,6
+	UpdatePattern(turn, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	index = getLineIndex(board, 0x0408102040800000);//6,1 - 1,6
+	UpdatePattern(turn, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	index = getLineIndex(board, 0x0000010204081020);//8,3 - 3,8
+	UpdatePattern(turn, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+
+	index = getLineIndex(board, 0x0000008040201008);//1,4 - 5,8
+	UpdatePattern(turn, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	index = getLineIndex(board, 0x1008040201000000);//4,1 - 8,5
+	UpdatePattern(turn, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	index = getLineIndex(board, 0x0810204080000000);//5,1 - 1,5
+	UpdatePattern(turn, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	index = getLineIndex(board, 0x0000000102040810);//8,4 - 4,8
+	UpdatePattern(turn, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	
+	index = getLineIndex(board, 0x0000000080402010);//1,5 - 4,8
+	UpdatePattern(turn, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	index = getLineIndex(board, 0x0804020100000000);//5,1 - 8,4
+	UpdatePattern(turn, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	index = getLineIndex(board, 0x1020408000000000);//4,1 - 1,4
+	UpdatePattern(turn, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	index = getLineIndex(board, 0x0000000001020408);//8,5 - 5,8
+	UpdatePattern(turn, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+
+	index = getCornerIndexUL(board);
+	UpdatePattern(turn, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	index = getCornerIndexUR(board);
+	UpdatePattern(turn, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	index = getCornerIndexDR(board);
+	UpdatePattern(turn, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	index = getCornerIndexDL(board);
+	UpdatePattern(turn, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+
+	index = getEdgeIndexUL_D(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+	index = getEdgeIndexUL_R(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+	index = getEdgeIndexUR_L(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+	index = getEdgeIndexUR_D(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+	index = getEdgeIndexDR_U(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+	index = getEdgeIndexDR_L(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+	index = getEdgeIndexDL_U(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+	index = getEdgeIndexDL_R(board);
+	UpdatePatternEdge(turn, PATTERN_EDGE, index, diff);
+
+	index = BitBoard_CountStone(BitBoard_getMobility(board->stone[BLACK], board->stone[WHITE]));
+	UpdatePatternEdge(turn, PATTERN_MOBILITY_B, index, diff);
+	index = BitBoard_CountStone(BitBoard_getMobility(board->stone[WHITE], board->stone[BLACK]));
+	UpdatePatternEdge(turn, PATTERN_MOBILITY_W, index, diff);
+
+	UpdatePatternEdge(turn, PATTERN_STONEDIFF, (black = BitBoard_CountStone(board->stone[BLACK])) - (white = BitBoard_CountStone(board->stone[WHITE])), diff);
+
+	UpdatePatternEdge(turn, PATTERN_PARITY, (BITBOARD_SIZE * BITBOARD_SIZE - black - white) & 1, diff);
+
+}

@@ -5,6 +5,7 @@
 const char PATTERN_VALUE_FILE[] = "PatternValue.dat";
 
 const short TURN_SPLIT = 15;//15’iŠK‚É•ª‚¯‚Ä•]‰¿’l‚ð•Ï‚¦‚é
+const double UPDATE_RATIO = 0.002;
 
 enum {
 	PATTERN_LINE4,

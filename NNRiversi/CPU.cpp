@@ -7,34 +7,47 @@
 #include <immintrin.h>
 
 
-CPU *CPU_Init(BitBoard *bitboard) {
+CPU *CPU_Init() {
 	CPU *ret;
 	ret = (CPU*)malloc(sizeof(CPU));
 	if (ret) {
-		CPU_Reset(ret, bitboard);
+		CPU_Reset(ret);
 	}
 	return ret;
 }
 
+void CPU_Reset(CPU *cpu) {
+	cpu->bitboard = BitBoard_New();
+	if (!cpu->bitboard) {
+		printf("cpu->bitboard can't alloc");
+		return;
+	}
+	cpu->leaf = 0;
+}
+
 void CPU_Delete(CPU *cpu) {
 	if (cpu->bitboard != NULL) {
-		//BitBoard_Delete(cpu->bitboard);
+		BitBoard_Delete(cpu->bitboard);
 	}
 	free(cpu);
 }
 
-void CPU_Reset(CPU *cpu, BitBoard *bitboard) {
-	cpu->node = 0;
-	cpu->bitboard = bitboard;
-}
+void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left) {
 
-void CPU_PUT(CPU *cpu, uint64 *PutPos, char color, char left) {
+	BitBoard_Copy(in_board, cpu->bitboard);
 	EmptyListInit(cpu, color);
-	if (left <= 10) {
-		NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MAX_DEPTH, PutPos, VALUE_MAX);
+	if (left <= END_DEPTH) {
+		NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, END_DEPTH, PutPos, VALUE_MAX);
 	}
 	else {
-		NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MAX_DEPTH, PutPos, VALUE_MAX);
+		//リーフで色が白のとき
+		if ((color == WHITE && MID_DEPTH % 2 == 0) || (color == BLACK && MID_DEPTH % 2 == 1)) {
+			//ボードを白黒反転
+			BitBoard_AllOpp(cpu->bitboard);
+			//黒にする
+			color = oppColor(color);
+		}
+		NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MID_DEPTH, PutPos, VALUE_MAX);
 	}
 }
 

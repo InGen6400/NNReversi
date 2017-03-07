@@ -31,6 +31,52 @@ void Pattern_setAVX(unsigned char AVX2_FLAG) {
 	}
 }
 
+void Pattern_Load() {
+	FILE *fp;
+	int i;
+	fp = fopen(PATTERN_VALUE_FILE, "rb");
+	if (!fp) {
+		printf("[pattern value] file OPEN error\n");
+		return;
+	}
+
+	printf("[pattern value] LOAD");
+	for (i = 0; i < PATTERN_AMOUNT; i++) {
+		putchar('.');
+		if (fread(PatternValue, sizeof(int), PatternIndex[i], fp)) {
+			printf("\n>>>[pattern value] flie READ error!!<<<\n");
+			fclose(fp);
+			return;
+		}
+	}
+	printf(">> success\n");
+	fclose(fp);
+	return;
+}
+
+void Pattern_Save() {
+	FILE *fp;
+	int i;
+	fp = fopen(PATTERN_VALUE_FILE, "wb");
+	if (!fp) {
+		printf("[pattern value] file OPEN error\n");
+		return;
+	}
+
+	printf("[pattern value] SAVE");
+	for (i = 0; i < PATTERN_AMOUNT; i++) {
+		putchar('.');
+		if (fwrite(PatternValue, sizeof(int), PatternIndex[i], fp) < (size_t)PatternIndex[i]) {
+			printf("\n>>>[pattern value] flie WRITE error!!<<<\n");
+			fclose(fp);
+			return;
+		}
+	}
+	printf(">> success\n");
+	fclose(fp);
+	return;
+}
+
 //AVX2Ç…ëŒâûÇµÇƒÇ¢ÇÈèÍçá
 unsigned char bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2

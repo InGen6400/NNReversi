@@ -36,6 +36,26 @@ void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->Sp = bitboard->Stack;
 }
 
+//”Õ–Ê‚ÌƒRƒs[
+void BitBoard_Copy(const BitBoard *source, BitBoard *out) {
+	*out = *source;
+	out->Sp = source->Sp - source->Stack + out->Stack;
+}
+
+void BitBoard_AllOpp(BitBoard *source) {
+	uint64 *p;
+	uint64 stoneTmp;
+	stoneTmp = source->stone[WHITE];
+	source->stone[WHITE] = source->stone[BLACK];
+	source->stone[BLACK] = stoneTmp;
+	for (p = source->Sp; p > source->Stack ; ) {
+		p--;//color‚Ö
+		*p = oppColor(*p);
+		p--;//reverse‚Ö
+		p--;//pos‚Ö(color‚Ìˆê‚Âæ)
+	}
+}
+
 //”Õ–Ê‚Ì•`‰æ
 void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
 	char x, y;
@@ -72,7 +92,7 @@ void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
 		}
 		if ((x+1) % 8 == 1) {
 
-			printf("”b %d", x / 8+1);
+			printf("”b %d", 8 - x / 8);
 			putchar('\n');
 			printf(" @{\{\{\{\{\{\{\{\{\{\{\n");
 		}

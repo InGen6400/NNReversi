@@ -105,6 +105,10 @@ void BitBoard_Delete(BitBoard *bitboard);
 
 void BitBoard_Reset(BitBoard *bitboard);
 
+void BitBoard_Copy(const BitBoard *source, BitBoard *out);
+
+void BitBoard_AllOpp(BitBoard *source);
+
 void BitBoard_Draw(const BitBoard *bitboard, char isMob);
 
 char BitBoard_CountStone(uint64 bits);

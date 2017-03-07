@@ -307,7 +307,7 @@ void Game_Battle(char showMobility) {
 
 	uint64 put;
 
-	CPU *cpu = CPU_Init(bitboard);
+	CPU *cpu = CPU_Init();
 	cpu->start = timeGetTime();
 
 	//CPUの色設定
@@ -333,11 +333,11 @@ void Game_Battle(char showMobility) {
 			if (turn == cpuTurn) {
 				//CPUのターン
 				printf("CPU Thinking...", turn);
-				cpu->node = 0;
+				cpu->leaf = 0;
 				cpu->start = timeGetTime();
-				CPU_PUT(cpu, &put, turn, left);
+				CPU_Move(cpu, bitboard, &put, turn, left);
 				cpu->end = timeGetTime();
-				printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
+				printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->leaf);
 				getXY(put, &x, &y);
 			}
 			else {
@@ -375,11 +375,11 @@ void Game_Battle(char showMobility) {
 			system("cls");
 			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
 				if (turn == cpuTurn) {
-					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
 					left--;
 				}
 				else {
-					printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					printf("You Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
 					left--;
 				}
 				turn = oppColor(turn);
@@ -419,8 +419,8 @@ void Game_Time(char showMobility) {
 
 	uint64 put;
 
-	CPU *cpu = CPU_Init(bitboard);
-	CPU *cpu2 = CPU_Init(bitboard);
+	CPU *cpu = CPU_Init();
+	CPU *cpu2 = CPU_Init();
 	cpu2->start = timeGetTime();
 	cpu->start = timeGetTime();
 
@@ -432,25 +432,25 @@ void Game_Time(char showMobility) {
 			passed = FALSE;
 			if (turn == cpuTurn) {
 				//CPUのターン
-				cpu->node = 0;
-				CPU_PUT(cpu, &put, turn, left);
+				cpu->leaf = 0;
+				CPU_Move(cpu, bitboard, &put, turn, left);
 				getXY(put, &x, &y);
 			}
 			else {
 				//CPU2のターン
-				cpu->node = 0;
-				CPU_PUT(cpu, &put, turn, left);
+				cpu->leaf = 0;
+				CPU_Move(cpu, bitboard, &put, turn, left);
 				getXY(put, &x, &y);
 			}
 
 			system("cls");
 			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
 				if (turn == cpuTurn) {
-					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
 					left--;
 				}
 				else {
-					printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
+					printf("You Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
 					left--;
 				}
 				turn = oppColor(turn);
@@ -494,8 +494,8 @@ void MODE_DEBUG() {
 	uint64 put;
 
 	bitboard = BitBoard_New();
-	CPU *cpu = CPU_Init(bitboard);
-	CPU *cpu2 = CPU_Init(bitboard);
+	CPU *cpu = CPU_Init();
+	CPU *cpu2 = CPU_Init();
 	cpu2->start = timeGetTime();
 	cpu->start = timeGetTime();
 	/*

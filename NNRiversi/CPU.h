@@ -3,7 +3,8 @@
 #include "BitBoard.h"
 #include "Board.h"
 
-const char MAX_DEPTH = 6;
+const char MID_DEPTH = 8;
+const char END_DEPTH = 16;
 
 const int VALUE_MAX = 100000000;
 
@@ -22,19 +23,19 @@ const char poslist[] = {
 };
 
 struct CPU_ {
-	int node;
+	int leaf;
 	int start, end;
 	BitBoard *bitboard;
 	charNode isEmpty[BITBOARD_SIZE * BITBOARD_SIZE];
 }typedef CPU;
 
-CPU *CPU_Init(BitBoard *bitboard);
+CPU *CPU_Init();
+
+void CPU_Reset(CPU *cpu);
 
 void CPU_Delete(CPU *cpu);
 
-void CPU_PUT(CPU *cpu, uint64 *PutPos, char color, char left);
-
-void CPU_Reset(CPU *cpu, BitBoard *bitboard);
+void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left);
 
 int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha);
 

@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <stdio.h>
 #include "BitBoard.h"
 #include "Player.h"
 #include "const.h"
@@ -13,12 +14,15 @@
 #include <intrin.h>
 #pragma comment(lib, "winmm.lib")
 
-const char NODEF_MODE = -1;
-const char BATTLE = 0;
-const char LEARN = 1;
-const char TIME = 2;
-const char PVP = 3;
-const char DEBUG = 4;
+enum {
+	NODEF_MODE = -1,
+	BATTLE,
+	TIME,
+	PVP,
+	LEARN,
+	READ,
+	DEBUG
+};
 
 char AVX2_FLAG;
 
@@ -29,6 +33,10 @@ void Game_Battle(char showMobility);
 void Game_Time(char showMobility);
 
 void MODE_DEBUG();
+
+void MODE_READBOOK();
+
+void MODE_LEARN();
 
 int main()
 {
@@ -67,6 +75,9 @@ int main()
 		else if (tmp[0] == 'P' || tmp[0] == 'p') {
 			mode = PVP;
 		}
+		else if (tmp[0] == 'R' || tmp[0] == 'r') {
+			mode = READ;
+		}
 		else if (tmp[0] == '.') {
 			showMobility = TRUE;
 			printf("着手可能な場所を表示します\n");
@@ -84,97 +95,16 @@ int main()
 		Game_Battle(showMobility);
 	}
 	else if (mode == LEARN) {
-		/*
-		system("cls");
-		mainBoard = Board_New();
-		cpu = CPU_Init(mainBoard);
-		cpu2 = CPU_Init(mainBoard);
-		left = 60;
-		Board_Draw(mainBoard);
-		while (!endFlag) {
-			if (turn == cpuTurn) {
-				if (Board_CanPlay(mainBoard, turn) == TRUE) {
-					passed = false;
-					//CPUのターン
-					printf("CPU Thinking...");
-					cpu->node = 0;
-					cpu->start = timeGetTime();
-					CPU_PUT(cpu, &cpuPut, turn, left);
-					cpu->end = timeGetTime();
-					x = getX(cpuPut);
-					y = getY(cpuPut);
-					printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->node);
-					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x - 1], "12345678"[y - 1]);
-				}
-				else {
-					x = -1;
-					if (passed) {
-						endFlag = true;
-					}
-					else {
-						passed = true;
-					}
-				}
-			}
-			else {
-				if (Board_CanPlay(mainBoard, turn) == TRUE) {
-					passed = false;
-					printf("CPU2 Thinking...");
-					cpu2->node = 0;
-					cpu2->start = timeGetTime();
-					CPU_PUT(cpu2, &cpuPut, turn, left);
-					cpu2->end = timeGetTime();
-					x = getX(cpuPut);
-					y = getY(cpuPut);
-				}
-				else {
-					x = -1;
-					if (passed) {
-						endFlag = true;
-					}
-					else {
-						passed = true;
-					}
-				}
-			}
-			if (x == -1) {
-				turn = getOppStone(turn);
-				if (turn == cpuTurn) {
-					printf("CPU pass\n");
-				}
-				else {
-					printf("You pass\n");
-				}
-
-			}
-			else if (x >= 1 && y >= 1 && x <= BOARD_SIZE && y <= BOARD_SIZE) {
-				system("cls");
-				if (flipCount = Board_Flip(mainBoard, turn, ConvertPos(x, y)) >= 1) {
-					if (turn == cpuTurn) {
-						printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x ], "12345678"[y]);
-						left--;
-					}
-					else {
-						printf("You Put (%c, %c)\n", "ABCDEFGH"[x ], "12345678"[y]);
-						left--;
-					}
-					printf("裏返した石数:%d\n", flipCount);
-					turn = getOppStone(turn);
-				}
-				else {
-					printf("You Can't Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
-				}
-				Board_Draw(mainBoard);
-
-			}
-		}
-		*/
+		MODE_LEARN();
 	}
 	else if (mode == TIME) {
 		Game_Time(FALSE);
 	}
 	else if (mode == DEBUG) {
 		MODE_DEBUG();
+	}
+	else if (mode == READ) {
+		MODE_READBOOK();
 	}
 	
     return 0;
@@ -332,7 +262,7 @@ void Game_Battle(char showMobility) {
 			passed = FALSE;
 			if (turn == cpuTurn) {
 				//CPUのターン
-				printf("CPU Thinking...", turn);
+				printf("CPU Thinking...");
 				cpu->leaf = 0;
 				cpu->start = timeGetTime();
 				CPU_Move(cpu, bitboard, &put, turn, left);
@@ -561,4 +491,25 @@ void MODE_DEBUG() {
 	BitBoard_Delete(bitboard);
 	CPU_Delete(cpu);
 	CPU_Delete(cpu2);
+}
+
+void MODE_LEARN() {
+
+}
+
+void MODE_READBOOK() {
+	char path[1000];
+	char loadedPath[1000];
+
+	printf("BOOK Path:");
+	fgets(path, sizeof(path), stdin);
+
+	//fgetsの改行を無視
+	strtok(path, "\n");
+
+	//ファイル名を変更
+	sprintf(loadedPath, "%s.end", path);
+	if (rename(path, loadedPath) == 0) {
+		printf("ファイル名変更:%s->%s\n", path, loadedPath);
+	}
 }

@@ -162,7 +162,6 @@
     <ClInclude Include="Container.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="Eval_Const.h" />
-    <ClInclude Include="Linear_Routine.h" />
     <ClInclude Include="Pattern.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="stdafx.h" />
@@ -174,7 +173,6 @@
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="CPU.cpp" />
-    <ClCompile Include="Linear_Routine.cpp" />
     <ClCompile Include="NNRiversi.cpp" />
     <ClCompile Include="Pattern.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -184,6 +182,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="kifu.gam.tar" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,6 +5,7 @@
 
 const char MID_DEPTH = 8;
 const char END_DEPTH = 16;
+const int VALUE_MAX = 1000000;
 
 const char poslist[] = {
 	A1, A8, H8, H1,

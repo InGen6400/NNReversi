@@ -384,6 +384,9 @@ void Game_Battle(char showMobility) {
 				}
 				turn = oppColor(turn);
 			}
+			else {
+				printf("Can't put (%d,%d)\n", x - 8, y - 8);
+			}
 
 			BitBoard_Draw(bitboard, showMobility);
 
@@ -454,6 +457,9 @@ void Game_Time(char showMobility) {
 					left--;
 				}
 				turn = oppColor(turn);
+			}
+			else {
+				printf("Can't put (%d,%d)\n", x - 8, y - 8);
 			}
 
 			BitBoard_Draw(bitboard, showMobility);
@@ -529,6 +535,9 @@ void MODE_DEBUG() {
 					left--;
 				}
 				turn = oppColor(turn);
+			}
+			else {
+				printf("Can't put (%d,%d)\n", x-8, y-8);
 			}
 
 			BitBoard_Draw(bitboard, FALSE);

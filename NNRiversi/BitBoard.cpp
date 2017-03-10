@@ -131,10 +131,10 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 		Stack_PUSH(bitboard, reverse);
 		Stack_PUSH(bitboard, color);
 		return 1;
-	}
+	}/*
 	else {
 		printf("iligal position\n");
-	}
+	}*/
 
 	return 0;
 }

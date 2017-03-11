@@ -485,6 +485,9 @@ void MODE_DEBUG() {
 		}
 	}
 	*/
+	
+	put=getPos_book("D3");
+
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();
 	printf("Time:%.4f", ((cpu2->end - cpu2->start)) / 1000.0);
@@ -503,6 +506,8 @@ void MODE_READBOOK() {
 
 	printf("BOOK Path:");
 	fgets(path, sizeof(path), stdin);
+
+	
 
 	//fgets‚Ì‰üs‚ğ–³‹
 	strtok(path, "\n");

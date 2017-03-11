@@ -131,6 +131,8 @@ uint64 getBitPos(char x, char y);
 
 void getXY(uint64 pos, int *x, int *y);
 
+uint64 getPos_book(char *in);
+
 char oppColor(char color);
 
 uint64 Stack_POP(BitBoard *bitboard);

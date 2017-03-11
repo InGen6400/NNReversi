@@ -30,7 +30,7 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外00x0000000000000000
-	bitboard->stone[WHITE] = 0x0000000001020408;//
+	//bitboard->stone[WHITE] = 0x0000000001020408;//
 	//bitboard->stone[BLACK] = 0x0000000000000000;//
 	//角のインデックスが22011021になるはず
 	bitboard->Sp = bitboard->Stack;
@@ -376,6 +376,12 @@ void drawBits(uint64 bits) {
 //x,y座標からビットボード座標に変換
 uint64 getBitPos(char x, char y) {
 	return (uint64)1 << (x + y * BOARD_SIZE);
+}
+
+//Bookの座標(A1形式)をビットボード座標に変換する
+uint64 getPos_book(char *in) {
+	printf("book pos:%d", (('H' - in[0]) + ('8' - in[1]) * 8));
+	return (uint64)1 << (('H'-in[0]) + ('8'-in[1])*8);
 }
 
 void getXY(uint64 pos, int *x, int *y) {

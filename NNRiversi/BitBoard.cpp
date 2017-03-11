@@ -50,7 +50,7 @@ void BitBoard_AllOpp(BitBoard *source) {
 	source->stone[BLACK] = stoneTmp;
 	for (p = source->Sp; p > source->Stack ; ) {
 		p--;//color‚Ö
-		*p = oppColor(*p);
+		*p = oppColor((char)*p);
 		p--;//reverse‚Ö
 		p--;//pos‚Ö(color‚Ìˆê‚Âæ)
 	}
@@ -58,7 +58,7 @@ void BitBoard_AllOpp(BitBoard *source) {
 
 //”Õ–Ê‚Ì•`‰æ
 void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
-	char x, y;
+	char x;
 
 	BitBoard cpyBoard = *bitboard;
 
@@ -111,7 +111,7 @@ char BitBoard_CountStone(uint64 bits) {
 	bits = (bits & 0x00FF00FF00FF00FF) + (bits >> 8 & 0x00FF00FF00FF00FF);
 	bits = (bits & 0x0000FFFF0000FFFF) + (bits >> 16 & 0x0000FFFF0000FFFF);
 	return (bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);*/
-	return _mm_popcnt_u64(bits);
+	return (char)_mm_popcnt_u64(bits);
 }
 
 //pos‚É’…Žè‚·‚é
@@ -217,7 +217,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 p
 //ˆêŽè–ß‚·(–¢ŽÀ‘•)
 int BitBoard_Undo(BitBoard *bitboard) {
 	if (bitboard->Sp <= bitboard->Stack)return 0;
-	char color = Stack_POP(bitboard);
+	char color = (char)Stack_POP(bitboard);
 	uint64 rev = Stack_POP(bitboard);
 	bitboard->stone[color] ^= rev | Stack_POP(bitboard);
 	bitboard->stone[oppColor(color)] ^= rev;

@@ -24,6 +24,8 @@ enum {
 	DEBUG
 };
 
+const short LINE_MAX = 200;
+
 char AVX2_FLAG;
 
 void Game_PVP(char showMobility);
@@ -501,13 +503,60 @@ void MODE_LEARN() {
 }
 
 void MODE_READBOOK() {
-	char path[1000];
-	char loadedPath[1000];
+	//ファイルパスと読み込み後のファイルパス
+	char path[1000], loadedPath[1000];
+	//一行分の文字列
+	char Line[LINE_MAX];
+	//着手位置だけのデータ
+	char *positions;
+	//着手データの一次記憶変数, 現在手番の色
+	char c_pos[5], color;
+	//イテレータ, ターン数, 石差, 読み込んだ行数
+	int i, turn, diff, dataCount = 0;
+	FILE *fp;
+	BitBoard *bitboard = BitBoard_New();
+	//着手位置
+	uint64 put;
 
 	printf("BOOK Path:");
 	fgets(path, sizeof(path), stdin);
-
 	
+	fp = fopen(path, "r");
+
+	while (fgets(Line, sizeof(Line), fp)) {
+		BitBoard_Reset(bitboard);
+		/*要修正＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃明日、読み飛ばさずに着手だけを行うように変更する(更新開始時のボードの状態とパスを含めた色を把握するため)*/
+		//序盤のランダムは無視しターンカウントだけ進める
+		turn = strlen(strtok(Line, " ")) / 2;
+		color = turn % 2;
+		//空白以降の棋譜は価値のあるデータ
+		positions = strtok(NULL, " ");
+		//石差取得(黒視点)
+		diff = atoi(strtok(NULL, " "));
+
+		for (i = 0; positions[i] != '\0'; i+=2) {
+			//二文字だけ取り出す(A1 etc...)
+			c_pos[0] = positions[i];
+			c_pos[1] = positions[i + 1];
+			put = getPos_book(c_pos);
+			//もし着手できなかった場合パスとして色を変えて着手
+			if (BitBoard_Flip(bitboard, color, put) == 0) {
+				color = oppColor(color);
+				BitBoard_Flip(bitboard, color, put);
+			}
+			turn++;
+			//パターンの評価値の更新
+			UpdateAllPattern(bitboard, diff, turn);
+			color = oppColor(color);
+		}
+		dataCount++;
+		//1000に一度表示
+		if (dataCount % 1000 == 0) {
+			printf("Finish Reading : %d", dataCount);
+		}
+	}
+
+	fclose(fp);
 
 	//fgetsの改行を無視
 	strtok(path, "\n");

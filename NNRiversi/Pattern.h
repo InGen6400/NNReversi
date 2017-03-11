@@ -52,3 +52,5 @@ void Pattern_Load();
 void Pattern_Save();
 
 void Pattern_setAVX(unsigned char AVX2_FLAG);
+
+void UpdateAllPattern(const BitBoard *board, int value, char turn);

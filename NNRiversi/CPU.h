@@ -36,7 +36,7 @@ void CPU_Delete(CPU *cpu);
 
 void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left);
 
-int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha);
+int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, char left, uint64 *PutPos, int alpha);
 
 int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha);
 

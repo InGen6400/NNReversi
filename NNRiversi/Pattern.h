@@ -47,6 +47,8 @@ static const short PatternIndex[] =
 //評価に利用する各パターンの評価値(黒優勢で+)
 static int *PatternValue[TURN_SPLIT][PATTERN_AMOUNT];
 
+void Pattern_Init();
+
 void Pattern_Load();
 
 void Pattern_Save();

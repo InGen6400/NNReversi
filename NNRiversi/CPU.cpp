@@ -37,7 +37,7 @@ void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, ch
 	BitBoard_Copy(in_board, cpu->bitboard);
 	EmptyListInit(cpu, color);
 	if (left <= END_DEPTH) {
-		NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, END_DEPTH, PutPos, VALUE_MAX);
+		printf("last point : %d", -NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, END_DEPTH, PutPos, VALUE_MAX));
 	}
 	else {
 		//リーフで色が白のとき
@@ -47,11 +47,11 @@ void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, ch
 			//黒にする
 			color = oppColor(color);
 		}
-		NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MID_DEPTH, PutPos, VALUE_MAX);
+		printf("point : %d", NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MID_DEPTH, left, PutPos, VALUE_MAX));
 	}
 }
 
-int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, uint64 *PutPos, int alpha) {
+int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, char left, uint64 *PutPos, int alpha) {
 	//char x, y;
 	int best = -VALUE_MAX, tmp;
 	uint64 move;
@@ -73,7 +73,7 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 		rev = getReverseBits(&me, &ene, pos);
 
 		//再帰
-		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, left - 1, &move, -best);
 		/*
 		引数にて反転したビットボードを渡すことで着手をもとに戻さなくてもいい
 		*/
@@ -87,7 +87,7 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	else {
-		tmp = -NegaAlphaSearch(me, ene, TRUE, oppColor(color), depth - 1, &move, -best);
+		tmp = -NegaAlphaSearch(me, ene, TRUE, oppColor(color), depth - 1, left - 1, &move, -best);
 		return tmp;
 	}
 }
@@ -101,7 +101,6 @@ int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, 
 	uint64 rev;
 
 	if (depth == 1) {
-		printf("last\n");
 		pos = BitBoard_getMobility(me, ene);
 		tmp = BitBoard_CountFlips(me, ene, pos);
 		best = BitBoard_CountStone(me) - BitBoard_CountStone(ene);
@@ -129,7 +128,7 @@ int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, 
 		//再帰
 		rev = getReverseBits(&me, &ene, pos);
 
-		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, &move, -best);
+		tmp = -NegaEndSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, &move, -best);
 
 		if (best < tmp) {
 			best = tmp;
@@ -141,7 +140,7 @@ int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, 
 	if (best != -VALUE_MAX)return best;
 	else if (isPassed == TRUE)return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 	else {
-		tmp = -NegaAlphaSearch(me, ene, TRUE, oppColor(color), depth - 1, &move, -best);
+		tmp = -NegaEndSearch(me, ene, TRUE, oppColor(color), depth - 1, &move, -best);
 		return tmp;
 	}
 }

@@ -131,7 +131,9 @@ uint64 getBitPos(char x, char y);
 
 void getXY(uint64 pos, int *x, int *y);
 
-uint64 getPos_book(char *in);
+uint64 getPos_book_upper(char *in);
+
+uint64 getPos_book_lower(char *in);
 
 char oppColor(char color);
 

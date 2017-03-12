@@ -379,9 +379,12 @@ uint64 getBitPos(char x, char y) {
 }
 
 //Bookの座標(A1形式)をビットボード座標に変換する
-uint64 getPos_book(char *in) {
-	printf("book pos:%d", (('H' - in[0]) + ('8' - in[1]) * 8));
+uint64 getPos_book_upper(char *in) {
 	return (uint64)1 << (('H'-in[0]) + ('8'-in[1])*8);
+}
+
+uint64 getPos_book_lower(char *in) {
+	return (uint64)1 << (('h' - in[0]) + ('8' - in[1]) * 8);
 }
 
 void getXY(uint64 pos, int *x, int *y) {

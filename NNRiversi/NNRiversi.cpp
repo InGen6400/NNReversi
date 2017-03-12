@@ -263,6 +263,7 @@ void Game_Battle(char showMobility) {
 		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
 			passed = FALSE;
 			if (turn == cpuTurn) {
+				system("cls");
 				//CPUのターン
 				printf("CPU Thinking...");
 				cpu->leaf = 0;
@@ -304,7 +305,7 @@ void Game_Battle(char showMobility) {
 				}
 			}
 
-			system("cls");
+			//system("cls");
 			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
 				if (turn == cpuTurn) {
 					printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
@@ -488,7 +489,7 @@ void MODE_DEBUG() {
 	}
 	*/
 	
-	put=getPos_book("D3");
+	put=getPos_book_upper("D3");
 
 	cpu2->end = timeGetTime();
 	cpu->end = timeGetTime();
@@ -510,44 +511,75 @@ void MODE_READBOOK() {
 	//着手位置だけのデータ
 	char *positions;
 	//着手データの一次記憶変数, 現在手番の色
-	char c_pos[5], color;
+	char c_pos[5], color=BLACK;
 	//イテレータ, ターン数, 石差, 読み込んだ行数
-	int i, turn, diff, dataCount = 0;
+	int i, left=60, diff, dataCount = 0, randomTurn;
 	FILE *fp;
 	BitBoard *bitboard = BitBoard_New();
 	//着手位置
 	uint64 put;
+	Pattern_Init();
+
+	Pattern_Load();
 
 	printf("BOOK Path:");
 	fgets(path, sizeof(path), stdin);
-	
+	strtok(path, "\n");
 	fp = fopen(path, "r");
+
+	if (!fp) {
+		printf("can't open file : %s", path);
+		return;
+	}
 
 	while (fgets(Line, sizeof(Line), fp)) {
 		BitBoard_Reset(bitboard);
-		/*要修正＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃＃明日、読み飛ばさずに着手だけを行うように変更する(更新開始時のボードの状態とパスを含めた色を把握するため)*/
-		//序盤のランダムは無視しターンカウントだけ進める
-		turn = strlen(strtok(Line, " ")) / 2;
-		color = turn % 2;
-		//空白以降の棋譜は価値のあるデータ
-		positions = strtok(NULL, " ");
-		//石差取得(黒視点)
-		diff = atoi(strtok(NULL, " "));
+		left = 60;
+		color = BLACK;
 
-		for (i = 0; positions[i] != '\0'; i+=2) {
-			//二文字だけ取り出す(A1 etc...)
+		//correctbkは通し番号があるのでカット
+		strtok(Line, " ");
+		//序盤のランダムは無視しターンカウントだけ進める
+		positions = strtok(NULL, " ");
+		for (i = 0; positions[i] != '\0'; i += 2) {
 			c_pos[0] = positions[i];
 			c_pos[1] = positions[i + 1];
-			put = getPos_book(c_pos);
+			put = getPos_book_lower(c_pos);
 			//もし着手できなかった場合パスとして色を変えて着手
 			if (BitBoard_Flip(bitboard, color, put) == 0) {
 				color = oppColor(color);
-				BitBoard_Flip(bitboard, color, put);
+				if (BitBoard_Flip(bitboard, color, put) == 0) {
+					printf("iligal data >> skip read RANDOM\n");
+				}
 			}
-			turn++;
-			//パターンの評価値の更新
-			UpdateAllPattern(bitboard, diff, turn);
+			left--;
+			//パターンの更新はしない
 			color = oppColor(color);
+		}
+		randomTurn = left;
+		//空白以降の棋譜を取得
+		positions = strtok(NULL, " ");
+		printf("positions : %s\n", positions);
+		//石差取得(黒視点)
+		diff = atoi(strtok(NULL, " "));
+
+		for (i = 0; positions[i] != NULL; i+=2) {
+			//二文字だけ取り出す(A1 etc...)
+			c_pos[0] = positions[i];
+			c_pos[1] = positions[i + 1];
+			put = getPos_book_lower(c_pos);
+			printf("dataCount:%d randomTurn:%d left:%d\n", dataCount, randomTurn, left);
+			//もし着手できなかった場合パスとして色を変えて着手
+			if (BitBoard_Flip(bitboard, color, put) == 0) {
+				color = oppColor(color);
+				if (BitBoard_Flip(bitboard, color, put) == 0) {
+					printf("iligal data >> skip read\n");
+				}
+			}
+			//パターンの評価値の更新
+			UpdateAllPattern(bitboard, diff, left);
+			color = oppColor(color);
+			left--;
 		}
 		dataCount++;
 		//1000に一度表示
@@ -557,6 +589,8 @@ void MODE_READBOOK() {
 	}
 
 	fclose(fp);
+
+	Pattern_Save();
 
 	//fgetsの改行を無視
 	strtok(path, "\n");

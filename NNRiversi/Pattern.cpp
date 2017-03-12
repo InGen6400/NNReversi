@@ -31,23 +31,41 @@ void Pattern_setAVX(unsigned char AVX2_FLAG) {
 	}
 }
 
+void Pattern_Init() {
+	int turn, id;
+	printf("Initialize Pattern\n");
+	
+	for (turn = 0; turn < 16; turn++) {
+		for (id = 0; id < PATTERN_AMOUNT; id++) {
+			PatternValue[turn][id] = (int*)calloc(PatternIndex[id], sizeof(int));
+			if (!PatternValue[turn][id]) {
+				printf("pattern init error");
+				return;
+			}
+		}
+	}
+
+}
+
 void Pattern_Load() {
 	FILE *fp;
-	int i;
+	int turn, id;
 	fp = fopen(PATTERN_VALUE_FILE, "rb");
 	if (!fp) {
-		printf("[pattern value] file OPEN error\n");
+		printf("[pattern value] file OPEN error : no file?\n");
 		return;
 	}
 
 	printf("[pattern value] LOAD");
-	for (i = 0; i < PATTERN_AMOUNT; i++) {
-		putchar('.');
-		if (fread(PatternValue, sizeof(int), PatternIndex[i], fp)) {
-			printf("\n>>>[pattern value] flie READ error!!<<<\n");
-			fclose(fp);
-			return;
+	for (turn = 0; turn < 16; turn++) {
+		for (id = 0; id < PATTERN_AMOUNT; id++) {
+			if (fread(PatternValue[turn][id], sizeof(int), PatternIndex[id], fp) < (size_t)PatternIndex[id]) {
+				printf("\n>>>[pattern value] flie READ error!!<<<\n");
+				fclose(fp);
+				return;
+			}
 		}
+		putchar('.');
 	}
 	printf(">> success\n");
 	fclose(fp);
@@ -56,7 +74,7 @@ void Pattern_Load() {
 
 void Pattern_Save() {
 	FILE *fp;
-	int i;
+	int turn, id;
 	fp = fopen(PATTERN_VALUE_FILE, "wb");
 	if (!fp) {
 		printf("[pattern value] file OPEN error\n");
@@ -64,13 +82,15 @@ void Pattern_Save() {
 	}
 
 	printf("[pattern value] SAVE");
-	for (i = 0; i < PATTERN_AMOUNT; i++) {
-		putchar('.');
-		if (fwrite(PatternValue, sizeof(int), PatternIndex[i], fp) < (size_t)PatternIndex[i]) {
-			printf("\n>>>[pattern value] flie WRITE error!!<<<\n");
-			fclose(fp);
-			return;
+	for (turn = 0; turn < 16; turn++) {
+		for (id = 0; id < PATTERN_AMOUNT; id++) {
+			if (fwrite(PatternValue[turn][id], sizeof(int), PatternIndex[id], fp) < (size_t)PatternIndex[id]) {
+				printf("\n>>>[pattern value] flie WRITE error!!<<<\n");
+				fclose(fp);
+				return;
+			}
 		}
+		putchar('.');
 	}
 	printf(">> success\n");
 	fclose(fp);
@@ -560,5 +580,4 @@ void UpdateAllPattern(const BitBoard *board, int value, char turn) {
 	UpdatePatternEdge(turn, PATTERN_STONEDIFF, (black = BitBoard_CountStone(board->stone[BLACK])) - (white = BitBoard_CountStone(board->stone[WHITE])), diff);
 
 	UpdatePatternEdge(turn, PATTERN_PARITY, (BITBOARD_SIZE * BITBOARD_SIZE - black - white) & 1, diff);
-
 }

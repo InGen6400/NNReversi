@@ -169,7 +169,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 		0x7F00000000000000,
 		0x0102040810204000,
 		0x0040201008040201);
-	int posCnt = ntz(pos);
+	int posCnt = _lzcnt_u64(pos);
 	mask = _mm256_srli_epi64(mask, 63 - posCnt);
 
 
@@ -207,7 +207,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	char posShift;
 	__m128i rev = h_or(flip);
 	return (uint64)(_mm_extract_epi64(rev, 0) | _mm_extract_epi64(rev, 1));
-#eli __AVX__
+#elif __AVX__
 
 #endif
 

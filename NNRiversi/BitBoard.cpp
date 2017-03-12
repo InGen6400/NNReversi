@@ -11,6 +11,7 @@
 #include "CPU.h"
 #include "Flags.h"
 #include <intrin.h>
+#include <immintrin.h>
 
 //ボード生成
 BitBoard *BitBoard_New(void) {
@@ -140,88 +141,145 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 	return 0;
 }
 
+//右から連続するゼロの数
+inline int ntz(uint64 in) {
+	return __popcnt64((in&(-in)) - 1);
+}
+
+inline __m256i nonzero(__m256i in) {
+	return _mm256_add_epi64(_mm256_cmpeq_epi64(in, _mm256_setzero_si256()), _mm256_set1_epi64x(1));
+}
+
+inline __m128i h_or(__m256i in) {
+	__m128i tmp = _mm_or_si128(_mm256_castsi256_si128(in), _mm256_extractf128_si256(in, 1));
+	return _mm_or_si128(tmp, _mm_alignr_epi8(tmp, tmp, 8));
+}
+
 //反転するビットを返す(要高速化)
-inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos) {
+inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 pos) {
 
-	if (AVX2_FLAG == TRUE) {
+#ifdef __AVX2__	
+	__m256i mes = _mm256_set1_epi64x(*me);
+	__m256i enes = _mm256_set1_epi64x(*opp);
 
-	}
+	__m256i oppM = _mm256_and_si256(enes, _mm256_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E));
 
-	uint64 revBits = 0;
-	
-	if (((*ene | *me) & pos) != 0)return 0;
-	const uint64 wh = *ene & 0x7E7E7E7E7E7E7E7E;
-	const uint64 wv = *ene & 0x00FFFFFFFFFFFF00;
+	__m256i mask = _mm256_set_epi64x(
+		0x0080808080808080,
+		0x7F00000000000000,
+		0x0102040810204000,
+		0x0040201008040201);
+	int posCnt = ntz(pos);
+	mask = _mm256_srli_epi64(mask, 63 - posCnt);
 
-	
 
-	//右探索6マス   
-	revBits |= (pos >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5) | (*me << 6));
-	revBits |= (pos >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5));
-	revBits |= (pos >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4));
-	revBits |= (pos >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3));
-	revBits |= (pos >> 5) & (wh >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2));
-	revBits |= (pos >> 6) & (wh >> 5) & (wh >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & (*me << 1);
+	uint64 AN[4];
+	__m256i *andnot = (__m256i*)AN;
+	*andnot = _mm256_andnot_si256(oppM, mask);
+	__m256i outf = _mm256_set_epi64x(
+		__lzcnt64(AN[0]) & *me,
+		__lzcnt64(AN[1]) & *me,
+		__lzcnt64(AN[2]) & *me,
+		__lzcnt64(AN[3]) & *me
+	);
 
-	//下探索6マス
-	revBits |= (pos >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32) | (*me << 40) | (*me << 48));
-	revBits |= (pos >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32) | (*me << 40));
-	revBits |= (pos >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32));
-	revBits |= (pos >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24));
-	revBits |= (pos >> 40) & (wv >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16));
-	revBits |= (pos >> 48) & (wv >> 40) & (wv >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & (*me << 8);
+	//flip = and(-outf << 1, mask)
+	__m256i flip = _mm256_and_si256(_mm256_slli_epi64(_mm256_sub_epi64(_mm256_setzero_si256(), outf), 1), mask);
 
-	//右下探索6マス
-	revBits |= (pos >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45) | (*me << 54));
-	revBits |= (pos >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45));
-	revBits |= (pos >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36));
-	revBits |= (pos >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27));
-	revBits |= (pos >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18));
-	revBits |= (pos >> 54) & (wh >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & (*me << 9);
 
-	//左下探索6マス
-	revBits |= (pos >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35) | (*me << 42));
-	revBits |= (pos >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35));
-	revBits |= (pos >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28));
-	revBits |= (pos >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21));
-	revBits |= (pos >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14));
-	revBits |= (pos >> 42) & (wh >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & (*me << 7);
 
-	//左探索6マス
-	revBits |= (pos << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4) | (*me >> 5) | (*me >> 6));
-	revBits |= (pos << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4) | (*me >> 5));
-	revBits |= (pos << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4));
-	revBits |= (pos << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3));
-	revBits |= (pos << 5) & (wh << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2));
-	revBits |= (pos << 6) & (wh << 5) & (wh << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & (*me >> 1);
+	mask = _mm256_set_epi64x(
+		0x0101010101010100,
+		0x00000000000000FE,
+		0x0002040810204080,
+		0x8040201008040200);
 
-	//上探索6マス
-	revBits |= (pos << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40) | (*me >> 48));
-	revBits |= (pos << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40));
-	revBits |= (pos << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32));
-	revBits |= (pos << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24));
-	revBits |= (pos << 40) & (wv << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16));
-	revBits |= (pos << 48) & (wv << 40) & (wv << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & (*me >> 8);
+	mask = _mm256_slli_epi64(mask, posCnt);
+	//outf = mask & ((oppM | ~mask) + 1) & mes
+	outf = _mm256_and_si256(
+		_mm256_and_si256(
+			mask, _mm256_add_epi64(
+				_mm256_or_si256(oppM, _mm256_andnot_si256(mask, mask)), _mm256_set1_epi64x(1))), mes);
 
-	//右上探索6マス
-	revBits |= (pos << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28) | (*me >> 35) | (*me >> 42));
-	revBits |= (pos << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28) | (*me >> 35));
-	revBits |= (pos << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28));
-	revBits |= (pos << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21));
-	revBits |= (pos << 35) & (wh << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14));
-	revBits |= (pos << 42) & (wh << 35) & (wh << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & (*me >> 7);
+	//flip = flip | ((outf - nonzero(outf)) & mask)
+	flip = _mm256_or_si256(flip, _mm256_and_si256(mask, _mm256_sub_epi64(outf, nonzero(outf))));
 
-	//左上探索6マス
-	revBits |= (pos << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36) | (*me >> 45) | (*me >> 54));
-	revBits |= (pos << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36) | (*me >> 45));
-	revBits |= (pos << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36));
-	revBits |= (pos << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27));
-	revBits |= (pos << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18));
-	revBits |= (pos << 54) & (wh << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & (*me >> 9);
-	
 	char posShift;
+	__m128i rev = h_or(flip);
+	return (uint64)(_mm_extract_epi64(rev, 0) | _mm_extract_epi64(rev, 1));
+#eli __AVX__
 
-	return revBits;
+#endif
+
+		/*
+		if (((*opp | *me) & pos) != 0)return 0;
+		const uint64 wh = *opp & 0x7E7E7E7E7E7E7E7E;
+		const uint64 wv = *opp & 0x00FFFFFFFFFFFF00;
+
+		//右探索6マス
+		revBits |= (pos >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5) | (*me << 6));
+		revBits |= (pos >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5));
+		revBits |= (pos >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4));
+		revBits |= (pos >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3));
+		revBits |= (pos >> 5) & (wh >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & ((*me << 1) | (*me << 2));
+		revBits |= (pos >> 6) & (wh >> 5) & (wh >> 4) & (wh >> 3) & (wh >> 2) & (wh >> 1) & wh & (*me << 1);
+
+		//下探索6マス
+		revBits |= (pos >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32) | (*me << 40) | (*me << 48));
+		revBits |= (pos >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32) | (*me << 40));
+		revBits |= (pos >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24) | (*me << 32));
+		revBits |= (pos >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16) | (*me << 24));
+		revBits |= (pos >> 40) & (wv >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & ((*me << 8) | (*me << 16));
+		revBits |= (pos >> 48) & (wv >> 40) & (wv >> 32) & (wv >> 24) & (wv >> 16) & (wv >> 8) & wv & (*me << 8);
+
+		//右下探索6マス
+		revBits |= (pos >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45) | (*me << 54));
+		revBits |= (pos >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45));
+		revBits |= (pos >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36));
+		revBits |= (pos >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27));
+		revBits |= (pos >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18));
+		revBits |= (pos >> 54) & (wh >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & (*me << 9);
+
+		//左下探索6マス
+		revBits |= (pos >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35) | (*me << 42));
+		revBits |= (pos >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35));
+		revBits |= (pos >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28));
+		revBits |= (pos >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21));
+		revBits |= (pos >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14));
+		revBits |= (pos >> 42) & (wh >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & (*me << 7);
+
+		//左探索6マス
+		revBits |= (pos << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4) | (*me >> 5) | (*me >> 6));
+		revBits |= (pos << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4) | (*me >> 5));
+		revBits |= (pos << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4));
+		revBits |= (pos << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3));
+		revBits |= (pos << 5) & (wh << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & ((*me >> 1) | (*me >> 2));
+		revBits |= (pos << 6) & (wh << 5) & (wh << 4) & (wh << 3) & (wh << 2) & (wh << 1) & wh & (*me >> 1);
+
+		//上探索6マス
+		revBits |= (pos << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40) | (*me >> 48));
+		revBits |= (pos << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32) | (*me >> 40));
+		revBits |= (pos << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24) | (*me >> 32));
+		revBits |= (pos << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16) | (*me >> 24));
+		revBits |= (pos << 40) & (wv << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & ((*me >> 8) | (*me >> 16));
+		revBits |= (pos << 48) & (wv << 40) & (wv << 32) & (wv << 24) & (wv << 16) & (wv << 8) & wv & (*me >> 8);
+
+		//右上探索6マス
+		revBits |= (pos << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28) | (*me >> 35) | (*me >> 42));
+		revBits |= (pos << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28) | (*me >> 35));
+		revBits |= (pos << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21) | (*me >> 28));
+		revBits |= (pos << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14) | (*me >> 21));
+		revBits |= (pos << 35) & (wh << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & ((*me >> 7) | (*me >> 14));
+		revBits |= (pos << 42) & (wh << 35) & (wh << 28) & (wh << 21) & (wh << 14) & (wh << 7) & wh & (*me >> 7);
+
+		//左上探索6マス
+		revBits |= (pos << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36) | (*me >> 45) | (*me >> 54));
+		revBits |= (pos << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36) | (*me >> 45));
+		revBits |= (pos << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27) | (*me >> 36));
+		revBits |= (pos << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27));
+		revBits |= (pos << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18));
+		revBits |= (pos << 54) & (wh << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & (*me >> 9);
+		*/
 }
 
 //一手戻す(未実装)

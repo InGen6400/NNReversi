@@ -59,9 +59,14 @@ int main()
 		AVX2_FLAG = FALSE;
 	}
 	Pattern_setAVX(AVX2_FLAG);
+	putchar('\n');
+	Pattern_Init();
+	//Pattern_Save();
+	Pattern_Load();
 
-	printf("設定\n");
-	
+	printf("\n設定\n");
+
+
 	while (mode == NODEF_MODE) {
 		printf("モード(B:battle or L:Learning or T:Time P:PVP):");
 		fgets(tmp, sizeof(tmp), stdin);
@@ -263,19 +268,18 @@ void Game_Battle(char showMobility) {
 		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
 			passed = FALSE;
 			if (turn == cpuTurn) {
-				system("cls");
 				//CPUのターン
-				printf("CPU Thinking...");
+				printf("CPU Thinking...\n");
 				cpu->leaf = 0;
 				cpu->start = timeGetTime();
 				CPU_Move(cpu, bitboard, &put, turn, left);
 				cpu->end = timeGetTime();
-				printf("\nNegaAlpha: time:%d node:%d\n", cpu->end - cpu->start, cpu->leaf);
 				getXY(put, &x, &y);
 			}
 			else {
 				//プレイヤーのターン
 				while (1) {
+					printf("あなたの番です:");
 					fgets(tmp, sizeof(tmp), stdin);
 					if (tmp[0] == 'q') {
 						endFlag = TRUE;
@@ -301,14 +305,18 @@ void Game_Battle(char showMobility) {
 						continue;
 					}
 					put = getBitPos(x, y);
+
 					break;
 				}
 			}
 
 			//system("cls");
 			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
+				system("cls");
+				BitBoard_Draw(bitboard, showMobility);
 				if (turn == cpuTurn) {
 					printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
+					printf("NegaAlpha: time:%d node:%d\n\n", cpu->end - cpu->start, cpu->leaf);
 					left--;
 				}
 				else {
@@ -321,9 +329,6 @@ void Game_Battle(char showMobility) {
 				printf("Can't put (%d,%d)\n", x - 8, y - 8);
 			}
 
-			BitBoard_Draw(bitboard, showMobility);
-
-
 		}
 		else {
 			if (passed) {
@@ -334,6 +339,7 @@ void Game_Battle(char showMobility) {
 				turn = oppColor(turn);
 			}
 		}
+
 	}
 	BitBoard_Delete(bitboard);
 	CPU_Delete(cpu);
@@ -518,9 +524,6 @@ void MODE_READBOOK() {
 	BitBoard *bitboard = BitBoard_New();
 	//着手位置
 	uint64 put;
-	Pattern_Init();
-
-	Pattern_Load();
 
 	printf("BOOK Path:");
 	fgets(path, sizeof(path), stdin);
@@ -530,6 +533,9 @@ void MODE_READBOOK() {
 	if (!fp) {
 		printf("can't open file : %s", path);
 		return;
+	}
+	else {
+		printf("Load File\n");
 	}
 
 	while (fgets(Line, sizeof(Line), fp)) {
@@ -553,37 +559,43 @@ void MODE_READBOOK() {
 				}
 			}
 			left--;
+			BitBoard_Draw(bitboard, TRUE);
+			getc(stdin);
 			//パターンの更新はしない
 			color = oppColor(color);
 		}
 		randomTurn = left;
 		//空白以降の棋譜を取得
 		positions = strtok(NULL, " ");
-		printf("positions : %s\n", positions);
+		printf("%d positions : %s\n", dataCount, positions);
 		//石差取得(黒視点)
 		diff = atoi(strtok(NULL, " "));
-
+		
 		for (i = 0; positions[i] != NULL; i+=2) {
 			//二文字だけ取り出す(A1 etc...)
 			c_pos[0] = positions[i];
 			c_pos[1] = positions[i + 1];
 			put = getPos_book_lower(c_pos);
-			printf("dataCount:%d randomTurn:%d left:%d\n", dataCount, randomTurn, left);
+			//printf("dataCount:%d randomTurn:%d left:%d diff:%d\n", dataCount, randomTurn, left, diff);
 			//もし着手できなかった場合パスとして色を変えて着手
 			if (BitBoard_Flip(bitboard, color, put) == 0) {
 				color = oppColor(color);
 				if (BitBoard_Flip(bitboard, color, put) == 0) {
-					printf("iligal data >> skip read\n");
+					BitBoard_Draw(bitboard, TRUE);
+					printf("turn:%d iligal data >> color:%c \"%c%c\"\n", 64-left, "BW"[color], c_pos[0], c_pos[1]);
+					getc(stdin);
 				}
 			}
+			BitBoard_Draw(bitboard, TRUE);
+			getc(stdin);
 			//パターンの評価値の更新
-			UpdateAllPattern(bitboard, diff, left);
+			UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
 			color = oppColor(color);
 			left--;
 		}
 		dataCount++;
 		//1000に一度表示
-		if (dataCount % 1000 == 0) {
+		if (dataCount % 100 == 0) {
 			printf("Finish Reading : %d", dataCount);
 		}
 	}

@@ -2,10 +2,11 @@
 
 #include "BitBoard.h"
 #include "Board.h"
+#include <limits.h>
 
-const char MID_DEPTH = 8;
+const char MID_DEPTH = 6;
 const char END_DEPTH = 16;
-const int VALUE_MAX = 1000000;
+const int VALUE_MAX = INT_MAX;
 
 const char poslist[] = {
 	A1, A8, H8, H1,
@@ -34,7 +35,7 @@ void CPU_Reset(CPU *cpu);
 
 void CPU_Delete(CPU *cpu);
 
-void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left);
+int CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left);
 
 int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, char left, uint64 *PutPos, int alpha);
 

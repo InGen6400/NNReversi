@@ -3,6 +3,7 @@
 #include "const.h"
 #include "CPU.h"
 #include "Container.h"
+#include "Pattern.h"
 #include <stdlib.h>
 #include <immintrin.h>
 
@@ -32,12 +33,12 @@ void CPU_Delete(CPU *cpu) {
 	free(cpu);
 }
 
-void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left) {
+int CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left) {
 
 	BitBoard_Copy(in_board, cpu->bitboard);
 	EmptyListInit(cpu, color);
 	if (left <= END_DEPTH) {
-		printf("last point : %d", -NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, END_DEPTH, PutPos, VALUE_MAX));
+		return -NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, END_DEPTH, PutPos, VALUE_MAX);
 	}
 	else {
 		//ƒŠ[ƒt‚ÅF‚ª”’‚Ì‚Æ‚«
@@ -47,7 +48,7 @@ void CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, ch
 			//•‚É‚·‚é
 			color = oppColor(color);
 		}
-		printf("point : %d", NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MID_DEPTH, left, PutPos, VALUE_MAX));
+		return NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MID_DEPTH, left, PutPos, VALUE_MAX);
 	}
 }
 
@@ -60,7 +61,15 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 	uint64 rev;
 
 	if (depth <= 0) {
-		return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
+		//return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
+		
+		//‘æˆêˆø”‚ð•‚Å“ˆê
+		if (color == WHITE) {
+			return getValue(ene, me, left);
+		}
+		else {
+			return getValue(me, ene, left);
+		}
 	}
 
 	mobility = BitBoard_getMobility(me, ene);

@@ -8,6 +8,7 @@
 #include "const.h"
 #include "CPU.h"
 #include "Pattern.h"
+#include "Flags.h"
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
@@ -25,8 +26,6 @@ enum {
 };
 
 const short LINE_MAX = 200;
-
-char AVX2_FLAG;
 
 void Game_PVP(char showMobility);
 
@@ -46,6 +45,13 @@ int main()
 	char mode = -1;
 	char showMobility = FALSE;
 	int x, y;
+
+#ifdef __AVX2__
+	printf("AVX2!!!\n");
+#elif __AVX__
+	printf("AVX!!!\n");
+#endif
+
 
 //AVX2‚ª—˜—p‰Â”\‚©‚Ç‚¤‚©‚Ì”»’è
 	int CPUInfo[4];

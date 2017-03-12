@@ -9,6 +9,7 @@
 #include "const.h"
 #include "Container.h"
 #include "CPU.h"
+#include "Flags.h"
 #include <intrin.h>
 
 //ボード生成
@@ -141,11 +142,18 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 
 //反転するビットを返す(要高速化)
 inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos) {
+
+	if (AVX2_FLAG == TRUE) {
+
+	}
+
+	uint64 revBits = 0;
 	
 	if (((*ene | *me) & pos) != 0)return 0;
-	uint64 revBits = 0;
 	const uint64 wh = *ene & 0x7E7E7E7E7E7E7E7E;
 	const uint64 wv = *ene & 0x00FFFFFFFFFFFF00;
+
+	
 
 	//右探索6マス   
 	revBits |= (pos >> 1) & wh & ((*me << 1) | (*me << 2) | (*me << 3) | (*me << 4) | (*me << 5) | (*me << 6));
@@ -210,6 +218,8 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 p
 	revBits |= (pos << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18) | (*me >> 27));
 	revBits |= (pos << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & ((*me >> 9) | (*me >> 18));
 	revBits |= (pos << 54) & (wh << 45) & (wh << 36) & (wh << 27) & (wh << 18) & (wh << 9) & wh & (*me >> 9);
+	
+	char posShift;
 
 	return revBits;
 }

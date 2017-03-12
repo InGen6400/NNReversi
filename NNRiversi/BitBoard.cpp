@@ -159,17 +159,20 @@ inline __m128i h_or(__m256i in) {
 inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 pos) {
 
 #ifdef __AVX2__	
-	__m256i mes = _mm256_set1_epi64x(*me);
-	__m256i enes = _mm256_set1_epi64x(*opp);
 
-	__m256i oppM = _mm256_and_si256(enes, _mm256_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E));
+#elif __AVX__
+
+#endif
+	__m256i mes = _mm256_set1_epi64x(*me);
+
+	__m256i oppM = _mm256_and_si256(_mm256_set1_epi64x(*opp), _mm256_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E));
 
 	__m256i mask = _mm256_set_epi64x(
-		0x0080808080808080,
-		0x7F00000000000000,
-		0x0102040810204000,
-		0x0040201008040201);
-	int posCnt = _lzcnt_u64(pos);
+		0x0080808080808080ULL,
+		0x7F00000000000000ULL,
+		0x0102040810204000ULL,
+		0x0040201008040201ULL);
+	int posCnt = ntz(pos);
 	mask = _mm256_srli_epi64(mask, 63 - posCnt);
 
 
@@ -177,29 +180,29 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	__m256i *andnot = (__m256i*)AN;
 	*andnot = _mm256_andnot_si256(oppM, mask);
 	__m256i outf = _mm256_set_epi64x(
-		__lzcnt64(AN[0]) & *me,
-		__lzcnt64(AN[1]) & *me,
-		__lzcnt64(AN[2]) & *me,
-		__lzcnt64(AN[3]) & *me
+		(0x8000000000000000ULL >> __lzcnt64(AN[0])) & *me,
+		(0x8000000000000000ULL >> __lzcnt64(AN[1])) & *me,
+		(0x8000000000000000ULL >> __lzcnt64(AN[2])) & *me,
+		(0x8000000000000000ULL >> __lzcnt64(AN[3])) & *me
 	);
 
 	//flip = and(-outf << 1, mask)
-	__m256i flip = _mm256_and_si256(_mm256_slli_epi64(_mm256_sub_epi64(_mm256_setzero_si256(), outf), 1), mask);
+	__m256i flip = _mm256_and_si256(_mm256_sub_epi64(_mm256_setzero_si256(), _mm256_slli_epi64(outf, 1)), mask);
 
 
 
 	mask = _mm256_set_epi64x(
-		0x0101010101010100,
-		0x00000000000000FE,
-		0x0002040810204080,
-		0x8040201008040200);
+		0x0101010101010100ULL,
+		0x00000000000000FEULL,
+		0x0002040810204080ULL,
+		0x8040201008040200ULL);
 
 	mask = _mm256_slli_epi64(mask, posCnt);
 	//outf = mask & ((oppM | ~mask) + 1) & mes
 	outf = _mm256_and_si256(
 		_mm256_and_si256(
 			mask, _mm256_add_epi64(
-				_mm256_or_si256(oppM, _mm256_andnot_si256(mask, mask)), _mm256_set1_epi64x(1))), mes);
+				_mm256_or_si256(oppM, _mm256_andnot_si256(mask, _mm256_set1_epi64x(1))), _mm256_set1_epi64x(1))), mes);
 
 	//flip = flip | ((outf - nonzero(outf)) & mask)
 	flip = _mm256_or_si256(flip, _mm256_and_si256(mask, _mm256_sub_epi64(outf, nonzero(outf))));
@@ -207,10 +210,6 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	char posShift;
 	__m128i rev = h_or(flip);
 	return (uint64)(_mm_extract_epi64(rev, 0) | _mm_extract_epi64(rev, 1));
-#elif __AVX__
-
-#endif
-
 		/*
 		if (((*opp | *me) & pos) != 0)return 0;
 		const uint64 wh = *opp & 0x7E7E7E7E7E7E7E7E;

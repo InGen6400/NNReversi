@@ -214,7 +214,7 @@ void Game_PVP(char showMobility) {
 				turn = oppColor(turn);
 			}
 			else {
-				printf("Can't put (%d,%d)\n", x-8, y-8);
+				printf("Can't put (%c,%c)\n", "HGFEDCBA"[x], "87654321"[y]);
 			}
 
 			BitBoard_Draw(bitboard, showMobility);

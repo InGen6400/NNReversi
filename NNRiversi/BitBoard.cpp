@@ -172,7 +172,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	__m256i mask = _mm256_slli_epi64(_mm256_set_epi64x(
 		0x0101010101010100ULL,
 		0x00000000000000FEULL,
-		0x0102040810204000ULL,
+		0x0002040810204080ULL,
 		0x8040201008040200ULL), posCnt);
 
 	__m256i outf = _mm256_and_si256(_mm256_and_si256(mask, _mm256_add_epi64(_mm256_or_si256(oppM, _mm256_andnot_si256(mask, _mm256_set1_epi16(0xFFFF))), _mm256_set1_epi64x(1))), mes);

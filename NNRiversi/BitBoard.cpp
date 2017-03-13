@@ -189,7 +189,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 		0x0102040810204000ULL,
 		0x0040201008040201ULL), 63 - posCnt);
 
-	__declspec(align(64)) uint64 AN[4];
+	alignas(64) uint64 AN[4];
 	__m256i *andnot = (__m256i*)AN;
 	*andnot = _mm256_andnot_si256(oppM, mask);
 

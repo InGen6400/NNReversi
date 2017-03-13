@@ -150,9 +150,9 @@ inline __m256i nonzero(__m256i in) {
 	return _mm256_add_epi64(_mm256_cmpeq_epi64(in, _mm256_setzero_si256()), _mm256_set1_epi64x(1));
 }
 
-inline __m128i h_or(__m256i in) {
-	__m128i tmp = _mm_or_si128(_mm256_castsi256_si128(in), _mm256_extractf128_si256(in, 1));
-	return _mm_or_si128(tmp, _mm_alignr_epi8(tmp, tmp, 8));
+inline uint64 h_or(__m256i in) {
+	__m128i tmp = _mm_or_si128(_mm256_extractf128_si256(in, 0), _mm256_extractf128_si256(in, 1));
+	return _mm_extract_epi64(tmp, 0) | _mm_extract_epi64(tmp, 1);
 }
 
 //反転するビットを返す(要高速化)
@@ -199,9 +199,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	//flip = flip | ((outf - nonzero(outf)) & mask)
 	flip = _mm256_or_si256(flip, _mm256_and_si256(mask, _mm256_slli_epi64(_mm256_sub_epi64(_mm256_setzero_si256(), outf), 1)));
 	
-	char posShift;
-	__m128i rev = h_or(flip);
-	return (uint64)(_mm_extract_epi64(rev, 0) | _mm_extract_epi64(rev, 1));
+	return h_or(flip);
 	
 	/*
 	uint64 revBits = 0;

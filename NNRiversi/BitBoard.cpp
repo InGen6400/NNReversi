@@ -168,23 +168,22 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 
 	__m256i oppM = _mm256_and_si256(_mm256_set1_epi64x(*opp), _mm256_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E));
 
-	__m256i mask = _mm256_set_epi64x(
-		0x0080808080808080ULL,
-		0x7F00000000000000ULL,
-		0x0102040810204000ULL,
-		0x0040201008040201ULL);
 	int posCnt = ntz(pos);
-	mask = _mm256_srli_epi64(mask, 63 - posCnt);
+	__m256i mask = _mm256_slli_epi64(_mm256_set_epi64x(
+		0x0101010101010100ULL,
+		0x00000000000000FEULL,
+		0x0102040810204000ULL,
+		0x8040201008040200ULL), posCnt);
 
 
-	uint64 AN[4];
+	__declspec(align(64)) uint64 AN[4];
 	__m256i *andnot = (__m256i*)AN;
 	*andnot = _mm256_andnot_si256(oppM, mask);
 	__m256i outf = _mm256_set_epi64x(
-		(0x8000000000000000ULL >> __lzcnt64(AN[3])) & *me,
-		(0x8000000000000000ULL >> __lzcnt64(AN[2])) & *me,
-		(0x8000000000000000ULL >> __lzcnt64(AN[1])) & *me,
-		(0x8000000000000000ULL >> __lzcnt64(AN[0])) & *me
+		(0x0000000000000001ULL << __lzcnt64(AN[0])) & *me,
+		(0x0000000000000001ULL << __lzcnt64(AN[1])) & *me,
+		(0x0000000000000001ULL << __lzcnt64(AN[2])) & *me,
+		(0x0000000000000001ULL << __lzcnt64(AN[3])) & *me
 	);
 
 	//flip = and(-outf << 1, mask)
@@ -193,12 +192,12 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 
 
 	mask = _mm256_set_epi64x(
-		0x0101010101010100ULL,
-		0x00000000000000FEULL,
-		0x0002040810204080ULL,
-		0x8040201008040200ULL);
+		0x0080808080808080ULL,
+		0x7F00000000000000ULL,
+		0x0102040810204000ULL,
+		0x0040201008040201ULL);
 
-	mask = _mm256_slli_epi64(mask, posCnt);
+	mask = _mm256_srli_epi64(mask, 63 - posCnt);
 	//outf = mask & ((oppM | ~mask) + 1) & mes
 	outf = _mm256_and_si256(mask, _mm256_and_si256(_mm256_add_epi64(_mm256_andnot_si256(_mm256_or_si256(oppM, mask), _mm256_set1_epi64x(1)), _mm256_set1_epi64x(1)), mes));
 
@@ -232,6 +231,14 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	revBits |= (pos >> 40) & (wh >> 32) & (wh >> 24) & (wh >> 16) & (wh >> 8) & wh & ((*me << 8) | (*me << 16));
 	revBits |= (pos >> 48) & (wh >> 40) & (wh >> 32) & (wh >> 24) & (wh >> 16) & (wh >> 8) & wh & (*me << 8);
 
+	//左下探索6マス
+	revBits |= (pos >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35) | (*me << 42));
+	revBits |= (pos >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35));
+	revBits |= (pos >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28));
+	revBits |= (pos >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21));
+	revBits |= (pos >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14));
+	revBits |= (pos >> 42) & (wh >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & (*me << 7);
+
 	//右下探索6マス
 	revBits |= (pos >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45) | (*me << 54));
 	revBits |= (pos >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18) | (*me << 27) | (*me << 36) | (*me << 45));
@@ -240,13 +247,6 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	revBits |= (pos >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & ((*me << 9) | (*me << 18));
 	revBits |= (pos >> 54) & (wh >> 45) & (wh >> 36) & (wh >> 27) & (wh >> 18) & (wh >> 9) & wh & (*me << 9);
 
-	//左下探索6マス
-	revBits |= (pos >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35) | (*me << 42));
-	revBits |= (pos >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28) | (*me << 35));
-	revBits |= (pos >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21) | (*me << 28));
-	revBits |= (pos >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14) | (*me << 21));
-	revBits |= (pos >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & ((*me << 7) | (*me << 14));
-	revBits |= (pos >> 42) & (wh >> 35) & (wh >> 28) & (wh >> 21) & (wh >> 14) & (wh >> 7) & wh & (*me << 7);
 
 	//左探索6マス
 	revBits |= (pos << 1) & wh & ((*me >> 1) | (*me >> 2) | (*me >> 3) | (*me >> 4) | (*me >> 5) | (*me >> 6));

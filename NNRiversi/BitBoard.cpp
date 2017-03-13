@@ -179,15 +179,18 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	__declspec(align(64)) uint64 AN[4];
 	__m256i *andnot = (__m256i*)AN;
 	*andnot = _mm256_andnot_si256(oppM, mask);
-	__m256i outf = _mm256_set_epi64x(
-		(0x0000000000000001ULL << __lzcnt64(AN[0])) & *me,
-		(0x0000000000000001ULL << __lzcnt64(AN[1])) & *me,
-		(0x0000000000000001ULL << __lzcnt64(AN[2])) & *me,
-		(0x0000000000000001ULL << __lzcnt64(AN[3])) & *me
-	);
+	__m256i outf = 
+		_mm256_slli_epi64(
+			_mm256_set_epi64x(
+				(0x0000000000000001ULL << __lzcnt64(AN[0])) & *me,
+				(0x0000000000000001ULL << __lzcnt64(AN[1])) & *me,
+				(0x0000000000000001ULL << __lzcnt64(AN[2])) & *me,
+				(0x0000000000000001ULL << __lzcnt64(AN[3])) & *me
+			)
+		, 1);
 
-	//flip = and(-outf << 1, mask)
-	__m256i flip = _mm256_and_si256(_mm256_sub_epi64(_mm256_setzero_si256(), _mm256_slli_epi64(outf, 1)), mask);
+	//flip = and(~(-outf), mask)
+	__m256i flip = _mm256_and_si256(_mm256_andnot_si256(_mm256_sub_epi64(_mm256_setzero_si256(), outf), _mm256_set1_epi16(0xFFFF)), mask);
 
 
 

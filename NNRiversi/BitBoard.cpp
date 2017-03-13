@@ -197,7 +197,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	outf = _mm256_and_si256(_mm256_set_epi64x(_lzcnt_u64(AN[0]), _lzcnt_u64(AN[1]), _lzcnt_u64(AN[2]), _lzcnt_u64(AN[3])), mes);
 
 	//flip = flip | ((outf - nonzero(outf)) & mask)
-	flip = _mm256_or_si256(flip, _mm256_and_si256(mask, _mm256_slli_epi64(_mm256_sub_epi64(outf, nonzero(outf)), 1)));
+	flip = _mm256_or_si256(flip, _mm256_and_si256(mask, _mm256_slli_epi64(_mm256_sub_epi64(_mm256_setzero_si256(), outf), 1)));
 	
 	char posShift;
 	__m128i rev = h_or(flip);

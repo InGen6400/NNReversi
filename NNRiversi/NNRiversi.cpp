@@ -531,6 +531,13 @@ void MODE_READBOOK() {
 	//着手位置
 	uint64 put;
 
+#if __AVX__
+	printf("\n########################################################################\n");
+	printf("AVXで実行しています。レジスタが足りなくなりエラーが出る可能性が高いです。\nできる限りAVX2での実行を。\n");
+	printf("########################################################################\n\n");
+#endif // __AVX__
+
+
 	printf("BOOK Path:");
 	fgets(path, sizeof(path), stdin);
 	strtok(path, "\n");
@@ -565,8 +572,11 @@ void MODE_READBOOK() {
 				}
 			}
 			left--;
+
+			/*
 			BitBoard_Draw(bitboard, TRUE);
 			getc(stdin);
+			*/
 			//パターンの更新はしない
 			color = oppColor(color);
 		}
@@ -592,8 +602,10 @@ void MODE_READBOOK() {
 					getc(stdin);
 				}
 			}
+			/*
 			BitBoard_Draw(bitboard, TRUE);
 			getc(stdin);
+			*/
 			//パターンの評価値の更新
 			UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
 			color = oppColor(color);

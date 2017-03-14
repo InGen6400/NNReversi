@@ -159,47 +159,48 @@ inline uint64 h_or(__m256i in) {
 inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 pos) {
 
 #ifdef __AVX2__	
-
-#elif __AVX__
-
-#endif
-	
+	//player's stones
 	__m256i mes = _mm256_set1_epi64x(*me);
-
+	//Masked Opp
 	__m256i oppM = _mm256_and_si256(_mm256_set1_epi64x(*opp), _mm256_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E));
 
 	int posCnt = ntz(pos);
+	//mask for UP LEFT U_RIGHT U_LEFT
 	__m256i mask = _mm256_slli_epi64(_mm256_set_epi64x(
 		0x0101010101010100ULL,
 		0x00000000000000FEULL,
 		0x0002040810204080ULL,
 		0x8040201008040200ULL), posCnt);
-
+	//outflank
 	__m256i outf = _mm256_and_si256(_mm256_and_si256(mask, _mm256_add_epi64(_mm256_or_si256(oppM, _mm256_andnot_si256(mask, _mm256_set1_epi16(0xFFFF))), _mm256_set1_epi64x(1))), mes);
-
-	//flip = and(~(-outf), mask)
+	//will flip
 	__m256i flip = _mm256_and_si256(mask, _mm256_sub_epi64(outf, nonzero(outf)));
-		//_mm256_and_si256(_mm256_andnot_si256(_mm256_sub_epi64(_mm256_setzero_si256(), outf), _mm256_set1_epi16(0xFFFF)), mask);
 
 
-	
+	//DOWN RIGHT D_LEFT D_RIGHT
 	mask = _mm256_srli_epi64(_mm256_set_epi64x(
 		0x0080808080808080ULL,
 		0x7F00000000000000ULL,
 		0x0102040810204000ULL,
-		0x0040201008040201ULL), 63 - posCnt);
+		0x0040201008040201ULL), (63 - posCnt));
 
+	//outf = (MSB1 >> lzcnt(~oppM & mask)) & me
 	alignas(64) uint64 AN[4];
 	__m256i *andnot = (__m256i*)AN;
 	*andnot = _mm256_andnot_si256(oppM, mask);
+	//AVX2Ç…ÇÕï¿óÒÇ≈LZCNTÇ∑ÇÈèàóùÇ™Ç»Ç¢ÇÃÇ≈îzóÒÇ…ìWäJÇµÇƒlacnt()
+	outf = _mm256_and_si256(_mm256_set_epi64x(0x8000000000000000 >> _lzcnt_u64(AN[3]), 0x8000000000000000 >> _lzcnt_u64(AN[2]), 0x8000000000000000 >> _lzcnt_u64(AN[1]), 0x8000000000000000 >> _lzcnt_u64(AN[0])), mes);
 
-	//outf = mask & ((oppM | ~mask) + 1) & mes
-	outf = _mm256_and_si256(_mm256_set_epi64x(0x8000000000000000 >> _lzcnt_u64(AN[0]), 0x8000000000000000 >> _lzcnt_u64(AN[1]), 0x8000000000000000 >> _lzcnt_u64(AN[2]), 0x8000000000000000 >> _lzcnt_u64(AN[3])), mes);
+	//flip = flip | ((-outf << 1) & mask)
+	flip = _mm256_or_si256(flip, _mm256_and_si256(_mm256_slli_epi64(_mm256_sub_epi64(_mm256_setzero_si256(), outf), 1), mask));
 
-	//flip = flip | ((outf - nonzero(outf)) & mask)
-	flip = _mm256_or_si256(flip, _mm256_andnot_si256(_mm256_slli_epi64(_mm256_sub_epi64(_mm256_setzero_si256(), outf), 1), mask));
-	
+	//horizontal or 64x4
 	return h_or(flip);
+#elif __AVX__
+
+#endif
+	
+
 	
 	/*
 	uint64 revBits = 0;
@@ -409,23 +410,28 @@ char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos) {
 
 void drawBits(uint64 bits) {
 	int x;	
-	printf(" Å@Å@Å@Å@Ç`  Ça  Çb  Çc  Çd  Çe  Çf  Çg  \n");
+	printf("\n\n");
+	printf(" Å@Å@Å@Å@Ç`  Ça  Çb  Çc  Çd  Çe  Çf  Çg          \n");
 	printf(" Å@Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{\n");
 	printf(" Å@ÅbÅîÅbÅîÅbÅîÅbÅîÅbÅîÅbÅîÅbÅîÅbÅîÅbÅîÅbÅîÅb\n");
 	printf(" Å@Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{\n");
-	for (x = 0; x < BITBOARD_SIZE * BITBOARD_SIZE; x++, bits >>= 1) {
-		if (x % 8 == 0) {
-			printf(" %d ÅbÅîÅb", x / 8 + 1);
+
+	for (x = BITBOARD_SIZE * BITBOARD_SIZE - 1; x >= 0; x--) {
+		if ((x + 1) % 8 == 0) {
+			printf(" %d ÅbÅîÅb", 8 - x / 8);
 		}
-		if (bits & 1) {
+		if ((bits >> x) & 1) {
 			printf("ÅúÅb");
+		}
+		else if ((bits >> x) & 1) {
+			printf("ÅZÅb");
 		}
 		else {
 			printf("Å@Åb");
 		}
-		if (x % 8 == 7) {
+		if ((x + 1) % 8 == 1) {
 
-			printf("ÅîÅb %d", x / 8 + 1);
+			printf("ÅîÅb %d", 8 - x / 8);
 			putchar('\n');
 			printf(" Å@Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{Å\Å{\n");
 		}

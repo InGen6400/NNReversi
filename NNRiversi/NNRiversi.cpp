@@ -560,6 +560,8 @@ void MODE_READBOOK() {
 		left = 60;
 		color = BLACK;
 
+		printf("data:%d ", dataCount);
+
 		//correctbkは通し番号があるのでカット
 		strtok(Line, " ");
 		//序盤のランダムは無視しターンカウントだけ進める
@@ -587,7 +589,7 @@ void MODE_READBOOK() {
 		randomTurn = left;
 		//空白以降の棋譜を取得
 		positions = strtok(NULL, " ");
-		printf("%d positions : %s\n", dataCount, positions);
+		printf("positions : %s\n", positions);
 		//石差取得(黒視点)
 		diff = atoi(strtok(NULL, " "));
 		

@@ -67,7 +67,7 @@ public:
 	M128I() {}
 	M128I(__m128i in) : m128i(in) {}
 	M128I(uint64 in) : m128i(_mm_set1_epi64x(in)) {}
-	M128I(uint64 x, uint64 y, uint64 z, uint64 w) : m128i(_mm_set_epi64x(x, y)) {}
+	M128I(uint64 x, uint64 y) : m128i(_mm_set_epi64x(x, y)) {}
 
 	M128I operator+() { return *this; }
 	M128I operator-() { return _mm_sub_epi64(_mm_setzero_si128(), this->m128i); }
@@ -260,14 +260,35 @@ inline M256I lzpos(M256I &in) {
 	return flipV8(in);
 }
 #elif __AVX__
-inline __m128i nonzero(__m128i in) {
-	return _mm_add_epi64(_mm_cmpeq_epi64(in, _mm_setzero_si128()), _mm_set1_epi64x(1));
+
+inline M128I flipV8(M128I in) {
+	return M128I(_mm_shuffle_epi8(in.m128i, flip_v8_table128));
+}
+
+inline M128I nonzero(M128I in) {
+	return _mm_add_epi64(_mm_cmpeq_epi64(in.m128i, _mm_setzero_si128()), _mm_set1_epi64x(1));
 }
 
 //horizontal or
-inline uint64 h_or(__m128i in) {
-	return _mm_extract_epi64(in, 0) | _mm_extract_epi64(in, 1);
+inline uint64 h_or(M128I in) {
+	return _mm_extract_epi64(in.m128i, 0) | _mm_extract_epi64(in.m128i, 1);
 }
+
+inline M128I andnot(const M128I in1, const M128I in2) {
+	return _mm_andnot_si128(in1.m128i, in2.m128i);
+}
+
+//leading zero count
+inline M128I lzpos(M128I &in) {
+	in = in | (in >> 1);
+	in = in | (in >> 2);
+	in = in | (in >> 4);
+	in = andnot(in >> 1, in);
+	in = flipV8(in);
+	in = in & -in;
+	return flipV8(in);
+}
+
 #endif
 
 
@@ -311,57 +332,44 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	return h_or(flip);
 #elif __AVX__
 
-
 	//player's stones
-	__m128i mes = _mm_set1_epi64x(*me);
+	M128I mes = _mm_set1_epi64x(*me);
 	//Masked Opp
-	__m128i oppM0 = _mm_and_si128(_mm_set1_epi64x(*opp), _mm_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E));
-	__m128i oppM1 = _mm_and_si128(_mm_set1_epi64x(*opp), _mm_set_epi64x(0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E));
+	M128I oppM = M128I(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E) & M128I(*opp);
 
 	int posCnt = ntz(pos);
 	//mask for UP LEFT
-	__m128i mask0 = _mm_slli_epi64(_mm_set_epi64x(
-		0x0101010101010100ULL,
-		0x00000000000000FEULL), posCnt);
-	//mask for U_RIGHT U_LEFT
-	__m128i mask1 = _mm_slli_epi64(_mm_set_epi64x(
-		0x0002040810204080ULL,
-		0x8040201008040200ULL), posCnt);
+	M128I mask = M128I(0x0101010101010100ULL, 0x00000000000000FEULL) << posCnt;
 
 	//outflank
-	__m128i outf0 = _mm_and_si128(_mm_and_si128(mask0, _mm_add_epi64(_mm_or_si128(oppM0, _mm_andnot_si128(mask0, _mm_set1_epi16(0xFFFF))), _mm_set1_epi64x(1))), mes);
-	__m128i outf1 = _mm_and_si128(_mm_and_si128(mask1, _mm_add_epi64(_mm_or_si128(oppM1, _mm_andnot_si128(mask1, _mm_set1_epi16(0xFFFF))), _mm_set1_epi64x(1))), mes);
+	M128I outf = mask & ((oppM | ~mask) + 1) & mes;
 	//will flip
-	__m128i flip0 = _mm_and_si128(mask0, _mm_sub_epi64(outf0, nonzero(outf0)));
-	__m128i flip1 = _mm_and_si128(mask1, _mm_sub_epi64(outf1, nonzero(outf1)));
-
+	M128I flip = (outf - nonzero(outf)) & mask;
 
 	//DOWN RIGHT
-	mask0 = _mm_srli_epi64(_mm_set_epi64x(
-		0x0080808080808080ULL,
-		0x7F00000000000000ULL), (63 - posCnt));
+	mask = M128I(0x0080808080808080ULL, 0x7F00000000000000ULL) >> (63 - posCnt);
+
+	outf = lzpos(andnot(oppM, mask)) & mes;
+
+	flip = flip | (-outf << 1) & mask;
+
+
+	oppM = M128I(0x7E7E7E7E7E7E7E7EULL, 0x7E7E7E7E7E7E7E7EULL) & M128I(*opp);
+	//mask for U_RIGHT U_LEFT
+	mask = M128I(0x0002040810204080ULL, 0x8040201008040200ULL) << posCnt;
+
+	outf = mask & ((oppM | ~mask) + 1) & mes;
+	flip = flip | ((outf - nonzero(outf)) & mask);
+
 	//D_LEFT D_RIGHT
-	mask1 = _mm_srli_epi64(_mm_set_epi64x(
-		0x0102040810204000ULL,
-		0x0040201008040201ULL), (63 - posCnt));
-	//outf = (MSB1 >> lzcnt(~oppM & mask)) & me
-	alignas(64) uint64 AN0[2];
-	alignas(64) uint64 AN1[2];
-	__m128i *andnot0 = (__m128i*)AN0;
-	__m128i *andnot1 = (__m128i*)AN1;
-	*andnot0 = _mm_andnot_si128(oppM0, mask0);
-	*andnot1 = _mm_andnot_si128(oppM1, mask1);
+	mask = M128I(0x0102040810204000ULL, 0x0040201008040201ULL) >> (63 - posCnt);
 
-	//AVX‚É‚Í•À—ñ‚ÅLZCNT‚·‚éˆ—‚ª‚È‚¢‚Ì‚Å”z—ñ‚É“WŠJ‚µ‚Älacnt()
-	outf0 = _mm_and_si128(_mm_set_epi64x(0x8000000000000000 >> (63 - _lzcnt_u64(AN0[1])), 0x8000000000000000 >> (63 - _lzcnt_u64(AN0[0]))), mes);
-	outf1 = _mm_and_si128(_mm_set_epi64x(0x8000000000000000 >> (63 - _lzcnt_u64(AN1[1])), 0x8000000000000000 >> (63 - _lzcnt_u64(AN1[0]))), mes);
+	outf = lzpos(andnot(oppM, mask)) & mes;
 
-	//flip = flip | ((-outf << 1) & mask)
-	flip0 = _mm_or_si128(flip0, _mm_and_si128(_mm_slli_epi64(_mm_sub_epi64(_mm_setzero_si128(), outf0), 1), mask0));
-	flip1 = _mm_or_si128(flip1, _mm_and_si128(_mm_slli_epi64(_mm_sub_epi64(_mm_setzero_si128(), outf1), 1), mask1));
+	flip = flip | (-outf << 1) & mask;
 
 	//horizontal or 64x4
-	return (h_or(flip0) | h_or(flip1));
+	return h_or(flip);
 #endif
 
 	/*

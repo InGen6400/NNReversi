@@ -268,7 +268,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	outf = lzpos(andnot(oppM, mask)) & mes;
 
 	//flip = flip | ((-outf << 1) & mask)
-	flip = (-outf << 1) & mask;
+	flip = flip | (-outf << 1) & mask;
 	//horizontal or 64x4
 	return h_or(flip);
 #elif __AVX__

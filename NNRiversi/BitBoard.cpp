@@ -198,7 +198,7 @@ inline unsigned long ntz(uint64 in) {
 }
 //Flip vertical 8
 inline M256I flipV8(M256I in) {
-	return _mm256_shuffle_epi8(in.m256i, flip_v8_table256);
+	return M256I(_mm256_shuffle_epi8(in.m256i, flip_v8_table256));
 }
 //in != 0
 inline M256I nonzero(M256I in) {

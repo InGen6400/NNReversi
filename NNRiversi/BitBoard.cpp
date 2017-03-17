@@ -12,8 +12,12 @@
 #include "CPU.h"
 #include "Flags.h"
 
+#ifdef __AVX2__
 alignas(64) __m256i flip_v8_table256;
+
+#elif __AVX__
 alignas(64) __m128i flip_v8_table128;
+#endif
 
 void Board_InitConst() {
 #ifdef __AVX2__
@@ -54,6 +58,32 @@ public:
 
 	M256I operator| (const M256I &in) { return _mm256_or_si256(this->m256i, in.m256i); }
 	M256I operator&(const M256I &in) { return _mm256_and_si256(this->m256i, in.m256i); }
+
+};
+
+class M128I {
+public:
+	__m128i m128i;
+	M128I() {}
+	M128I(__m128i in) : m128i(in) {}
+	M128I(uint64 in) : m128i(_mm_set1_epi64x(in)) {}
+	M128I(uint64 x, uint64 y, uint64 z, uint64 w) : m128i(_mm_set_epi64x(x, y)) {}
+
+	M128I operator+() { return *this; }
+	M128I operator-() { return _mm_sub_epi64(_mm_setzero_si128(), this->m128i); }
+	M128I operator~() { return _mm_andnot_si128(m128i, M128I(0xFFFFFFFFFFFFFFFFULL).m128i); }
+
+	M128I operator+(const int in) { return _mm_add_epi64(this->m128i, M128I(in).m128i); }
+	M128I operator+(const M128I &in) { return _mm_add_epi64(this->m128i, in.m128i); }
+
+	M128I operator-(const int in) { return _mm_sub_epi64(this->m128i, M128I(in).m128i); }
+	M128I operator-(const M128I &in) { return _mm_sub_epi64(this->m128i, in.m128i); }
+
+	M128I operator >> (const int shift) { return _mm_srli_epi64(this->m128i, shift); }
+	M128I operator << (const int shift) { return _mm_slli_epi64(this->m128i, shift); }
+
+	M128I operator| (const M128I &in) { return _mm_or_si128(this->m128i, in.m128i); }
+	M128I operator&(const M128I &in) { return _mm_and_si128(this->m128i, in.m128i); }
 
 };
 
@@ -196,27 +226,24 @@ inline unsigned long ntz(uint64 in) {
 		return 64;
 	}
 }
+
+#ifdef __AVX2__
+
 //Flip vertical 8
 inline M256I flipV8(M256I in) {
 	return M256I(_mm256_shuffle_epi8(in.m256i, flip_v8_table256));
 }
+
 //in != 0
 inline M256I nonzero(M256I in) {
 	return _mm256_add_epi64(_mm256_cmpeq_epi64(in.m256i, _mm256_setzero_si256()), _mm256_set1_epi64x(1));
 }
 
-inline __m128i nonzero(__m128i in) {
-	return _mm_add_epi64(_mm_cmpeq_epi64(in, _mm_setzero_si128()), _mm_set1_epi64x(1));
-}
-//horizontal or
 inline uint64 h_or(M256I in) {
 	__m128i tmp = _mm_or_si128(_mm256_extractf128_si256(in.m256i, 0), _mm256_extractf128_si256(in.m256i, 1));
 	return _mm_extract_epi64(tmp, 0) | _mm_extract_epi64(tmp, 1);
 }
 
-inline uint64 h_or(__m128i in) {
-	return _mm_extract_epi64(in, 0) | _mm_extract_epi64(in, 1);
-}
 
 inline M256I andnot(const M256I in1, const M256I in2) {
 	return _mm256_andnot_si256(in1.m256i, in2.m256i);
@@ -232,6 +259,17 @@ inline M256I lzpos(M256I &in) {
 	in = in & -in;
 	return flipV8(in);
 }
+#elif __AVX__
+inline __m128i nonzero(__m128i in) {
+	return _mm_add_epi64(_mm_cmpeq_epi64(in, _mm_setzero_si128()), _mm_set1_epi64x(1));
+}
+
+//horizontal or
+inline uint64 h_or(__m128i in) {
+	return _mm_extract_epi64(in, 0) | _mm_extract_epi64(in, 1);
+}
+#endif
+
 
 //反転するビットを返す(要高速化)
 inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 pos) {

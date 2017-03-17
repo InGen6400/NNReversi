@@ -47,9 +47,9 @@ int main()
 	int x, y;
 
 #ifdef __AVX2__
-	printf("AVX2!!!\n");
+	printf("compiled AVX2!!!\n");
 #elif __AVX__
-	printf("AVX!!!\n");
+	printf("compiled AVX!!!\n");
 #endif
 
 

@@ -21,6 +21,8 @@ struct _BitBoard
 	uint64 *Sp;
 }typedef BitBoard;
 
+void Board_InitConst();
+
 BitBoard *BitBoard_New(void);
 
 void BitBoard_Delete(BitBoard *bitboard);

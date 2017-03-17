@@ -70,6 +70,8 @@ int main()
 	//Pattern_Save();
 	Pattern_Load();
 
+	Board_InitConst();
+
 	printf("\nİ’è\n");
 
 

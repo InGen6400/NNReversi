@@ -5,14 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <intrin.h>
 #include "BitBoard.h"
 #include "const.h"
 #include "Container.h"
 #include "CPU.h"
 #include "Flags.h"
-#include "M256I_class.h"
-#include <intrin.h>
-#include <immintrin.h>
+
+alignas(64) __m256i flip_v8_table256;
+alignas(64) __m128i flip_v8_table128;
 
 void Board_InitConst() {
 #ifdef __AVX2__
@@ -29,6 +30,32 @@ void Board_InitConst() {
 	);
 #endif
 }
+
+class M256I {
+public:
+	__m256i m256i;
+	M256I() {}
+	M256I(__m256i in) : m256i(in) {}
+	M256I(uint64 in) : m256i(_mm256_set1_epi64x(in)) {}
+	M256I(uint64 x, uint64 y, uint64 z, uint64 w) : m256i(_mm256_set_epi64x(x, y, z, w)) {}
+
+	M256I operator+() { return *this; }
+	M256I operator-() { return _mm256_sub_epi64(_mm256_setzero_si256(), this->m256i); }
+	M256I operator~() { return _mm256_andnot_si256(m256i, M256I(0xFFFFFFFFFFFFFFFFULL).m256i); }
+
+	M256I operator+(const int in) { return _mm256_add_epi64(this->m256i, M256I(in).m256i); }
+	M256I operator+(const M256I &in) { return _mm256_add_epi64(this->m256i, in.m256i); }
+
+	M256I operator-(const int in) { return _mm256_sub_epi64(this->m256i, M256I(in).m256i); }
+	M256I operator-(const M256I &in) { return _mm256_sub_epi64(this->m256i, in.m256i); }
+
+	M256I operator >> (const int shift) { return _mm256_srli_epi64(this->m256i, shift); }
+	M256I operator << (const int shift) { return _mm256_slli_epi64(this->m256i, shift); }
+
+	M256I operator| (const M256I &in) { return _mm256_or_si256(this->m256i, in.m256i); }
+	M256I operator&(const M256I &in) { return _mm256_and_si256(this->m256i, in.m256i); }
+
+};
 
 //ボード生成
 BitBoard *BitBoard_New(void) {
@@ -190,6 +217,11 @@ inline uint64 h_or(M256I in) {
 inline uint64 h_or(__m128i in) {
 	return _mm_extract_epi64(in, 0) | _mm_extract_epi64(in, 1);
 }
+
+inline M256I andnot(const M256I in1, const M256I in2) {
+	return _mm256_andnot_si256(in1.m256i, in2.m256i);
+}
+
 //leading zero count
 inline M256I lzpos(M256I &in) {
 	in = in | (in >> 1);
@@ -199,10 +231,6 @@ inline M256I lzpos(M256I &in) {
 	in = flipV8(in);
 	in = in & -in;
 	return flipV8(in);
-}
-
-inline M256I andnot(const M256I in1, const M256I in2) {
-	return _mm256_andnot_si256(in1.m256i, in2.m256i);
 }
 
 //反転するビットを返す(要高速化)
@@ -266,8 +294,8 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	__m128i outf0 = _mm_and_si128(_mm_and_si128(mask0, _mm_add_epi64(_mm_or_si128(oppM0, _mm_andnot_si128(mask0, _mm_set1_epi16(0xFFFF))), _mm_set1_epi64x(1))), mes);
 	__m128i outf1 = _mm_and_si128(_mm_and_si128(mask1, _mm_add_epi64(_mm_or_si128(oppM1, _mm_andnot_si128(mask1, _mm_set1_epi16(0xFFFF))), _mm_set1_epi64x(1))), mes);
 	//will flip
-	__m128i flip0 = _mm_and_si128(mask0, _mm_sub_epi64(outf0, nonzero128(outf0)));
-	__m128i flip1 = _mm_and_si128(mask1, _mm_sub_epi64(outf1, nonzero128(outf1)));
+	__m128i flip0 = _mm_and_si128(mask0, _mm_sub_epi64(outf0, nonzero(outf0)));
+	__m128i flip1 = _mm_and_si128(mask1, _mm_sub_epi64(outf1, nonzero(outf1)));
 
 
 	//DOWN RIGHT
@@ -295,7 +323,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	flip1 = _mm_or_si128(flip1, _mm_and_si128(_mm_slli_epi64(_mm_sub_epi64(_mm_setzero_si128(), outf1), 1), mask1));
 
 	//horizontal or 64x4
-	return (h_or128(flip0) | h_or128(flip1));
+	return (h_or(flip0) | h_or(flip1));
 #endif
 
 	/*

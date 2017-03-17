@@ -2,6 +2,7 @@
 
 #include "Container.h"
 #include "const.h"
+#include <intrin.h>
 
 const char WALL = -1;
 const char NONE = 2;
@@ -11,9 +12,6 @@ const char BLACK = 1;
 const char BITBOARD_SIZE = 8;
 
 typedef unsigned long long uint64;
-
-alignas(64) __m256i flip_v8_table256;
-alignas(64) __m256i flip_v8_table128;
 
 struct _BitBoard
 {

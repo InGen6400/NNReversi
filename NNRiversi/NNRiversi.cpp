@@ -533,11 +533,13 @@ void MODE_READBOOK() {
 	//着手位置
 	uint64 put;
 
-#if __AVX__
+#if __AVX2__
+#elif __AVX__
 	printf("\n########################################################################\n");
 	printf("AVXで実行しています。レジスタが足りなくなりエラーが出る可能性が高いです。\nできる限りAVX2での実行を。\n");
 	printf("########################################################################\n\n");
-#endif // __AVX__
+#endif
+
 
 
 	printf("BOOK Path:");
@@ -605,7 +607,7 @@ void MODE_READBOOK() {
 				}
 			}
 			
-			BitBoard_Draw(bitboard, TRUE);
+			//BitBoard_Draw(bitboard, TRUE);
 			//getc(stdin);
 			
 			//パターンの評価値の更新
@@ -616,13 +618,14 @@ void MODE_READBOOK() {
 		dataCount++;
 		//1000に一度表示
 		if (dataCount % 100 == 0) {
-			printf("Finish Reading : %d", dataCount);
+			printf("Finish Reading : %d\n", dataCount);
 		}
 	}
 
 	fclose(fp);
 
 	Pattern_Save();
+
 
 	//fgetsの改行を無視
 	strtok(path, "\n");

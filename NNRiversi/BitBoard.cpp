@@ -10,8 +10,25 @@
 #include "Container.h"
 #include "CPU.h"
 #include "Flags.h"
+#include "M256I_class.h"
 #include <intrin.h>
 #include <immintrin.h>
+
+void Board_InitConst() {
+#ifdef __AVX2__
+	flip_v8_table256 = _mm256_set_epi8(
+		24, 25, 26, 27, 28, 29, 30, 31,
+		16, 17, 18, 19, 20, 21, 22, 23,
+		8, 9, 10, 11, 12, 13, 14, 15,
+		0, 1, 2, 3, 4, 5, 6, 7
+	);
+#elif __AVX__
+	flip_v8_table128 = _mm_set_epi8(
+		8, 9, 10, 11, 12, 13, 14, 15,
+		0, 1, 2, 3, 4, 5, 6, 7
+	);
+#endif
+}
 
 //ボード生成
 BitBoard *BitBoard_New(void) {
@@ -142,25 +159,50 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 }
 
 //右から連続するゼロの数
-inline int ntz(uint64 in) {
-	return __popcnt64((in&(-in)) - 1);
+inline unsigned long ntz(uint64 in) {
+	unsigned long idx;
+	if (_BitScanForward64(&idx, in)) {
+		return idx;
+	}
+	else
+	{
+		return 64;
+	}
+}
+//Flip vertical 8
+inline M256I flipV8(M256I in) {
+	return _mm256_shuffle_epi8(in.m256i, flip_v8_table256);
+}
+//in != 0
+inline M256I nonzero(M256I in) {
+	return _mm256_add_epi64(_mm256_cmpeq_epi64(in.m256i, _mm256_setzero_si256()), _mm256_set1_epi64x(1));
 }
 
-inline __m256i nonzero256(__m256i in) {
-	return _mm256_add_epi64(_mm256_cmpeq_epi64(in, _mm256_setzero_si256()), _mm256_set1_epi64x(1));
-}
-
-inline __m128i nonzero128(__m128i in) {
+inline __m128i nonzero(__m128i in) {
 	return _mm_add_epi64(_mm_cmpeq_epi64(in, _mm_setzero_si128()), _mm_set1_epi64x(1));
 }
-
-inline uint64 h_or256(__m256i in) {
-	__m128i tmp = _mm_or_si128(_mm256_extractf128_si256(in, 0), _mm256_extractf128_si256(in, 1));
+//horizontal or
+inline uint64 h_or(M256I in) {
+	__m128i tmp = _mm_or_si128(_mm256_extractf128_si256(in.m256i, 0), _mm256_extractf128_si256(in.m256i, 1));
 	return _mm_extract_epi64(tmp, 0) | _mm_extract_epi64(tmp, 1);
 }
 
-inline uint64 h_or128(__m128i in) {
+inline uint64 h_or(__m128i in) {
 	return _mm_extract_epi64(in, 0) | _mm_extract_epi64(in, 1);
+}
+//leading zero count
+inline M256I lzpos(M256I &in) {
+	in = in | (in >> 1);
+	in = in | (in >> 2);
+	in = in | (in >> 4);
+	in = andnot(in >> 1, in);
+	in = flipV8(in);
+	in = in & -in;
+	return flipV8(in);
+}
+
+inline M256I andnot(const M256I in1, const M256I in2) {
+	return _mm256_andnot_si256(in1.m256i, in2.m256i);
 }
 
 //反転するビットを返す(要高速化)
@@ -169,41 +211,38 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	//
 #ifdef __AVX2__	
 	//player's stones
-	__m256i mes = _mm256_set1_epi64x(*me);
+	M256I mes = M256I(*me);
 	//Masked Opp
-	__m256i oppM = _mm256_and_si256(_mm256_set1_epi64x(*opp), _mm256_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E));
+	M256I oppM = M256I(0xFFFFFFFFFFFFFFFF, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E, 0x7E7E7E7E7E7E7E7E) & M256I(*opp);
 
 	int posCnt = ntz(pos);
 	//mask for UP LEFT U_RIGHT U_LEFT
-	__m256i mask = _mm256_slli_epi64(_mm256_set_epi64x(
+	M256I mask = M256I(
 		0x0101010101010100ULL,
 		0x00000000000000FEULL,
 		0x0002040810204080ULL,
-		0x8040201008040200ULL), posCnt);
+		0x8040201008040200ULL) << posCnt;
 	//outflank
-	__m256i outf = _mm256_and_si256(_mm256_and_si256(mask, _mm256_add_epi64(_mm256_or_si256(oppM, _mm256_andnot_si256(mask, _mm256_set1_epi16(0xFFFF))), _mm256_set1_epi64x(1))), mes);
+	M256I outf = mask & ((oppM | ~mask) + 1) & mes;
 	//will flip
-	__m256i flip = _mm256_and_si256(mask, _mm256_sub_epi64(outf, nonzero256(outf)));
+	M256I flip = (outf - nonzero(outf)) & mask;
 
 
 	//DOWN RIGHT D_LEFT D_RIGHT
-	mask = _mm256_srli_epi64(_mm256_set_epi64x(
+	mask = M256I(
 		0x0080808080808080ULL,
 		0x7F00000000000000ULL,
 		0x0102040810204000ULL,
-		0x0040201008040201ULL), (63 - posCnt));
+		0x0040201008040201ULL) >> (63 - posCnt);
 
 	//outf = (MSB1 >> lzcnt(~oppM & mask)) & me
-	alignas(64) uint64 AN[4];
-	__m256i *andnot = (__m256i*)AN;
-	*andnot = _mm256_andnot_si256(oppM, mask);
 	//AVX2には並列でLZCNTする処理がないので配列に展開してlacnt()
-	outf = _mm256_and_si256(_mm256_set_epi64x(0x8000000000000000 >> _lzcnt_u64(AN[3]), 0x8000000000000000 >> _lzcnt_u64(AN[2]), 0x8000000000000000 >> _lzcnt_u64(AN[1]), 0x8000000000000000 >> _lzcnt_u64(AN[0])), mes);
+	outf = lzpos(andnot(oppM, mask)) & mes;
 
 	//flip = flip | ((-outf << 1) & mask)
-	flip = _mm256_or_si256(flip, _mm256_and_si256(_mm256_slli_epi64(_mm256_sub_epi64(_mm256_setzero_si256(), outf), 1), mask));
+	flip = (-outf << 1) & mask;
 	//horizontal or 64x4
-	return h_or256(flip);
+	return h_or(flip);
 #elif __AVX__
 
 
@@ -258,7 +297,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 	//horizontal or 64x4
 	return (h_or128(flip0) | h_or128(flip1));
 #endif
-	
+
 	/*
 	uint64 revBits = 0;
 

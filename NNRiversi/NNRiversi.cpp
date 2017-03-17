@@ -602,10 +602,10 @@ void MODE_READBOOK() {
 					getc(stdin);
 				}
 			}
-			/*
+			
 			BitBoard_Draw(bitboard, TRUE);
-			getc(stdin);
-			*/
+			//getc(stdin);
+			
 			//パターンの評価値の更新
 			UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
 			color = oppColor(color);

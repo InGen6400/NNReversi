@@ -19,16 +19,15 @@ unsigned char(*bitGather)(uint64 in, uint64 mask);
 
 //関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
 void Pattern_setAVX(unsigned char AVX2_FLAG) {
-	if (AVX2_FLAG) {
-		printf(">>Set AVX2 Mode\n");
-		bitGather = bitGatherAVX2;
-		getIndex = getIndex_AVX2;
-	}
-	else{
-		printf(">>Set Normal Mode\n");
-		bitGather = bitGather_Normal;
-		getIndex = getIndex_Normal;
-	}
+#if __AVX2__
+	printf(">>Set AVX2 Mode\n");
+	bitGather = bitGatherAVX2;
+	getIndex = getIndex_AVX2;
+#elif __AVX__
+	printf(">>Set Normal Mode\n");
+	bitGather = bitGather_Normal;
+	getIndex = getIndex_Normal;
+#endif
 }
 
 void Pattern_Init() {
@@ -98,13 +97,13 @@ void Pattern_Save() {
 }
 
 //AVX2に対応している場合
-unsigned char bitGatherAVX2(uint64 in, uint64 mask) {
+inline unsigned char bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2
 	return _pext_u64(in, mask);
 }
 
 //AVX2未対応の場合_メインでとりあえず動かすため(AVX2で動作することが前提なので雑なつくり)
-unsigned char bitGather_Normal(uint64 in, uint64 mask) {
+inline unsigned char bitGather_Normal(uint64 in, uint64 mask) {
 	int i, count=0;
 	uint64 out=0;
 	for (i = 0; i < 64; mask >>= 1, in >>= 1, i++) {
@@ -206,7 +205,7 @@ inline unsigned char getMirrorCorner_LR(unsigned char in) {
 #pragma endregion
 
 //player, oppからインデックスを返す
-unsigned short getIndex_AVX2(const unsigned char player, const unsigned char opp)
+inline unsigned short getIndex_AVX2(const unsigned char player, const unsigned char opp)
 {
 	alignas(16) static const uint16 pow_3[LEN] = { 0x1,  0x1 * 2,  0x3,  0x3 * 2,  0x9,   0x9 * 2,   0x1b,  0x1b * 2,
 		0x51, 0x51 * 2, 0xf3, 0xf3 * 2, 0x2d9, 0x2d9 * 2, 0x88b, 0x88b * 2 };//(1,3,9,27,81,243,729,2187)*2 と1,3,9,27,81,243,729,2187
@@ -231,7 +230,7 @@ unsigned short getIndex_AVX2(const unsigned char player, const unsigned char opp
 }
 
 //player, oppからインデックスを返す(AVX2で動作することが前提なので雑なつくり)
-unsigned short getIndex_Normal(const unsigned char player, const unsigned char opp)
+inline unsigned short getIndex_Normal(const unsigned char player, const unsigned char opp)
 {
 	alignas(16) static const uint16 pow_3[LEN/2] = { 0x1, 0x3, 0x9, 0x1b, 0x51, 0xf3, 0x2d9, 0x88b };//1,3,9,27,81,243,729,2187
 	alignas(16) static const uint16 pow_3_2[LEN/2] = { 0x1*2, 0x3*2, 0x9*2, 0x1b*2, 0x51*2, 0xf3*2, 0x2d9*2, 0x88b*2 };//(1,3,9,27,81,243,729,2187)*2

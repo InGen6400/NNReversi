@@ -38,6 +38,7 @@ int CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, cha
 	BitBoard_Copy(in_board, cpu->bitboard);
 	EmptyListInit(cpu, color);
 	if (left <= END_DEPTH) {
+		printf("spart\n");
 		return -NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, END_DEPTH, PutPos, VALUE_MAX);
 	}
 	else {
@@ -64,12 +65,7 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 		//return BitBoard_CountStone(me) - BitBoard_CountStone(ene);
 		
 		//‘æˆêˆø”‚ğ•‚Å“ˆê
-		if (color == WHITE) {
-			return getValue(ene, me, left);
-		}
-		else {
-			return getValue(me, ene, left);
-		}
+		return getValue(me, ene, left);
 	}
 
 	mobility = BitBoard_getMobility(me, ene);

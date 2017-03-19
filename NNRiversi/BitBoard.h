@@ -23,6 +23,8 @@ struct _BitBoard
 
 void Board_InitConst();
 
+void drawBits(const uint64 bits);
+
 BitBoard *BitBoard_New(void);
 
 void BitBoard_Delete(BitBoard *bitboard);

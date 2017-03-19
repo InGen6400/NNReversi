@@ -54,7 +54,9 @@ public:
 	M256I operator-(const M256I &in) { return _mm256_sub_epi64(this->m256i, in.m256i); }
 
 	M256I operator >> (const int shift) { return _mm256_srli_epi64(this->m256i, shift); }
+	M256I operator >> (const M256I shift) { return _mm256_srlv_epi64(this->m256i, shift.m256i); }
 	M256I operator << (const int shift) { return _mm256_slli_epi64(this->m256i, shift); }
+	M256I operator << (const M256I shift) { return _mm256_sllv_epi64(this->m256i, shift.m256i); }
 
 	M256I operator| (const M256I &in) { return _mm256_or_si256(this->m256i, in.m256i); }
 	M256I operator&(const M256I &in) { return _mm256_and_si256(this->m256i, in.m256i); }
@@ -80,7 +82,9 @@ public:
 	M128I operator-(const M128I &in) { return _mm_sub_epi64(this->m128i, in.m128i); }
 
 	M128I operator >> (const int shift) { return _mm_srli_epi64(this->m128i, shift); }
+	M128I operator >> (const M128I shift) { return _mm_srlv_epi64(this->m128i, shift.m128i); }
 	M128I operator << (const int shift) { return _mm_slli_epi64(this->m128i, shift); }
+	M128I operator << (const M128I shift) { return _mm_sllv_epi64(this->m128i, shift.m128i); }
 
 	M128I operator| (const M128I &in) { return _mm_or_si128(this->m128i, in.m128i); }
 	M128I operator&(const M128I &in) { return _mm_and_si128(this->m128i, in.m128i); }
@@ -110,6 +114,7 @@ void BitBoard_Reset(BitBoard *bitboard) {
 	//bitboard->stone[BLACK] = 0x0000000000000000;//
 	//角のインデックスが22011021になるはず
 	bitboard->Sp = bitboard->Stack;
+	Stack_PUSH(bitboard, 0xFFFFFFFFFFFFFFFFULL);
 }
 
 //盤面のコピー
@@ -458,105 +463,80 @@ int BitBoard_Undo(BitBoard *bitboard) {
 	return color;
 }
 
-//着手可能位置(要高速化)
-uint64 BitBoard_getMobility(uint64 me, uint64 ene) {
+#ifdef __AVX2__
+uint64 BitBoard_getMobility(uint64 me, uint64 opp) {
+	M256I mes(me);
+	M256I oppM = M256I(0xFFFFFFFFFFFFFFFFULL, 0x7E7E7E7E7E7E7E7EULL, 0x7E7E7E7E7E7E7E7EULL, 0x7E7E7E7E7E7E7E7EULL) & M256I(opp);
+	M256I empty = M256I(~(me | opp));
+	M256I shift = M256I(8, 1, 9, 7);
 
-	uint64 blank = ~(me | ene);
+	M256I move(oppM & (mes >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	M256I mobility = empty & (move >> shift);
 
-	uint64 mobility;
+	move = oppM & (mes << shift);
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	mobility = mobility | (empty & (move << shift));
 
-	uint64 mask = ene & 0x7e7e7e7e7e7e7e7e;
-
-	//左
-	uint64 t = mask & (me << 1);
-
-	t |= mask & (t << 1);
-	t |= mask & (t << 1);
-	t |= mask & (t << 1);
-	t |= mask & (t << 1);
-	t |= mask & (t << 1);
-
-	mobility = blank & (t << 1);
-
-	//右
-	t = mask & (me >> 1);
-
-	t |= mask & (t >> 1);
-	t |= mask & (t >> 1);
-	t |= mask & (t >> 1);
-	t |= mask & (t >> 1);
-	t |= mask & (t >> 1);
-
-	mobility |= blank & (t >> 1);
-
-	//下
-	t = mask & (me >> 8);
-
-	t |= mask & (t >> 8);
-	t |= mask & (t >> 8);
-	t |= mask & (t >> 8);
-	t |= mask & (t >> 8);
-	t |= mask & (t >> 8);
-
-	mobility |= blank & (t >> 8);
-
-	//上
-	t = mask & (me << 8);
-
-	t |= mask & (t << 8);
-	t |= mask & (t << 8);
-	t |= mask & (t << 8);
-	t |= mask & (t << 8);
-	t |= mask & (t << 8);
-
-	mobility |= blank & (t << 8);
-
-	//右下
-	t = mask & (me >> 9);
-
-	t |= mask & (t >> 9);
-	t |= mask & (t >> 9);
-	t |= mask & (t >> 9);
-	t |= mask & (t >> 9);
-	t |= mask & (t >> 9);
-
-	mobility |= blank & (t >> 9);
-
-	//左下
-	t = mask & (me >> 7);
-
-	t |= mask & (t >> 7);
-	t |= mask & (t >> 7);
-	t |= mask & (t >> 7);
-	t |= mask & (t >> 7);
-	t |= mask & (t >> 7);
-
-	mobility |= blank & (t >> 7);
-
-	//右上
-	t = mask & (me << 9);
-
-	t |= mask & (t << 9);
-	t |= mask & (t << 9);
-	t |= mask & (t << 9);
-	t |= mask & (t << 9);
-	t |= mask & (t << 9);
-
-	mobility |= blank & (t << 9);
-
-	//左上
-	t = mask & (me << 7);
-
-	t |= mask & (t << 7);
-	t |= mask & (t << 7);
-	t |= mask & (t << 7);
-	t |= mask & (t << 7);
-	t |= mask & (t << 7);
-
-	mobility |= blank & (t << 7);
-
-	return mobility;
+	return h_or(mobility);
 }
+
+#elif __AVX__
+
+uint64 BitBoard_getMobility(uint64 me, uint64 opp) {
+	M128I mes(me);
+	M128I empty = M128I(~(me | opp));
+	M128I oppM = M128I(0xFFFFFFFFFFFFFFFFULL, 0x7E7E7E7E7E7E7E7EULL) & M128I(opp);
+	M128I shift = M128I(8, 1);
+
+	M128I move(oppM & (mes >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	M128I mobility = empty & (move >> shift);
+
+	move = oppM & (mes << shift);
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	mobility = mobility | (empty & (move << shift));
+
+
+	oppM = M128I(0x7E7E7E7E7E7E7E7EULL, 0x7E7E7E7E7E7E7E7EULL) & M128I(opp);
+	shift = M128I(9, 7);
+
+	move = (oppM & (mes >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	move = move | (oppM & (move >> shift));
+	mobility = mobility | (empty & (move >> shift));
+
+	move = oppM & (mes << shift);
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	move = move | (oppM & (move << shift));
+	mobility = mobility | (empty & (move << shift));
+
+	return h_or(mobility);
+}
+#endif
+
 
 //posに着手できるか
 char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos) {

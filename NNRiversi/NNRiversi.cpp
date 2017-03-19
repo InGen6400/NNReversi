@@ -155,7 +155,7 @@ void Game_PVP(char showMobility) {
 						break;
 					}
 					else if (tmp[0] == '.' && tmp[1] == '.') {
-						if (*(bitboard->Sp - 1) != -2) {
+						if (*(bitboard->Sp - 1) != 0xFFFFFFFFFFFFFFFFULL) {
 							turn = BitBoard_Undo(bitboard);
 							system("cls");
 							printf("戻しました\n");
@@ -183,7 +183,7 @@ void Game_PVP(char showMobility) {
 						break;
 					}
 					else if (tmp[0] == '.' && tmp[1] == '.') {
-						if (*(bitboard->Sp - 1) != -2) {
+						if (*(bitboard->Sp - 1) != 0xFFFFFFFFFFFFFFFFULL) {
 							turn = BitBoard_Undo(bitboard);
 							system("cls");
 							printf("戻しました\n");
@@ -241,7 +241,7 @@ void Game_Battle(char showMobility) {
 	BitBoard *bitboard;
 	bitboard = BitBoard_New();
 
-	int turn = BLACK;
+	int color = BLACK;
 	int x, y;
 
 	char endFlag = FALSE;
@@ -273,14 +273,18 @@ void Game_Battle(char showMobility) {
 	system("cls");
 	BitBoard_Draw(bitboard, showMobility);
 	while (!endFlag) {
-		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
+		if ((bitboard->stone[BLACK] & bitboard->stone[WHITE]) != 0) {
+			
+			drawBits(bitboard->stone[BLACK] & bitboard->stone[WHITE]);
+		}
+		if (BitBoard_getMobility(bitboard->stone[color], (bitboard->stone[oppColor(color)])) > 0) {
 			passed = FALSE;
-			if (turn == cpuTurn) {
+			if (color == cpuTurn) {
 				//CPUのターン
 				printf("CPU Thinking...\n");
 				cpu->leaf = 0;
 				cpu->start = timeGetTime();
-				CPU_Move(cpu, bitboard, &put, turn, left);
+				CPU_Move(cpu, bitboard, &put, color, left);
 				cpu->end = timeGetTime();
 				getXY(put, &x, &y);
 			}
@@ -294,11 +298,14 @@ void Game_Battle(char showMobility) {
 						break;
 					}
 					else if (tmp[0] == '.' && tmp[1] == '.') {
-						if (*(bitboard->Sp - 1) != -2) {
+						if (*(bitboard->Sp - 1) != 0xFFFFFFFFFFFFFFFFULL) {
 							//前回のCPUのターンまで戻る
 							do {
-								turn = BitBoard_Undo(bitboard);
-							} while (turn == cpuTurn);
+								if (*(bitboard->Sp - 1) != 0xFFFFFFFFFFFFFFFFULL) {
+									break;
+								}
+								color = BitBoard_Undo(bitboard);
+							} while (color == cpuTurn);
 							system("cls");
 							printf("戻しました\n");
 							BitBoard_Draw(bitboard, showMobility);
@@ -313,28 +320,32 @@ void Game_Battle(char showMobility) {
 						continue;
 					}
 					put = getBitPos(x, y);
-
 					break;
 				}
 			}
 
 			//system("cls");
-			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
-				system("cls");
-				BitBoard_Draw(bitboard, showMobility);
-				if (turn == cpuTurn) {
-					printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
-					printf("NegaAlpha: time:%d node:%d\n\n", cpu->end - cpu->start, cpu->leaf);
-					left--;
+			if ((BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) & put) != 0) {
+				if (BitBoard_Flip(bitboard, color, put) >= 1) {
+					system("cls");
+					BitBoard_Draw(bitboard, showMobility);
+					if (color == cpuTurn) {
+						printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
+						printf("NegaAlpha: time:%d node:%d\n\n", cpu->end - cpu->start, cpu->leaf);
+						left--;
+					}
+					else {
+						printf("You Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
+						left--;
+					}
+					color = oppColor(color);
 				}
 				else {
-					printf("You Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
-					left--;
+					printf("Can't put (%c,%c)\n", "HGFEDCBA"[x], "87654321"[y]);
 				}
-				turn = oppColor(turn);
 			}
 			else {
-				printf("Can't put (%d,%d)\n", x - 8, y - 8);
+				printf("Can't put stone (%c,%c)\n", "HGFEDCBA"[x], "87654321"[y]);
 			}
 
 		}
@@ -344,7 +355,7 @@ void Game_Battle(char showMobility) {
 			}
 			else {
 				passed = TRUE;
-				turn = oppColor(turn);
+				color = oppColor(color);
 			}
 		}
 
@@ -608,15 +619,24 @@ void MODE_READBOOK() {
 					getc(stdin);
 				}
 			}
-			
-			//BitBoard_Draw(bitboard, TRUE);
+			if (left == 1) {
+				BitBoard_Draw(bitboard, TRUE);
+			}
 			//getc(stdin);
 			
 			//パターンの評価値の更新
-			UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
+			if (color == BLACK) {
+				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
+			}
+			else {
+				BitBoard_AllOpp(bitboard);
+				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], -diff, left);
+				BitBoard_AllOpp(bitboard);
+			}
 			color = oppColor(color);
 			left--;
 		}
+		getc(stdin);
 		dataCount++;
 		//1000に一度表示
 		if (dataCount % 100 == 0) {

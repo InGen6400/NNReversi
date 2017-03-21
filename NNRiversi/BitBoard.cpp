@@ -82,9 +82,13 @@ public:
 	M128I operator-(const M128I &in) { return _mm_sub_epi64(this->m128i, in.m128i); }
 
 	M128I operator >> (const int shift) { return _mm_srli_epi64(this->m128i, shift); }
-	M128I operator >> (const M128I shift) { return _mm_srlv_epi64(this->m128i, shift.m128i); }
+	M128I operator >> (const M128I shift) {
+		return _mm_set_epi64x(_mm_extract_epi64(this->m128i, 1) >> _mm_extract_epi64(shift.m128i, 1), _mm_extract_epi64(this->m128i, 0) >> _mm_extract_epi64(shift.m128i, 0));
+	}
 	M128I operator << (const int shift) { return _mm_slli_epi64(this->m128i, shift); }
-	M128I operator << (const M128I shift) { return _mm_sllv_epi64(this->m128i, shift.m128i); }
+	M128I operator << (const M128I shift) {
+		return _mm_set_epi64x(_mm_extract_epi64(this->m128i, 1) << _mm_extract_epi64(shift.m128i, 1), _mm_extract_epi64(this->m128i, 0) << _mm_extract_epi64(shift.m128i, 0));
+	}
 
 	M128I operator| (const M128I &in) { return _mm_or_si128(this->m128i, in.m128i); }
 	M128I operator&(const M128I &in) { return _mm_and_si128(this->m128i, in.m128i); }

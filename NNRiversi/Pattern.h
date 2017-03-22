@@ -5,7 +5,7 @@
 const char PATTERN_VALUE_FILE[] = "PatternValue.dat";
 
 const short TURN_SPLIT = 15;//15’iŠK‚É•ª‚¯‚Ä•]‰¿’l‚ð•Ï‚¦‚é
-const double UPDATE_RATIO = 0.002;
+const double UPDATE_RATIO = 0.0002;
 
 enum {
 	PATTERN_LINE4,
@@ -21,6 +21,8 @@ enum {
 	PATTERN_MOBILITY_B,
 	PATTERN_MOBILITY_W,
 	PATTERN_STONEDIFF,
+	PATTERN_CORNER_STONE,
+	PATTERN_X_STONE,
 	PATTERN_PARITY,
 	PATTERN_AMOUNT
 };
@@ -39,7 +41,9 @@ static const short PatternIndex[] =
 	POW3_8,//Edge
 	64,//Mobility_B
 	64,//Mobility_W
-	64,//Stone Diff
+	128,//Stone Diff(-64 ~ 64)+64 -> (0~128)
+	8,//CORNER_STONE(-4  ~ 4 )+4  -> (0~8)
+	8,//X_STONE     (-4  ~ 4 )+4  -> (0~8)
 	2,//Parity
 	0,//Dummy(PatternAmount)
 };

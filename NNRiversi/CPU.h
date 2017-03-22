@@ -25,6 +25,7 @@ const char poslist[] = {
 struct CPU_ {
 	int leaf;
 	int start, end;
+	int openD, midD, endD;
 	BitBoard *bitboard;
 	charNode isEmpty[BITBOARD_SIZE * BITBOARD_SIZE];
 }typedef CPU;
@@ -34,6 +35,8 @@ CPU *CPU_Init();
 void CPU_Reset(CPU *cpu);
 
 void CPU_Delete(CPU *cpu);
+
+void CPU_SetLevel(CPU *cpu, int open, int mid, int end);
 
 int CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left);
 

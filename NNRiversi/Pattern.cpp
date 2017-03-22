@@ -453,9 +453,13 @@ int getValue(uint64 black, uint64 white, char left) {
 	ret += PatternValue[left][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(black, white))];//BLACKの着手可能位置の数
 	ret += PatternValue[left][PATTERN_MOBILITY_W][BitBoard_CountStone(BitBoard_getMobility(white, black))];//WHITEの着手可能位置の数
 	//石差
-	ret += PatternValue[left][PATTERN_STONEDIFF][(black = BitBoard_CountStone(black)) - (white = BitBoard_CountStone(white))];//BLACKから見たWHITEとの石差
+	ret += PatternValue[left][PATTERN_STONEDIFF][(black_count = BitBoard_CountStone(black)) - (white_count = BitBoard_CountStone(white)) + 64];//BLACKから見たWHITEとの石差
+	//角の石差(0x8100000000000081は角のマスク)
+	ret += PatternValue[left][PATTERN_STONEDIFF][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4];
+	//Xの石差 (0x0042000000004200はXのマスク)
+	ret += PatternValue[left][PATTERN_STONEDIFF][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
 	//パリティー
-	ret += PatternValue[left][PATTERN_PARITY][(BITBOARD_SIZE * BITBOARD_SIZE - black - white)&1];//空きます数の偶奇
+	ret += PatternValue[left][PATTERN_PARITY][(BITBOARD_SIZE * BITBOARD_SIZE - black_count - white_count)&1];//空きます数の偶奇
 
 	return ret;
 }
@@ -475,6 +479,7 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	char blackCount, whiteCount;
 
 	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
+
 	//printf("diff:%d\n", diff);
 	left /= 4;
 	index = getLineIndex(black, white, 0x000000FF00000000);//y=4

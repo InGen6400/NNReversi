@@ -114,7 +114,7 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外00x0000000000000000
-	//bitboard->stone[WHITE] = 0x0000000001020408;//
+	//bitboard->stone[WHITE] = 0x0042000000004200;//
 	//bitboard->stone[BLACK] = 0x0000000000000000;//
 	//角のインデックスが22011021になるはず
 	bitboard->Sp = bitboard->Stack;
@@ -203,7 +203,7 @@ char BitBoard_CountStone(uint64 bits) {
 char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 	uint64 reverse;
 	uint64 *me = &bitboard->stone[color];
-	uint64 *ene = &bitboard->stone[(color+1)&1];
+	uint64 *ene = &bitboard->stone[oppColor(color)];
 
 	reverse = getReverseBits(me, ene, pos);
 	//drawBits(pos);
@@ -222,6 +222,21 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 	}*/
 
 	return 0;
+}
+
+int get_rand(int max)
+{
+	return (int)((double)max * rand() / (RAND_MAX + 1.0));
+}
+
+void move_random(BitBoard *bitboard, char color) {
+	uint64 pos = 0;
+	uint64 mobility = BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]);
+	do {
+		pos = (mobility & ((uint64)0x0000000000000001 << get_rand(64)));
+	} while (pos == 0);
+	//drawBits(pos);
+	BitBoard_Flip(bitboard, color, pos);
 }
 
 //右から連続するゼロの数
@@ -548,7 +563,7 @@ char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos) {
 	uint64 reverse = getReverseBits(&me, &ene, pos);
 
 	if (reverse != 0) {
-		return true;
+		return TRUE;
 	}
 
 	return FALSE;

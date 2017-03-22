@@ -158,12 +158,12 @@
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
     <ClInclude Include="bitTest.h" />
-    <ClInclude Include="Board.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="Eval_Const.h" />
     <ClInclude Include="Flags.h" />
+    <ClInclude Include="Hive_routine.h" />
     <ClInclude Include="Pattern.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="stdafx.h" />
@@ -172,9 +172,9 @@
   <ItemGroup>
     <ClCompile Include="BitBoard.cpp" />
     <ClCompile Include="bitTester.cpp" />
-    <ClCompile Include="Board.cpp" />
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="Hive_routine.cpp" />
     <ClCompile Include="NNRiversi.cpp" />
     <ClCompile Include="Pattern.cpp" />
     <ClCompile Include="Player.cpp" />

@@ -41,6 +41,8 @@ char BitBoard_CountStone(uint64 bits);
 
 char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos);
 
+void move_random(BitBoard *bitboard, char color);
+
 uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos);
 
 int BitBoard_Undo(BitBoard *bitboard);

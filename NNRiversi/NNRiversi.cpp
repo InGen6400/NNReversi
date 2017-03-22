@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
+#include <time.h>
 #include <intrin.h>
 #pragma comment(lib, "winmm.lib")
 
@@ -284,7 +285,7 @@ void Game_Battle(char showMobility) {
 				printf("CPU Thinking...\n");
 				cpu->leaf = 0;
 				cpu->start = timeGetTime();
-				CPU_Move(cpu, bitboard, &put, color, left);
+				printf("value:%d\n", CPU_Move(cpu, bitboard, &put, color, left));
 				cpu->end = timeGetTime();
 				getXY(put, &x, &y);
 			}
@@ -327,7 +328,7 @@ void Game_Battle(char showMobility) {
 			//system("cls");
 			if ((BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) & put) != 0) {
 				if (BitBoard_Flip(bitboard, color, put) >= 1) {
-					system("cls");
+					//system("cls");
 					BitBoard_Draw(bitboard, showMobility);
 					if (color == cpuTurn) {
 						printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
@@ -524,8 +525,90 @@ void MODE_DEBUG() {
 	CPU_Delete(cpu2);
 }
 
-void MODE_LEARN() {
+inline int get_rand(int max)
+{
+	return (int)((double)max * rand() / (RAND_MAX + 1.0));
+}
 
+
+void MODE_LEARN() {
+	BitBoard *bitboard = BitBoard_New();
+	CPU *cpu = CPU_Init();
+	uint64 move;
+	int history[BOARD_SIZE * BOARD_SIZE];
+	int i, j, num, turn, value;
+	char color;
+	int result;
+	srand((unsigned)time(NULL));
+	printf("対戦回数:");
+	scanf("%d", &num);
+
+	CPU_SetLevel(cpu, 0, 4, 12);
+	getchar();
+	for (i = 0; i < num; i++) {
+		BitBoard_Reset(bitboard);
+		color = BLACK;
+		turn = 0;
+		printf("skip op\n");
+		for (j = 0; j < 8; j++) {
+			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
+				move_random(bitboard, color);
+				history[turn] = color;
+				turn++;
+			}
+			color = oppColor(color);
+			system("cls");
+			BitBoard_Draw(bitboard, FALSE);
+			//getchar();
+		}
+		printf("read mid\n");
+		while (1) {
+			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
+				if (__popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])) > 12 && get_rand(100) < 1) {
+					move_random(bitboard, color);
+				}
+				else {
+					value = CPU_Move(cpu, bitboard, &move, color, __popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])));
+					BitBoard_Flip(bitboard, color, move);
+				}
+				history[turn] = color;
+				turn++;
+			}
+			else if (BitBoard_getMobility(bitboard->stone[oppColor(color)], bitboard->stone[color]) == 0) {
+				break;
+			}
+			color = oppColor(color);
+			Sleep(10);
+			system("cls");
+			BitBoard_Draw(bitboard, FALSE);
+			//getchar();
+		}
+		printf("get result\n");
+		result = (BitBoard_CountStone(bitboard->stone[BLACK]) - BitBoard_CountStone(bitboard->stone[WHITE]));
+		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < 8; j++) {
+			turn--;
+			BitBoard_Undo(bitboard);
+		}
+		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < BOARD_SIZE * BOARD_SIZE - 12; j++) {
+			turn--;
+			BitBoard_Undo(bitboard);
+			if (history[turn] == BLACK) {
+				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], result, __popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])));
+			}
+			else {
+				BitBoard_AllOpp(bitboard);
+				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], -result, __popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])));
+				BitBoard_AllOpp(bitboard);
+			}
+		}
+
+		if ((i + 1) % 100 == 0) {
+			printf("Learning %d / %d\n", i + 1, num);
+			Pattern_Save();
+		}
+	}
+	Pattern_Save();
+	printf("exit\n");
 }
 
 void MODE_READBOOK() {
@@ -619,9 +702,10 @@ void MODE_READBOOK() {
 					getc(stdin);
 				}
 			}
+			/*
 			if (left == 1) {
 				BitBoard_Draw(bitboard, TRUE);
-			}
+			}*/
 			//getc(stdin);
 			
 			//パターンの評価値の更新
@@ -636,7 +720,7 @@ void MODE_READBOOK() {
 			color = oppColor(color);
 			left--;
 		}
-		getc(stdin);
+		//getc(stdin);
 		dataCount++;
 		//1000に一度表示
 		if (dataCount % 100 == 0) {

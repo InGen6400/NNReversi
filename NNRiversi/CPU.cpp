@@ -24,6 +24,8 @@ void CPU_Reset(CPU *cpu) {
 		return;
 	}
 	cpu->leaf = 0;
+	cpu->endD = END_DEPTH;
+	cpu->midD = MID_DEPTH;
 }
 
 void CPU_Delete(CPU *cpu) {
@@ -33,23 +35,28 @@ void CPU_Delete(CPU *cpu) {
 	free(cpu);
 }
 
+void CPU_SetLevel(CPU *cpu, int open, int mid, int end) {
+	cpu->endD = end;
+	cpu->midD = mid;
+}
+
 int CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, char left) {
 
 	BitBoard_Copy(in_board, cpu->bitboard);
 	EmptyListInit(cpu, color);
-	if (left <= END_DEPTH) {
+	if (left <= cpu->endD) {
 		printf("spart\n");
-		return -NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, END_DEPTH, PutPos, VALUE_MAX);
+		return NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, cpu->endD, PutPos, VALUE_MAX);
 	}
 	else {
 		//リーフで色が白のとき
-		if ((color == WHITE && MID_DEPTH % 2 == 0) || (color == BLACK && MID_DEPTH % 2 == 1)) {
+		if ((color == WHITE && cpu->midD % 2 == 0) || (color == BLACK && cpu->midD % 2 == 1)) {
 			//ボードを白黒反転
 			BitBoard_AllOpp(cpu->bitboard);
 			//黒にする
 			color = oppColor(color);
 		}
-		return NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, MID_DEPTH, left, PutPos, VALUE_MAX);
+		return NegaAlphaSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, cpu->midD, left, PutPos, VALUE_MAX);
 	}
 }
 

@@ -45,7 +45,7 @@ int CPU_Move(CPU *cpu, const BitBoard *in_board, uint64 *PutPos, char color, cha
 	BitBoard_Copy(in_board, cpu->bitboard);
 	EmptyListInit(cpu, color);
 	if (left <= cpu->endD) {
-		printf("spart\n");
+		//printf("spart\n");
 		return NegaEndSearch(cpu->bitboard->stone[color], cpu->bitboard->stone[oppColor(color)], FALSE, color, cpu->endD, PutPos, VALUE_MAX);
 	}
 	else {

@@ -558,8 +558,8 @@ void MODE_LEARN() {
 				left--;
 			}
 			color = oppColor(color);
-			system("cls");
-			BitBoard_Draw(bitboard, FALSE);
+			/*system("cls");
+			BitBoard_Draw(bitboard, FALSE);*/
 			//getchar();
 		}
 		printf("read mid\n");
@@ -581,7 +581,7 @@ void MODE_LEARN() {
 						drawBits(BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]));
 						getchar();
 					}
-					printf("left:%d\n", left);
+					//printf("left:%d\n", left);
 				}
 				history[left] = color;
 				left--;
@@ -591,8 +591,8 @@ void MODE_LEARN() {
 			}
 			color = oppColor(color);
 			Sleep(10);
-			system("cls");
-			BitBoard_Draw(bitboard, FALSE);
+			/*system("cls");
+			BitBoard_Draw(bitboard, FALSE);*/
 			//getchar();
 		}
 		printf("get result\n");

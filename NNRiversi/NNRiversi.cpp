@@ -537,6 +537,7 @@ void MODE_LEARN() {
 	uint64 move;
 	int history[BOARD_SIZE * BOARD_SIZE];
 	int i, j, num, turn, value;
+	int left;
 	char color;
 	int result;
 	srand((unsigned)time(NULL));
@@ -548,13 +549,13 @@ void MODE_LEARN() {
 	for (i = 0; i < num; i++) {
 		BitBoard_Reset(bitboard);
 		color = BLACK;
-		turn = 0;
+		left = 60;
 		printf("skip op\n");
 		for (j = 0; j < 8; j++) {
 			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
 				move_random(bitboard, color);
-				history[turn] = color;
-				turn++;
+				history[left] = color;
+				left--;
 			}
 			color = oppColor(color);
 			system("cls");
@@ -564,15 +565,22 @@ void MODE_LEARN() {
 		printf("read mid\n");
 		while (1) {
 			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
-				if (__popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])) > 12 && get_rand(100) < 1) {
+				if (left > 12 && get_rand(100) < 1) {
 					move_random(bitboard, color);
 				}
 				else {
-					value = CPU_Move(cpu, bitboard, &move, color, __popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])));
-					BitBoard_Flip(bitboard, color, move);
+					value = CPU_Move(cpu, bitboard, &move, color, left);
+					if (BitBoard_Flip(bitboard, color, move) == 0) {
+						printf("can't put   color:%d\n", color);
+						drawBits(move);
+						printf("mobility\n");
+						drawBits(BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]));
+						getchar();
+					}
+					printf("left:%d\n", left);
 				}
-				history[turn] = color;
-				turn++;
+				history[left] = color;
+				left--;
 			}
 			else if (BitBoard_getMobility(bitboard->stone[oppColor(color)], bitboard->stone[color]) == 0) {
 				break;
@@ -585,19 +593,19 @@ void MODE_LEARN() {
 		}
 		printf("get result\n");
 		result = (BitBoard_CountStone(bitboard->stone[BLACK]) - BitBoard_CountStone(bitboard->stone[WHITE]));
-		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < 8; j++) {
-			turn--;
+		for (j = left; j < 8; j++) {
+			left++;
 			BitBoard_Undo(bitboard);
 		}
 		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < BOARD_SIZE * BOARD_SIZE - 12; j++) {
-			turn--;
+			left++;
 			BitBoard_Undo(bitboard);
-			if (history[turn] == BLACK) {
-				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], result, __popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])));
+			if (history[left] == BLACK) {
+				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], result, left);
 			}
 			else {
 				BitBoard_AllOpp(bitboard);
-				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], -result, __popcnt64(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])));
+				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], -result, left);
 				BitBoard_AllOpp(bitboard);
 			}
 		}

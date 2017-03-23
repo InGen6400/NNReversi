@@ -571,6 +571,10 @@ void MODE_LEARN() {
 				else {
 					value = CPU_Move(cpu, bitboard, &move, color, left);
 					if (BitBoard_Flip(bitboard, color, move) == 0) {
+						printf("white\n");
+						drawBits(bitboard->stone[WHITE]);
+						printf("black\n");
+						drawBits(bitboard->stone[BLACK]);
 						printf("can't put   color:%d\n", color);
 						drawBits(move);
 						printf("mobility\n");

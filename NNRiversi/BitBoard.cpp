@@ -63,6 +63,13 @@ public:
 
 };
 
+inline uint64 sr(uint64 a, uint64 b) {
+	return a >> b;
+}
+
+inline uint64 sl(uint64 a, uint64 b) {
+	return a << b;
+}
 class M128I {
 public:
 	__m128i m128i;
@@ -83,17 +90,18 @@ public:
 
 	M128I operator >> (const int shift) { return _mm_srli_epi64(this->m128i, shift); }
 	M128I operator >> (const M128I shift) {
-		return _mm_set_epi64x(_mm_extract_epi64(this->m128i, 1) >> _mm_extract_epi64(shift.m128i, 1), _mm_extract_epi64(this->m128i, 0) >> _mm_extract_epi64(shift.m128i, 0));
+		return _mm_set_epi64x(sr(_mm_extract_epi64(this->m128i, 1), (uint64)_mm_extract_epi64(shift.m128i, 1)), sr(_mm_extract_epi64(this->m128i, 0), (uint64)_mm_extract_epi64(shift.m128i, 0)));
 	}
 	M128I operator << (const int shift) { return _mm_slli_epi64(this->m128i, shift); }
 	M128I operator << (const M128I shift) {
-		return _mm_set_epi64x(_mm_extract_epi64(this->m128i, 1) << _mm_extract_epi64(shift.m128i, 1), _mm_extract_epi64(this->m128i, 0) << _mm_extract_epi64(shift.m128i, 0));
+		return _mm_set_epi64x(sl(_mm_extract_epi64(this->m128i, 1), (uint64)_mm_extract_epi64(shift.m128i, 1)), sl(_mm_extract_epi64(this->m128i, 0), (uint64)_mm_extract_epi64(shift.m128i, 0)));
 	}
 
 	M128I operator| (const M128I &in) { return _mm_or_si128(this->m128i, in.m128i); }
-	M128I operator&(const M128I &in) { return _mm_and_si128(this->m128i, in.m128i); }
+	M128I operator& (const M128I &in) { return _mm_and_si128(this->m128i, in.m128i); }
 
 };
+
 
 //É{Å[Éhê∂ê¨
 BitBoard *BitBoard_New(void) {

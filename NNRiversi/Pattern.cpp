@@ -71,29 +71,26 @@ void Pattern_Load() {
 	return;
 }
 
-void Pattern_Save() {
+int Pattern_Save() {
 	FILE *fp;
 	int turn, id;
 	fp = fopen(PATTERN_VALUE_FILE, "wb");
 	if (!fp) {
 		printf("[pattern value] file OPEN error\n");
-		return;
+		return 0;
 	}
 
-	printf("[pattern value] SAVE");
 	for (turn = 0; turn < 16; turn++) {
 		for (id = 0; id < PATTERN_AMOUNT; id++) {
 			if (fwrite(PatternValue[turn][id], sizeof(int), PatternIndex[id], fp) < (size_t)PatternIndex[id]) {
 				printf("\n>>>[pattern value] flie WRITE error!!<<<\n");
 				fclose(fp);
-				return;
+				return 0;
 			}
 		}
-		putchar('.');
 	}
-	printf(">> success\n");
 	fclose(fp);
-	return;
+	return 1;
 }
 
 //AVX2‚É‘Î‰‚µ‚Ä‚¢‚éê‡

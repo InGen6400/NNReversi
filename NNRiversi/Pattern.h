@@ -55,7 +55,7 @@ void Pattern_Init();
 
 void Pattern_Load();
 
-void Pattern_Save();
+int Pattern_Save();
 
 void Pattern_setAVX(unsigned char AVX2_FLAG);
 

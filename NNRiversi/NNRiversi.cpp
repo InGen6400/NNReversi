@@ -546,11 +546,14 @@ void MODE_LEARN() {
 
 	CPU_SetLevel(cpu, 0, 4, 12);
 	getchar();
+
+	printf("\n0%%                      50%%                      100%%\n");
+	printf("+-----------------------+------------------------+\n");
+
 	for (i = 0; i < num; i++) {
 		BitBoard_Reset(bitboard);
 		color = BLACK;
 		left = 60;
-		printf("skip op\n");
 		for (j = 0; j < 8; j++) {
 			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
 				move_random(bitboard, color);
@@ -562,7 +565,6 @@ void MODE_LEARN() {
 			BitBoard_Draw(bitboard, FALSE);*/
 			//getchar();
 		}
-		printf("read mid\n");
 		while (1) {
 			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
 				if (left > 12 && get_rand(100) < 1) {
@@ -595,7 +597,6 @@ void MODE_LEARN() {
 			BitBoard_Draw(bitboard, FALSE);*/
 			//getchar();
 		}
-		printf("get result\n");
 		result = (BitBoard_CountStone(bitboard->stone[BLACK]) - BitBoard_CountStone(bitboard->stone[WHITE]));
 		for (j = left; j < 8; j++) {
 			left++;
@@ -613,13 +614,20 @@ void MODE_LEARN() {
 				BitBoard_AllOpp(bitboard);
 			}
 		}
-
-		if ((i + 1) % 100 == 0) {
-			printf("Learning %d / %d\n", i + 1, num);
+		if (i % (num / 50) == num / 50 - 2) {
+			putchar('\r');
+			for (j = 0; j < (i + 1) / (num / 50); j++) {
+				putchar('#');
+			}
+			printf("\t\t\t\t\t\t\t%d/%d", i, num);
 			Pattern_Save();
 		}
+		//printf("<<<%3d%%", (double)i / num * 100);
 	}
-	Pattern_Save();
+	printf("\n");
+	if (Pattern_Save() == 1) {
+		printf("Save success\n");
+	}
 	printf("exit\n");
 }
 

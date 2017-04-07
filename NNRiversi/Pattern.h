@@ -1,11 +1,13 @@
 #pragma once
 #include "BitBoard.h"
 #include "const.h"
+#include <limits.h>
 
 const char PATTERN_VALUE_FILE[] = "PatternValue.dat";
 
 const short TURN_SPLIT = 15;//15’iŠK‚É•ª‚¯‚Ä•]‰¿’l‚ð•Ï‚¦‚é
-const double UPDATE_RATIO = 0.0002;
+const double UPDATE_RATIO = 0.0005;
+const int MAX_VALUE = INT_MAX;
 
 enum {
 	PATTERN_LINE4,

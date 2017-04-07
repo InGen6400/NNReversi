@@ -1,12 +1,12 @@
 // NNRiversi.cpp : コンソール アプリケーションのエントリ ポイントを定義します。
 //
-
 #include "stdafx.h"
 #include <stdio.h>
 #include "BitBoard.h"
 #include "Player.h"
 #include "const.h"
-#include "CPU.h"
+//#include "CPU.h"
+#include "Hive_routine.h"
 #include "Pattern.h"
 #include "Flags.h"
 #include <stdlib.h>
@@ -32,11 +32,13 @@ void Game_PVP(char showMobility);
 
 void Game_Battle(char showMobility);
 
-void Game_Time(char showMobility);
+//void Game_Time(char showMobility);
 
-void MODE_DEBUG();
+//void MODE_DEBUG();
 
 void MODE_READBOOK();
+
+void MODE_ResetReadEnd();
 
 void MODE_LEARN();
 
@@ -94,6 +96,9 @@ int main()
 		else if (tmp[0] == 'R' || tmp[0] == 'r') {
 			mode = READ;
 		}
+		else if (tmp[0] == '\\') {
+			MODE_ResetReadEnd();
+		}
 		else if (tmp[0] == '.') {
 			showMobility = TRUE;
 			printf("着手可能な場所を表示します\n");
@@ -114,10 +119,10 @@ int main()
 		MODE_LEARN();
 	}
 	else if (mode == TIME) {
-		Game_Time(FALSE);
+		//Game_Time(FALSE);
 	}
 	else if (mode == DEBUG) {
-		MODE_DEBUG();
+		//MODE_DEBUG();
 	}
 	else if (mode == READ) {
 		MODE_READBOOK();
@@ -253,9 +258,8 @@ void Game_Battle(char showMobility) {
 
 	uint64 put;
 
-	CPU *cpu = CPU_Init();
-	cpu->start = timeGetTime();
-
+	Hive *hive = Hive_New();
+	setLevel(hive, 8, 16);
 	//CPUの色設定
 	while (cpuTurn == -2)
 	{
@@ -283,10 +287,7 @@ void Game_Battle(char showMobility) {
 			if (color == cpuTurn) {
 				//CPUのターン
 				printf("CPU Thinking...\n");
-				cpu->leaf = 0;
-				cpu->start = timeGetTime();
-				printf("value:%d\n", CPU_Move(cpu, bitboard, &put, color, left));
-				cpu->end = timeGetTime();
+				printf("value:%d\n", NextMove(hive, bitboard, color, &put));
 				getXY(put, &x, &y);
 			}
 			else {
@@ -332,7 +333,6 @@ void Game_Battle(char showMobility) {
 					BitBoard_Draw(bitboard, showMobility);
 					if (color == cpuTurn) {
 						printf("CPU Put (%c, %c)\n", "HGFEDCBA"[x], "87654321"[y]);
-						printf("NegaAlpha: time:%d node:%d\n\n", cpu->end - cpu->start, cpu->leaf);
 						left--;
 					}
 					else {
@@ -362,9 +362,9 @@ void Game_Battle(char showMobility) {
 
 	}
 	BitBoard_Delete(bitboard);
-	CPU_Delete(cpu);
+	Hive_Del(hive);
 }
-
+/*Hive 未対応
 void Game_Time(char showMobility) {
 
 	BitBoard *bitboard;
@@ -442,7 +442,8 @@ void Game_Time(char showMobility) {
 	CPU_Delete(cpu);
 	CPU_Delete(cpu2);
 }
-
+*/
+/*hive 未対応
 void MODE_DEBUG() {
 
 	BitBoard *bitboard;
@@ -463,7 +464,7 @@ void MODE_DEBUG() {
 	CPU *cpu2 = CPU_Init();
 	cpu2->start = timeGetTime();
 	cpu->start = timeGetTime();
-	/*
+
 	//CPUの色設定
 	system("cls");
 	BitBoard_Draw(bitboard, FALSE);
@@ -513,7 +514,6 @@ void MODE_DEBUG() {
 			}
 		}
 	}
-	*/
 	
 	put=getPos_book_upper("D3");
 
@@ -524,7 +524,7 @@ void MODE_DEBUG() {
 	CPU_Delete(cpu);
 	CPU_Delete(cpu2);
 }
-
+*/
 inline int get_rand(int max)
 {
 	return (int)((double)max * rand() / (RAND_MAX + 1.0));
@@ -533,18 +533,27 @@ inline int get_rand(int max)
 
 void MODE_LEARN() {
 	BitBoard *bitboard = BitBoard_New();
-	CPU *cpu = CPU_Init();
+	Hive *hive = Hive_New();
 	uint64 move;
-	int history[BOARD_SIZE * BOARD_SIZE];
+	int history[BITBOARD_SIZE * BITBOARD_SIZE];
 	int i, j, num, turn, value;
 	int left;
 	char color;
+	char ShowLearn = 'n';
 	int result;
 	srand((unsigned)time(NULL));
 	printf("対戦回数:");
 	scanf("%d", &num);
 
-	CPU_SetLevel(cpu, 0, 4, 12);
+	printf("観戦しますか？(y/n):");
+	scanf("%s", &ShowLearn);
+	while (ShowLearn != 'n' && ShowLearn != 'y') {
+		printf("yかnで入力してください\n");
+		printf("観戦しますか？(y/n):");
+		scanf("%s", &ShowLearn);
+	}
+
+	setLevel(hive, 4, 12);
 	getchar();
 
 	printf("\n0%%                      50%%                      100%%\n");
@@ -571,7 +580,7 @@ void MODE_LEARN() {
 					move_random(bitboard, color);
 				}
 				else {
-					value = CPU_Move(cpu, bitboard, &move, color, left);
+					value = NextMove(hive, bitboard, color, &move);
 					if (BitBoard_Flip(bitboard, color, move) == 0) {
 						printf("white\n");
 						drawBits(bitboard->stone[WHITE]);
@@ -592,9 +601,10 @@ void MODE_LEARN() {
 				break;
 			}
 			color = oppColor(color);
-			Sleep(10);
-			/*system("cls");
-			BitBoard_Draw(bitboard, FALSE);*/
+			if (ShowLearn == 'y') {
+				system("cls");
+				BitBoard_Draw(bitboard, FALSE);
+			}
 			//getchar();
 		}
 		result = (BitBoard_CountStone(bitboard->stone[BLACK]) - BitBoard_CountStone(bitboard->stone[WHITE]));
@@ -602,7 +612,7 @@ void MODE_LEARN() {
 			left++;
 			BitBoard_Undo(bitboard);
 		}
-		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < BOARD_SIZE * BOARD_SIZE - 12; j++) {
+		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < BITBOARD_SIZE * BITBOARD_SIZE - 12; j++) {
 			left++;
 			BitBoard_Undo(bitboard);
 			if (history[left] == BLACK) {
@@ -614,12 +624,12 @@ void MODE_LEARN() {
 				BitBoard_AllOpp(bitboard);
 			}
 		}
-		if (i % (num / 50) == num / 50 - 2) {
+		if (i % (num / 50) == num / 50 - 1) {
 			putchar('\r');
 			for (j = 0; j < (i + 1) / (num / 50); j++) {
 				putchar('#');
 			}
-			printf("\t\t\t\t\t\t\t%d/%d", i, num);
+			printf("\t\t\t\t\t\t\t%d/%d", i+1, num);
 			Pattern_Save();
 		}
 		//printf("<<<%3d%%", (double)i / num * 100);
@@ -761,4 +771,15 @@ void MODE_READBOOK() {
 	if (rename(path, loadedPath) == 0) {
 		printf("ファイル名変更:%s->%s\n", path, loadedPath);
 	}
+}
+
+void MODE_ResetReadEnd() {
+	char tmp[1000];
+	char cmd[1100];
+	printf(".endファイルのあるディレクトリパス:");
+	scanf("%s", &tmp);
+	sprintf(cmd, "ren %s\\*.end *.", tmp);
+	system(cmd);
+	fgets(tmp, sizeof(tmp), stdin);
+	printf("\n");
 }

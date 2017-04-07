@@ -31,10 +31,10 @@ const char BLACK  = 1;
 #pragma endregion
 */
 #pragma region POS_define
-
+/*
 const char NOMOVE = -2;
 const char PASS = -1;
-
+*/
 const char A1 = 11;
 const char A2 = 21;
 const char A3 = 31;

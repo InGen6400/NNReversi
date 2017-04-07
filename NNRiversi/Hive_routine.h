@@ -1,5 +1,8 @@
 #pragma once
 #include "BitBoard.h"
+#include <limits.h>
+
+const int VALUE_MAX = INT_MAX;
 
 struct _Hive
 {
@@ -10,14 +13,16 @@ struct _Hive
 	int Node;
 }typedef Hive;
 
-static int Hive_Init(Hive *hive);
+int Hive_Init(Hive *hive);
 
 Hive *Hive_New();
 
 void Hive_Del(Hive *hive);
 
-uint64 NextMove(Hive *hive, const BitBoard *bitboard, int i_color, int *o_value);
+void setLevel(Hive *hive, int mid, int end);
 
-int End_Search(Hive hive, uint64 me, uint64 opp, int depth, int color, int );
+int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos);
 
-int Mid_Search();
+int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char isPassed, char color, char left, char depth, uint64 *PutPos);
+
+int EndAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char isPassed, char color, char left, uint64 *PutPos);

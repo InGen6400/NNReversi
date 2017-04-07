@@ -4,14 +4,17 @@
 #include "const.h"
 #include <intrin.h>
 
+typedef unsigned long long uint64;
+
 const char WALL = -1;
 const char NONE = 2;
 const char WHITE = 0;
 const char BLACK = 1;
 
-const char BITBOARD_SIZE = 8;
+const uint64 PASS = 0b11;
+const uint64 NOMOVE = 0b111;
 
-typedef unsigned long long uint64;
+const char BITBOARD_SIZE = 8;
 
 struct _BitBoard
 {

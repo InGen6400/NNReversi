@@ -85,7 +85,7 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 		rev = getReverseBits(&me, &ene, pos);
 
 		//再帰
-		tmp = -NegaAlphaSearch(ene ^ rev, me ^ rev ^ pos, FALSE, oppColor(color), depth - 1, left - 1, &move, -best);
+		tmp = -NegaAlphaSearch(ene ^ rev, (me ^ rev) | pos, FALSE, oppColor(color), depth - 1, left - 1, &move, -best);
 		/*
 		引数にて反転したビットボードを渡すことで着手をもとに戻さなくてもいい
 		*/

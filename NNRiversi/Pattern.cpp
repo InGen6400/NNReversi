@@ -1,8 +1,10 @@
+
 #include "stdafx.h"
 #include "Pattern.h"
 #include "BitBoard.h"
 #include "bitTest.h"
 #include <intrin.h>
+#include <stdlib.h>
 
 #define LEN 16
 
@@ -52,6 +54,15 @@ void Pattern_Load() {
 	fp = fopen(PATTERN_VALUE_FILE, "rb");
 	if (!fp) {
 		printf("[pattern value] file OPEN error : no file?\n");
+		printf("Create New Pattern File...\n");
+		if (Pattern_Save()) {
+			printf("Save success\n");
+		}
+		else {
+			printf("Save failed\n");
+			exit(EXIT_FAILURE);
+		}
+
 		return;
 	}
 
@@ -452,22 +463,26 @@ int getValue(uint64 black, uint64 white, char left) {
 	//石差
 	ret += PatternValue[left][PATTERN_STONEDIFF][(black_count = BitBoard_CountStone(black)) - (white_count = BitBoard_CountStone(white)) + 64];//BLACKから見たWHITEとの石差
 	//角の石差(0x8100000000000081は角のマスク)
-	ret += PatternValue[left][PATTERN_STONEDIFF][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4];
+	ret += PatternValue[left][PATTERN_CORNER_STONE][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4];
 	//Xの石差 (0x0042000000004200はXのマスク)
-	ret += PatternValue[left][PATTERN_STONEDIFF][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
+	ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
 	//パリティー
 	ret += PatternValue[left][PATTERN_PARITY][(BITBOARD_SIZE * BITBOARD_SIZE - black_count - white_count)&1];//空きます数の偶奇
 
 	return ret;
 }
 
-inline void UpdatePattern(char left, char pattern, short index, short mirror, int diff) {
+inline void UpdatePattern_Mirror(char left, char pattern, short index, short mirror, int diff) {
+	if ((long)PatternValue[left][pattern][index] + diff >= MAX_VALUE || (long)PatternValue[left][pattern][index] + diff <= -MAX_VALUE) {
+		printf("Pattern Limit\n");
+		return;
+	}
 	PatternValue[left][pattern][index] += diff;
 	//もし反転インデックスがあるなら同じ値を代入する
 	PatternValue[left][pattern][mirror] = PatternValue[left][pattern][index];
 }
 
-inline void UpdatePatternEdge(char turn, char pattern, short index, int diff) {
+inline void UpdatePattern_nonMirror(char turn, char pattern, short index, int diff) {
 	PatternValue[turn][pattern][index] += diff;
 }
 
@@ -476,109 +491,111 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	char blackCount, whiteCount;
 
 	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
-
-	//printf("diff:%d\n", diff);
 	left /= 4;
 	index = getLineIndex(black, white, 0x000000FF00000000);//y=4
-	UpdatePattern(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x00000000FF000000);//y=5
-	UpdatePattern(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x0808080808080808);//x=5
-	UpdatePattern(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x1010101010101010);//x=4
-	UpdatePattern(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
 
 	index = getLineIndex(black, white, 0x0000FF0000000000);//y=3
-	UpdatePattern(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x0000000000FF0000);//y=6
-	UpdatePattern(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x2020202020202020);//x=3
-	UpdatePattern(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x0404040404040404);//x=6
-	UpdatePattern(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
 
 	index = getLineIndex(black, white, 0x00FF000000000000);//y=2
-	UpdatePattern(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x000000000000FF00);//y=7
-	UpdatePattern(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x4040404040404040);//x=2
-	UpdatePattern(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x0202020202020202);//x=7
-	UpdatePattern(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
 														  //斜め線
 	index = getLineIndex(black, white, 0x8040201008040201);//UL-DR
-	UpdatePattern(left, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
 	index = getLineIndex(black, white, 0x0102040810204080);//UR-DL
-	UpdatePattern(left, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
 	
 	index = getLineIndex(black, white, 0x4020100804020100);//2,1 - 8,7
-	UpdatePattern(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
 	index = getLineIndex(black, white, 0x0080402010080402);//1,2 - 7,8
-	UpdatePattern(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
 	index = getLineIndex(black, white, 0x0204081020408000);//7,1 - 1,7
-	UpdatePattern(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
 	index = getLineIndex(black, white, 0x0001020408102040);//8,2 - 2,8
-	UpdatePattern(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
 
 	index = getLineIndex(black, white, 0x0000804020100804);//1,3 - 6,8
-	UpdatePattern(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
 	index = getLineIndex(black, white, 0x2010080402010000);//3,1 - 8,6
-	UpdatePattern(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
 	index = getLineIndex(black, white, 0x0408102040800000);//6,1 - 1,6
-	UpdatePattern(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
 	index = getLineIndex(black, white, 0x0000010204081020);//8,3 - 3,8
-	UpdatePattern(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
 
 	index = getLineIndex(black, white, 0x0000008040201008);//1,4 - 5,8
-	UpdatePattern(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
 	index = getLineIndex(black, white, 0x1008040201000000);//4,1 - 8,5
-	UpdatePattern(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
 	index = getLineIndex(black, white, 0x0810204080000000);//5,1 - 1,5
-	UpdatePattern(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
 	index = getLineIndex(black, white, 0x0000000102040810);//8,4 - 4,8
-	UpdatePattern(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
 	
 	index = getLineIndex(black, white, 0x0000000080402010);//1,5 - 4,8
-	UpdatePattern(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
 	index = getLineIndex(black, white, 0x0804020100000000);//5,1 - 8,4
-	UpdatePattern(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
 	index = getLineIndex(black, white, 0x1020408000000000);//4,1 - 1,4
-	UpdatePattern(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
 	index = getLineIndex(black, white, 0x0000000001020408);//8,5 - 5,8
-	UpdatePattern(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
 
 	index = getCornerIndexUL(black, white);
-	UpdatePattern(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
 	index = getCornerIndexUR(black, white);
-	UpdatePattern(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
 	index = getCornerIndexDR(black, white);
-	UpdatePattern(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
 	index = getCornerIndexDL(black, white);
-	UpdatePattern(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
 
 	index = getEdgeIndexUL_D(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexUL_R(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexUR_L(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexUR_D(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexDR_U(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexDR_L(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexDL_U(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexDL_R(black, white);
-	UpdatePatternEdge(left, PATTERN_EDGE, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 
 	index = BitBoard_CountStone(BitBoard_getMobility(black, white));
-	UpdatePatternEdge(left, PATTERN_MOBILITY_B, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_MOBILITY_B, index, diff);
 	index = BitBoard_CountStone(BitBoard_getMobility(white, black));
-	UpdatePatternEdge(left, PATTERN_MOBILITY_W, index, diff);
+	UpdatePattern_nonMirror(left, PATTERN_MOBILITY_W, index, diff);
 
-	UpdatePatternEdge(left, PATTERN_STONEDIFF, (blackCount = BitBoard_CountStone(black)) - (whiteCount = BitBoard_CountStone(white)), diff);
+	UpdatePattern_nonMirror(left, PATTERN_STONEDIFF, (blackCount = BitBoard_CountStone(black)) - (whiteCount = BitBoard_CountStone(white)), diff);
 
-	UpdatePatternEdge(left, PATTERN_PARITY, (BITBOARD_SIZE * BITBOARD_SIZE - blackCount - whiteCount) & 1, diff);
+	UpdatePattern_nonMirror(left, PATTERN_CORNER_STONE, BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4, diff);
+
+	UpdatePattern_nonMirror(left, PATTERN_X_STONE, BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4, diff);
+
+	UpdatePattern_nonMirror(left, PATTERN_PARITY, (BITBOARD_SIZE * BITBOARD_SIZE - blackCount - whiteCount) & 1, diff);
 }

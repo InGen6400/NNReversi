@@ -259,7 +259,7 @@ void Game_Battle(char showMobility) {
 	uint64 put;
 
 	Hive *hive = Hive_New();
-	setLevel(hive, 8, 16);
+	setLevel(hive, 8, 18);
 	//CPUの色設定
 	while (cpuTurn == -2)
 	{
@@ -303,7 +303,7 @@ void Game_Battle(char showMobility) {
 						if (*(bitboard->Sp - 1) != 0xFFFFFFFFFFFFFFFFULL) {
 							//前回のCPUのターンまで戻る
 							do {
-								if (*(bitboard->Sp - 1) != 0xFFFFFFFFFFFFFFFFULL) {
+								if (*(bitboard->Sp - 1) == 0xFFFFFFFFFFFFFFFFULL) {
 									break;
 								}
 								color = BitBoard_Undo(bitboard);

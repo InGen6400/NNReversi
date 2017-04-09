@@ -63,8 +63,8 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 		else {
 			color = i_color;
 		}
-		return (double)(MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -VALUE_MAX, VALUE_MAX,
-			FALSE, color, left, hive->midDepth, PutPos)+0.5)/1000;
+		return ((double)MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -VALUE_MAX, VALUE_MAX,
+			FALSE, color, left, hive->midDepth, PutPos)+0.5)/STONE_VALUE;
 	}
 }
 
@@ -103,7 +103,7 @@ int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 	if (moved == FALSE) {
 		if (isPassed == TRUE) {
 			*PutPos = NOMOVE;
-			max = BitBoard_CountStone(me) - BitBoard_CountStone(opp);
+			max = (BitBoard_CountStone(me) - BitBoard_CountStone(opp)) * STONE_VALUE;
 		}
 		else {
 			*PutPos = PASS;

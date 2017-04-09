@@ -259,7 +259,7 @@ void Game_Battle(char showMobility) {
 	uint64 put;
 
 	Hive *hive = Hive_New();
-	setLevel(hive, 8, 18);
+	setLevel(hive, 9, 18);
 	//CPUの色設定
 	while (cpuTurn == -2)
 	{
@@ -552,8 +552,12 @@ void MODE_LEARN() {
 		printf("観戦しますか？(y/n):");
 		scanf("%s", &ShowLearn);
 	}
-
-	setLevel(hive, 4, 12);
+	if (AVX2_FLAG == TRUE) {
+		setLevel(hive, 4, 12);
+	}
+	else {
+		setLevel(hive, 4, 12);
+	}
 	getchar();
 
 	printf("\n0%%                      50%%                      100%%\n");
@@ -765,6 +769,8 @@ void MODE_READBOOK() {
 
 	//fgetsの改行を無視
 	strtok(path, "\n");
+
+	printf("asd\n");
 
 	//ファイル名を変更
 	sprintf(loadedPath, "%s.end", path);

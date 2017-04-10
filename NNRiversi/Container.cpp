@@ -9,6 +9,12 @@ charNode *CharListInit(int num) {
 	return ret;
 }
 
+void BookList_Add(BookNode *prev, BookData *data, uint64 key1, uint64 key2) {
+	
+}
+
+void BookList_Del(BookNode *node);
+
 void addNode(charNode *node) {
 	if (node->next != NULL) {
 		node->next->prev = node;

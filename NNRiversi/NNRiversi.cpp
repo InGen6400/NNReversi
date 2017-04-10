@@ -259,7 +259,12 @@ void Game_Battle(char showMobility) {
 	uint64 put;
 
 	Hive *hive = Hive_New();
-	setLevel(hive, 9, 18);
+	if (AVX2_FLAG == TRUE) {
+		setLevel(hive, 9, 18);
+	}
+	else {
+		setLevel(hive, 8, 18);
+	}
 	//CPUÇÃêFê›íË
 	while (cpuTurn == -2)
 	{
@@ -628,13 +633,14 @@ void MODE_LEARN() {
 				BitBoard_AllOpp(bitboard);
 			}
 		}
-		if (i % (num / 50) == num / 50 - 1) {
-			putchar('\r');
-			for (j = 0; j < (i + 1) / (num / 50); j++) {
-				putchar('#');
-			}
-			printf("\t\t\t\t\t\t\t%d/%d", i+1, num);
+		putchar('\r');
+		for (j = 0; j < (i + 1) / (num / 50); j++) {
+			putchar('#');
+		}
+		printf("\t\t\t\t\t\t\t%d/%d", i+1, num);
+		if (i % 100 == 0) {
 			Pattern_Save();
+			printf("\tsaved:%d", i);
 		}
 		//printf("<<<%3d%%", (double)i / num * 100);
 	}

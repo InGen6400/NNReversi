@@ -6,7 +6,7 @@
 const char PATTERN_VALUE_FILE[] = "PatternValue.dat";
 
 const short TURN_SPLIT = 15;//15’iŠK‚É•ª‚¯‚Ä•]‰¿’l‚ð•Ï‚¦‚é
-const double UPDATE_RATIO = 0.0015;
+const double UPDATE_RATIO = 0.0005;
 const int MAX_VALUE = INT_MAX;
 
 enum {

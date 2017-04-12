@@ -689,26 +689,28 @@ void MODE_READBOOK() {
 		printf("Load File\n");
 	}
 
+	char skip;
 	while (fgets(Line, sizeof(Line), fp)) {
 		BitBoard_Reset(bitboard);
 		left = 60;
 		color = BLACK;
-
 		printf("data:%d ", dataCount);
-
+		skip = FALSE;
 		//correctbkは通し番号があるのでカット
-		strtok(Line, " ");
+		//strtok(Line, " ");
 		//序盤のランダムは無視しターンカウントだけ進める
-		positions = strtok(NULL, " ");
+		positions = strtok(Line, " ");
 		for (i = 0; positions[i] != '\0'; i += 2) {
 			c_pos[0] = positions[i];
 			c_pos[1] = positions[i + 1];
-			put = getPos_book_lower(c_pos);
+			put = getPos_book_upper(c_pos);
 			//もし着手できなかった場合パスとして色を変えて着手
 			if (BitBoard_Flip(bitboard, color, put) == 0) {
 				color = oppColor(color);
 				if (BitBoard_Flip(bitboard, color, put) == 0) {
 					printf("iligal data >> skip read RANDOM\n");
+					skip = TRUE;
+					break;
 				}
 			}
 			left--;
@@ -720,49 +722,57 @@ void MODE_READBOOK() {
 			//パターンの更新はしない
 			color = oppColor(color);
 		}
-		randomTurn = left;
-		//空白以降の棋譜を取得
-		positions = strtok(NULL, " ");
-		printf("positions : %s\n", positions);
-		//石差取得(黒視点)
-		diff = atoi(strtok(NULL, " "));
-		
-		for (i = 0; positions[i] != NULL; i+=2) {
-			//二文字だけ取り出す(A1 etc...)
-			c_pos[0] = positions[i];
-			c_pos[1] = positions[i + 1];
-			put = getPos_book_lower(c_pos);
-			//printf("dataCount:%d randomTurn:%d left:%d diff:%d\n", dataCount, randomTurn, left, diff);
-			//もし着手できなかった場合パスとして色を変えて着手
-			if (BitBoard_Flip(bitboard, color, put) == 0) {
-				color = oppColor(color);
+		if (skip == FALSE) {
+			randomTurn = left;
+			//空白以降の棋譜を取得
+			positions = strtok(NULL, " ");
+			printf("positions : %s\n", positions);
+			//石差取得(黒視点)
+			diff = atoi(strtok(NULL, " "));
+
+			for (i = 0; positions[i] != NULL; i += 2) {
+				//二文字だけ取り出す(A1 etc...)
+				c_pos[0] = positions[i];
+				c_pos[1] = positions[i + 1];
+				put = getPos_book_upper(c_pos);
+				//printf("dataCount:%d randomTurn:%d left:%d diff:%d\n", dataCount, randomTurn, left, diff);
+				//もし着手できなかった場合パスとして色を変えて着手
 				if (BitBoard_Flip(bitboard, color, put) == 0) {
-					BitBoard_Draw(bitboard, TRUE);
-					printf("turn:%d iligal data >> color:%c \"%c%c\"\n", 64-left, "BW"[color], c_pos[0], c_pos[1]);
-					getc(stdin);
+					color = oppColor(color);
+					if (BitBoard_Flip(bitboard, color, put) == 0) {
+						BitBoard_Draw(bitboard, TRUE);
+						printf("turn:%d iligal data >> color:%c \"%c%c\"\n", 64 - left, "BW"[color], c_pos[0], c_pos[1]);
+						skip = TRUE;
+						break;
+					}
+				}
+				/*
+				if (left == 1) {
+				BitBoard_Draw(bitboard, TRUE);
+				}*/
+				//getc(stdin);
+
+				color = oppColor(color);
+				left--;
+				//パターンの評価値の更新
+				if (skip == FALSE) {
+					if (color == BLACK) {
+						UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
+					}
+					else {
+						UpdateAllPattern(bitboard->stone[WHITE], bitboard->stone[BLACK], -diff, left);
+					}
 				}
 			}
-			/*
-			if (left == 1) {
-				BitBoard_Draw(bitboard, TRUE);
-			}*/
 			//getc(stdin);
-			
-			//パターンの評価値の更新
-			if (color == BLACK) {
-				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
+			dataCount++;
+			//1000に一度表示
+			if (dataCount % 100 == 0) {
+				printf("Finish Reading : %d\n", dataCount);
 			}
-			else {
-				UpdateAllPattern(bitboard->stone[WHITE], bitboard->stone[BLACK], -diff, left);
-			}
-			color = oppColor(color);
-			left--;
 		}
-		//getc(stdin);
-		dataCount++;
-		//1000に一度表示
-		if (dataCount % 100 == 0) {
-			printf("Finish Reading : %d\n", dataCount);
+		else {
+			skip = FALSE;
 		}
 	}
 

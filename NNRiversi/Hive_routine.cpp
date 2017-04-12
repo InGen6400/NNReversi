@@ -46,7 +46,7 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 
 	BitBoard_Copy(bitboard, hive->bitboard);
 	hive->Node = 0;
-	left = 64 - (BitBoard_CountStone(bitboard->stone[BLACK]) + BitBoard_CountStone(bitboard->stone[WHITE]));
+	left = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE]));
 	//open‚Í–¢ì¬(ì¬—\’è)
 	//I”Õ’Tõ
 	if (left <= hive->endDepth) {

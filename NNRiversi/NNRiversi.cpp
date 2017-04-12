@@ -263,7 +263,7 @@ void Game_Battle(char showMobility) {
 		setLevel(hive, 9, 18);
 	}
 	else {
-		setLevel(hive, 8, 18);
+		setLevel(hive, 7, 18);
 	}
 	//CPU‚ÌFÝ’è
 	while (cpuTurn == -2)
@@ -753,9 +753,7 @@ void MODE_READBOOK() {
 				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
 			}
 			else {
-				BitBoard_AllOpp(bitboard);
-				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], -diff, left);
-				BitBoard_AllOpp(bitboard);
+				UpdateAllPattern(bitboard->stone[WHITE], bitboard->stone[BLACK], -diff, left);
 			}
 			color = oppColor(color);
 			left--;

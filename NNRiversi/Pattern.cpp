@@ -490,7 +490,7 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	int index, diff;
 	char blackCount, whiteCount;
 
-	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
+	diff = ((value - getValue(black, white, left))*UPDATE_RATIO);
 	left /= 4;
 	index = getLineIndex(black, white, 0x000000FF00000000);//y=4
 	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);

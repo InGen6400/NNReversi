@@ -70,13 +70,14 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 
 int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char isPassed, char color, char left, char depth, uint64 *PutPos) {
 	int value, max = alpha;
-	char moved = FALSE;
+	int moved = FALSE;
 	uint64 move;
 	uint64 mobility, pos, rev;
 
 	if (depth == 0) {
 		return getValue(me, opp, left);
 	}
+
 	*PutPos = NOMOVE;
 	mobility = BitBoard_getMobility(me, opp);
 	while (mobility != 0) {
@@ -84,13 +85,13 @@ int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 		pos = ((-mobility) & mobility);
 		mobility ^= pos;
 
-		if (!moved) {
+		if (moved == FALSE) {
 			*PutPos = pos;
 			moved = TRUE;
 		}
 
 		rev = getReverseBits(&me, &opp, pos);
-		value = -MidAlphaBeta(hive, opp^rev, (me^rev)|pos, -beta, -max, FALSE, oppColor(color), left-1, depth-1, &move);
+		value = -MidAlphaBeta(hive, opp^rev, (me^rev) | pos, -beta, -max, FALSE, oppColor(color), left - 1, depth - 1, &move);
 		if (value > max) {
 			max = value;
 			*PutPos = pos;
@@ -103,11 +104,11 @@ int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 	if (moved == FALSE) {
 		if (isPassed == TRUE) {
 			*PutPos = NOMOVE;
-			max = (BitBoard_CountStone(me) - BitBoard_CountStone(opp)) * STONE_VALUE;
+			max = BitBoard_CountStone(me) - BitBoard_CountStone(opp);
 		}
 		else {
 			*PutPos = PASS;
-			max = -MidAlphaBeta(hive, opp, me, -beta, -max, TRUE, oppColor(color), left, depth, &move);
+			max = -MidAlphaBeta(hive, opp, me, -beta, -max, TRUE, oppColor(color), left, depth - 1, &move);
 		}
 	}
 

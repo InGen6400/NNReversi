@@ -561,13 +561,13 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
 
 	index = getCornerIndexUL(black, white);
-	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
 	index = getCornerIndexUR(black, white);
-	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
 	index = getCornerIndexDR(black, white);
-	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
 	index = getCornerIndexDL(black, white);
-	UpdatePattern_Mirror(left, PATTERN_CORNER, index, getMirrorCorner_Diag(index), diff);
+	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
 
 	index = getEdgeIndexUL_D(black, white);
 	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);

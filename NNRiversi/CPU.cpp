@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <immintrin.h>
 
-
+/*
 CPU *CPU_Init() {
 	CPU *ret;
 	ret = (CPU*)malloc(sizeof(CPU));
@@ -88,7 +88,7 @@ int NegaAlphaSearch(uint64 me, uint64 ene, char isPassed, char color, char depth
 		tmp = -NegaAlphaSearch(ene ^ rev, (me ^ rev) | pos, FALSE, oppColor(color), depth - 1, left - 1, &move, -best);
 		/*
 		引数にて反転したビットボードを渡すことで着手をもとに戻さなくてもいい
-		*/
+		*//*
 		if (best < tmp) {
 			best = tmp;
 			*PutPos = pos;
@@ -127,11 +127,11 @@ int NegaEndSearch(uint64 me, uint64 ene, char isPassed, char color, char depth, 
 		}
 		*PutPos = NOMOVE;
 		return best;
-	}
+	}*/
 	/*if (depth <= 0) {
 	cpu->node++;
 	return Evaluation(cpu->bitboard, color);
-	}*/
+	}*//*
 	mobility = BitBoard_getMobility(me, ene);
 	while (mobility != 0) {
 
@@ -177,3 +177,4 @@ void EmptyListInit(CPU *cpu, char color) {
 		}
 	}
 }
+*/

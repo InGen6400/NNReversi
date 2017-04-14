@@ -6,7 +6,7 @@
 #include <intrin.h>
 #include <stdlib.h>
 
-#define LEN 16
+#define INDEX_LEN 16
 
 typedef unsigned short uint16;
 
@@ -107,15 +107,15 @@ int Pattern_Save() {
 //AVX2に対応している場合
 inline unsigned char bitGatherAVX2(uint64 in, uint64 mask) {
 	//AVX2
-	return _pext_u64(in, mask);
+	return (unsigned char)_pext_u64(in, mask);
 }
 
 //AVX2未対応の場合_メインでとりあえず動かすため(AVX2で動作することが前提なので雑なつくり)
 inline unsigned char bitGather_Normal(uint64 in, uint64 mask) {
 	int i, count=0;
-	uint64 out=0;
+	unsigned char out=0;
 	for (i = 0; i < 64; mask >>= 1, in >>= 1, i++) {
-		if (mask & 1) {
+		if ((mask & 1) == 1) {
 			out |= (in & 1) << count;
 			count++;
 		}
@@ -157,82 +157,27 @@ inline unsigned char delta_swap(unsigned char bits, unsigned char mask, unsigned
 	return bits ^ x ^ (x << delta);
 }
 
-#pragma region getMirror
-
-//ビットを左右逆転したものを返す
-inline unsigned char getMirrorLine8(unsigned char in) {
-	unsigned char data;
-	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
-	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
-	return ((data & 0x0F) << 4) | ((data & 0xF0) >> 4);
-}
-
-//呼び出し元で分かりやすくなるように以下4関数はまとめていない
-inline unsigned char getMirrorLine7(unsigned char in) {
-	unsigned char data;
-	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
-	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
-	return (((data & 0x0F) << 4) | ((data & 0xF0) >> 4)) >> 1;
-}
-
-inline unsigned char getMirrorLine6(unsigned char in) {
-	unsigned char data;
-	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
-	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
-	return (((data & 0x0F) << 4) | ((data & 0xF0) >> 4)) >> 2;
-}
-
-inline unsigned char getMirrorLine5(unsigned char in) {
-	unsigned char data;
-	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
-	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
-	return (((data & 0x0F) << 4) | ((data & 0xF0) >> 4)) >> 3;
-}
-
-inline unsigned char getMirrorLine4(unsigned char in) {
-	unsigned char data;
-	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
-	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
-	return (((data & 0x0F) << 4) | ((data & 0xF0) >> 4)) >> 4;
-}
-
-//対角線で軸対象
-inline unsigned char getMirrorCorner_Diag(unsigned char in) {
-	in = delta_swap(in, 0b00000001, 2);//6,8
-	in = delta_swap(in, 0b00010000, 2);//2,4
-	return delta_swap(in, 0b00000010, 4);//3,7
-}
-
-//角のインデックスを左右反転
-inline unsigned char getMirrorCorner_LR(unsigned char in) {
-	in = delta_swap(in, 0b00100000, 2);//1,3
-	in = delta_swap(in, 0b00000100, 2);//3,6
-	return delta_swap(in, 0b00000001, 1);//7,8
-}
-
-#pragma endregion
-
 //player, oppからインデックスを返す
 inline unsigned short getIndex_AVX2(const unsigned char player, const unsigned char opp)
 {
-	alignas(16) static const uint16 pow_3[LEN] = { 0x1,  0x1 * 2,  0x3,  0x3 * 2,  0x9,   0x9 * 2,   0x1b,  0x1b * 2,
-		0x51, 0x51 * 2, 0xf3, 0xf3 * 2, 0x2d9, 0x2d9 * 2, 0x88b, 0x88b * 2 };//(1,3,9,27,81,243,729,2187)*2 と1,3,9,27,81,243,729,2187
-	alignas(16) uint16 y[LEN] = { 0 };
-	alignas(16) uint16 z[LEN] = { 0 };
+	alignas(16) static const uint16 pow_3[INDEX_LEN] = { 0x1,  0x1 * 2,  0x3,  0x3 * 2,  0x9,   0x9 * 2,   0x1b,  0x1b * 2,
+		0x51, 0x51 * 2, 0xf3, 0xf3 * 2, 0x2d9, 0x2d9 * 2, 0x88b, 0x88b * 2 };//(1,3,9,27,81,243,729,2187)*2 と1,3,9,27,81,243,729,2187を交互に
+	alignas(16) uint16 y[INDEX_LEN] = { 0 };
+	alignas(16) uint16 z[INDEX_LEN] = { 0 };
 
 	//レジストリに登録
 	__m256i *mmx = (__m256i *)pow_3;
 	__m256i *mmy = (__m256i *)y;
-	__m256i *mmz = (__m256i *)z;
+	__m256i *mmtmp = (__m256i *)z;
 
 	//データの整形
 	setData_AVX2(mmy, player, opp);
 
 	//それぞれの積の和
-	*mmz = _mm256_madd_epi16(*mmx, *mmy);
+	*mmtmp = _mm256_madd_epi16(*mmx, *mmy);
 	//16bitx16bit=32bit
-	*mmz = _mm256_hadd_epi32(*mmz, *mmz);
-	*mmz = _mm256_hadd_epi32(*mmz, *mmz);
+	*mmtmp = _mm256_hadd_epi32(*mmtmp, *mmtmp);
+	*mmtmp = _mm256_hadd_epi32(*mmtmp, *mmtmp);
 	//0バイト目と8バイト目がそれぞれの出力になる
 	return z[0] + z[8];
 }
@@ -240,13 +185,13 @@ inline unsigned short getIndex_AVX2(const unsigned char player, const unsigned c
 //player, oppからインデックスを返す(AVX2で動作することが前提なので雑なつくり)
 inline unsigned short getIndex_Normal(const unsigned char player, const unsigned char opp)
 {
-	alignas(16) static const uint16 pow_3[LEN/2] = { 0x1, 0x3, 0x9, 0x1b, 0x51, 0xf3, 0x2d9, 0x88b };//1,3,9,27,81,243,729,2187
-	alignas(16) static const uint16 pow_3_2[LEN/2] = { 0x1*2, 0x3*2, 0x9*2, 0x1b*2, 0x51*2, 0xf3*2, 0x2d9*2, 0x88b*2 };//(1,3,9,27,81,243,729,2187)*2
+	alignas(16) static const uint16 pow_3[INDEX_LEN/2] = { 0x1, 0x3, 0x9, 0x1b, 0x51, 0xf3, 0x2d9, 0x88b };//1,3,9,27,81,243,729,2187
+	alignas(16) static const uint16 pow_3_2[INDEX_LEN/2] = { 0x1*2, 0x3*2, 0x9*2, 0x1b*2, 0x51*2, 0xf3*2, 0x2d9*2, 0x88b*2 };//(1,3,9,27,81,243,729,2187)*2
 
-	alignas(16) uint16 y1[LEN/2] = { 0 };
-	alignas(16) uint16 y2[LEN/2] = { 0 };
-	alignas(16) uint16 z1[LEN/2] = { 0 };
-	alignas(16) uint16 z2[LEN/2] = { 0 };
+	alignas(16) uint16 y1[INDEX_LEN/2] = { 0 };
+	alignas(16) uint16 y2[INDEX_LEN/2] = { 0 };
+	alignas(16) uint16 z1[INDEX_LEN/2] = { 0 };
+	alignas(16) uint16 z2[INDEX_LEN/2] = { 0 };
 
 	//レジストリに登録
 	__m128i *mmy1 = (__m128i *)y1;
@@ -276,7 +221,128 @@ inline unsigned short getIndex_Normal(const unsigned char player, const unsigned
 	return z1[0] + z2[0];
 }
 
+#pragma region getMirror_2
+
+//ビットを左右逆転したものを返す
+inline unsigned char getMirrorLine8_2(unsigned char in) {
+	unsigned char data;
+	data = ((in & 0x55) << 1) | ((in & 0xAA) >> 1);
+	data = ((data & 0x33) << 2) | ((data & 0xCC) >> 2);
+	return ((data & 0x0F) << 4) | ((data & 0xF0) >> 4);
+}
+
+//角のインデックスを左右反転
+inline unsigned char getMirrorCorner_2_LR(unsigned char in) {
+	in = delta_swap(in, 0b00100000, 2);//1,3
+	in = delta_swap(in, 0b00000100, 2);//3,6
+	return delta_swap(in, 0b00000001, 1);//7,8
+}
+
+#pragma endregion
+
+#pragma region getMirror_3
+
+inline unsigned short getMirrorLine8_3(unsigned char black, unsigned char white) {
+
+	black = ((black & 0x55) << 1) | ((black & 0xAA) >> 1);
+	black = ((black & 0x33) << 2) | ((black & 0xCC) >> 2);
+	black = ((black & 0x0F) << 4) | ((black & 0xF0) >> 4);
+
+	white = ((white & 0x55) << 1) | ((white & 0xAA) >> 1);
+	white = ((white & 0x33) << 2) | ((white & 0xCC) >> 2);
+	white = ((white & 0x0F) << 4) | ((white & 0xF0) >> 4);
+
+	return getIndex(black, white);
+}
+
+
+//呼び出し元で分かりやすくなるように以下4関数はまとめていない
+inline unsigned short getMirrorLine7_3(unsigned char black, unsigned char white) {
+
+	black = ((black & 0x55) << 1) | ((black & 0xAA) >> 1);
+	black = ((black & 0x33) << 2) | ((black & 0xCC) >> 2);
+	black = (((black & 0x0F) << 4) | ((black & 0xF0) >> 4)) >> 1;
+
+	white = ((white & 0x55) << 1) | ((white & 0xAA) >> 1);
+	white = ((white & 0x33) << 2) | ((white & 0xCC) >> 2);
+	white = (((white & 0x0F) << 4) | ((white & 0xF0) >> 4)) >> 1;
+
+	return getIndex(black, white);
+}
+
+inline unsigned short getMirrorLine6_3(unsigned char black, unsigned char white) {
+
+	black = ((black & 0x55) << 1) | ((black & 0xAA) >> 1);
+	black = ((black & 0x33) << 2) | ((black & 0xCC) >> 2);
+	black = (((black & 0x0F) << 4) | ((black & 0xF0) >> 4)) >> 2;
+
+	white = ((white & 0x55) << 1) | ((white & 0xAA) >> 1);
+	white = ((white & 0x33) << 2) | ((white & 0xCC) >> 2);
+	white = (((white & 0x0F) << 4) | ((white & 0xF0) >> 4)) >> 2;
+
+	return getIndex(black, white);
+}
+
+inline unsigned short getMirrorLine5_3(unsigned char black, unsigned char white) {
+
+	black = ((black & 0x55) << 1) | ((black & 0xAA) >> 1);
+	black = ((black & 0x33) << 2) | ((black & 0xCC) >> 2);
+	black = (((black & 0x0F) << 4) | ((black & 0xF0) >> 4)) >> 3;
+
+	white = ((white & 0x55) << 1) | ((white & 0xAA) >> 1);
+	white = ((white & 0x33) << 2) | ((white & 0xCC) >> 2);
+	white = (((white & 0x0F) << 4) | ((white & 0xF0) >> 4)) >> 3;
+
+	return getIndex(black, white);
+}
+
+inline unsigned short getMirrorLine4_3(unsigned char black, unsigned char white) {
+
+	black = ((black & 0x55) << 1) | ((black & 0xAA) >> 1);
+	black = ((black & 0x33) << 2) | ((black & 0xCC) >> 2);
+	black = (((black & 0x0F) << 4) | ((black & 0xF0) >> 4)) >> 4;
+
+	white = ((white & 0x55) << 1) | ((white & 0xAA) >> 1);
+	white = ((white & 0x33) << 2) | ((white & 0xCC) >> 2);
+	white = (((white & 0x0F) << 4) | ((white & 0xF0) >> 4)) >> 4;
+
+	return getIndex(black, white);
+}
+
+//対角線で軸対象
+inline unsigned short getMirrorCorner_Diag_3(unsigned char black, unsigned char white) {
+
+	black = delta_swap(black, 0b00000001, 2);//6,8
+	black = delta_swap(black, 0b00010000, 2);//2,4
+	black = delta_swap(black, 0b00000010, 4);//3,
+
+	white = delta_swap(white, 0b00000001, 2);//6,8
+	white = delta_swap(white, 0b00010000, 2);//2,4
+	white = delta_swap(white, 0b00000010, 4);//3,7
+
+	return getIndex(black, white);
+}
+
+inline unsigned short getMirrorCorner_3_LR(unsigned char black, unsigned char white) {
+	black = delta_swap(black, 0b00100000, 2);//1,3
+	black = delta_swap(black, 0b00000100, 2);//3,6
+	black = delta_swap(black, 0b00000001, 1);//7,8
+
+	white = delta_swap(white, 0b00100000, 2);//1,3
+	white = delta_swap(white, 0b00000100, 2);//3,6
+	white = delta_swap(white, 0b00000001, 1);//7,8
+
+	return getIndex(black, white);
+}
+
+#pragma endregion
+
 #pragma region GetIndexFunctions
+
+//直線のインデックスを取得
+inline unsigned short getLineIndex(uint64 black, uint64 white, uint64 mask) {
+	return getIndex(bitGather(black, mask), bitGather(white, mask));
+}
 
 //左上のインデックス
 inline unsigned short getCornerIndexUL(uint64 black, uint64 white) {
@@ -285,35 +351,28 @@ inline unsigned short getCornerIndexUL(uint64 black, uint64 white) {
 
 //右上のインデックス
 inline unsigned short getCornerIndexUR(uint64 black, uint64 white) {
-	return getIndex(getMirrorCorner_LR(bitGather(black, 0x0707030000000000)), getMirrorCorner_LR(bitGather(white, 0x0707030000000000)));
+	return getIndex(getMirrorCorner_2_LR(bitGather(black, 0x0707030000000000)), getMirrorCorner_2_LR(bitGather(white, 0x0707030000000000)));
 }
 
 //左下のインデックス
 inline unsigned short getCornerIndexDL(uint64 black, uint64 white) {
-	return getIndex(getMirrorCorner_LR(getMirrorLine8(bitGather(black, 0x0000000000C0E0E0))), getMirrorCorner_LR(getMirrorLine8(bitGather(white, 0x0000000000C0E0E0))));
+	return getIndex(getMirrorCorner_2_LR(getMirrorLine8_2(bitGather(black, 0x0000000000C0E0E0))), getMirrorCorner_2_LR(getMirrorLine8_2(bitGather(white, 0x0000000000C0E0E0))));
 }
 
 //右下のインデックス
 inline unsigned short getCornerIndexDR(uint64 black, uint64 white) {
-	return getIndex(getMirrorLine8(bitGather(black, 0x0000000000030707)), getMirrorLine8(bitGather(white, 0x0000000000030707)));
+	return getIndex(getMirrorLine8_2(bitGather(black, 0x0000000000030707)), getMirrorLine8_2(bitGather(white, 0x0000000000030707)));
 }
 
-//直線のインデックスを取得
-inline unsigned short getLineIndex(uint64 black, uint64 white, uint64 mask) {
-	return getIndex(bitGather(black, mask), bitGather(white, mask));
-}
 
 //左上から右へのエッジ
-#pragma region UL_R
 
 inline unsigned short getEdgeIndexUL_R(uint64 black, uint64 white) {
 	return getIndex(bitGather(black, 0xFE40000000000000), bitGather(white, 0xFE40000000000000));
 }
 
-#pragma endregion
 
 //左上から下へのエッジ
-#pragma region UL_D
 
 inline unsigned char swap_EdgeUL_D(unsigned char in) {
 	return (((in & 0b00011111) << 1) | (in & 0b11000000) | ((in & 0b00100000) >> 5));
@@ -323,23 +382,19 @@ inline unsigned short getEdgeIndexUL_D(uint64 black, uint64 white) {
 	return getIndex(swap_EdgeUL_D(bitGather(black, 0x80C0808080808000)), swap_EdgeUL_D(bitGather(white, 0x80C0808080808000)));
 }
 
-#pragma endregion
 
 //右上から左へのエッジ
-#pragma region UR_L
 
 inline unsigned char swap_EdgeUR_L(unsigned char in) {
 	return (((in & 0b01111111) << 1) | ((in & 0b10000000) >> 7));
 }
 
 inline unsigned short getEdgeIndexUR_L(uint64 black, uint64 white) {
-	return getIndex(swap_EdgeUR_L(getMirrorLine8(bitGather(black, 0x7F02000000000000))), swap_EdgeUR_L(getMirrorLine8(bitGather(white, 0x7F02000000000000))));
+	return getIndex(swap_EdgeUR_L(getMirrorLine8_2(bitGather(black, 0x7F02000000000000))), swap_EdgeUR_L(getMirrorLine8_2(bitGather(white, 0x7F02000000000000))));
 }
 
-#pragma endregion
 
 //右上から下へのエッジ
-#pragma region UR_D
 
 inline unsigned char swap_EdgeUR_D(unsigned char in) {
 	return (((in & 0b00111111) << 1) | (in & 0b10000000) | ((in & 0b01000000) >> 6));
@@ -349,32 +404,25 @@ inline unsigned short getEdgeIndexUR_D(uint64 black, uint64 white) {
 	return getIndex(swap_EdgeUR_D(bitGather(black, 0x0103010101010100)), swap_EdgeUR_D(bitGather(white, 0x0103010101010100)));
 }
 
-#pragma endregion
 
 //右下から上へのエッジ
-#pragma region DR_U
 
 inline unsigned char swap_EdgeDR_U(unsigned char in) {
 	return (((in & 0b00011111) << 1) | (in & 0b11000000) | ((in & 0b00100000) >> 5));
 }
 
 inline unsigned short getEdgeIndexDR_U(uint64 black, uint64 white) {
-	return getIndex(swap_EdgeDR_U(getMirrorLine8(bitGather(black, 0x0001010101010301))), swap_EdgeDR_U(getMirrorLine8(bitGather(white, 0x0001010101010301))));
+	return getIndex(swap_EdgeDR_U(getMirrorLine8_2(bitGather(black, 0x0001010101010301))), swap_EdgeDR_U(getMirrorLine8_2(bitGather(white, 0x0001010101010301))));
 }
 
-#pragma endregion
 
 //右下から左へのエッジ
-#pragma region DR_L
 
 inline unsigned short getEdgeIndexDR_L(uint64 black, uint64 white) {
-	return getIndex(getMirrorLine8(bitGather(black, 0x000000000000027F)), getMirrorLine8(bitGather(white, 0x000000000000027F)));
+	return getIndex(getMirrorLine8_2(bitGather(black, 0x000000000000027F)), getMirrorLine8_2(bitGather(white, 0x000000000000027F)));
 }
 
-#pragma endregion
-
 //左下から右へのエッジ
-#pragma region DL_R
 
 inline unsigned char swap_EdgeDL_R(unsigned char in) {
 	return (((in & 0b01111111) << 1) | ((in & 0b10000000) >> 7));
@@ -384,22 +432,44 @@ inline unsigned short getEdgeIndexDL_R(uint64 black, uint64 white) {
 	return getIndex(swap_EdgeDL_R(bitGather(black, 0x00000000000040FE)), swap_EdgeDL_R(bitGather(white, 0x00000000000040FE)));
 }
 
-#pragma endregion
 
 //左下から上へのエッジ
-#pragma region DL_U
 
 inline unsigned char swap_EdgeDL_U(unsigned char in) {
 	return (((in & 0b00111111) << 1) | (in & 0b10000000) | ((in & 0b01000000) >> 6));
 }
 
 inline unsigned short getEdgeIndexDL_U(uint64 black, uint64 white) {
-	return getIndex(swap_EdgeDL_U(getMirrorLine8(bitGather(black, 0x008080808080C080))), swap_EdgeDR_U(getMirrorLine8(bitGather(white, 0x008080808080C080))));
+	return getIndex(swap_EdgeDL_U(getMirrorLine8_2(bitGather(black, 0x008080808080C080))), swap_EdgeDR_U(getMirrorLine8_2(bitGather(white, 0x008080808080C080))));
 }
 
-#pragma endregion
 
 #pragma endregion
+
+inline void getBWbitsM(uint64 black, uint64 white, uint64 mask, unsigned char *retB, unsigned char *retW) {
+	*retB = bitGather(black, mask);
+	*retW = bitGather(white, mask);
+}
+
+inline void getBWbits_UL(uint64 black, uint64 white, unsigned char *retB, unsigned char *retW) {
+	*retB = bitGather(black, 0xe0e0c00000000000);
+	*retW = bitGather(white, 0xe0e0c00000000000);
+}
+
+inline void getBWbits_UR(uint64 black, uint64 white, unsigned char *retB, unsigned char *retW) {
+	*retB = getMirrorCorner_2_LR(bitGather(black, 0x0707030000000000));
+	*retW = getMirrorCorner_2_LR(bitGather(white, 0x0707030000000000));
+}
+
+inline void getBWbits_DL(uint64 black, uint64 white, unsigned char *retB, unsigned char *retW) {
+	*retB = getMirrorCorner_2_LR(getMirrorLine8_2(bitGather(black, 0x0000000000C0E0E0)));
+	*retW = getMirrorCorner_2_LR(getMirrorLine8_2(bitGather(white, 0x0000000000C0E0E0)));
+}
+
+inline void getBWbits_DR(uint64 black, uint64 white, unsigned char *retB, unsigned char *retW) {
+	*retB = getMirrorLine8_2(bitGather(black, 0x0000000000030707));
+	*retW = getMirrorLine8_2(bitGather(white, 0x0000000000030707));
+}
 
 int getValue(uint64 black, uint64 white, char left) {
 	int ret = 0;
@@ -472,7 +542,7 @@ int getValue(uint64 black, uint64 white, char left) {
 	return ret;
 }
 
-inline void UpdatePattern_Mirror(char left, char pattern, short index, short mirror, int diff) {
+inline void UpdatePattern_Mirror(char left, char pattern, unsigned short index, unsigned short mirror, int diff) {
 	if ((long)PatternValue[left][pattern][index] + diff >= MAX_VALUE || (long)PatternValue[left][pattern][index] + diff <= -MAX_VALUE) {
 		printf("Pattern Limit\n");
 		return;
@@ -482,93 +552,97 @@ inline void UpdatePattern_Mirror(char left, char pattern, short index, short mir
 	PatternValue[left][pattern][mirror] = PatternValue[left][pattern][index];
 }
 
-inline void UpdatePattern_nonMirror(char turn, char pattern, short index, int diff) {
-	PatternValue[turn][pattern][index] += diff;
+inline void UpdatePattern_nonMirror(char left, char pattern, unsigned short index, int diff) {
+	PatternValue[left][pattern][index] += diff;
 }
 
 void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
-	int index, diff;
+	int diff;
 	char blackCount, whiteCount;
+	unsigned char bBlack, bWhite;
 
-	diff = ((value - getValue(black, white, left))*UPDATE_RATIO);
+	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
 	left /= 4;
-	index = getLineIndex(black, white, 0x000000FF00000000);//y=4
-	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x00000000FF000000);//y=5
-	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x0808080808080808);//x=5
-	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x1010101010101010);//x=4
-	UpdatePattern_Mirror(left, PATTERN_LINE4, index, getMirrorLine8(index), diff);
+	getBWbitsM(black, white, 0x000000FF00000000, &bBlack, &bWhite);
+	UpdatePattern_Mirror(left, PATTERN_LINE4, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x00000000FF000000, &bBlack, &bWhite);//y=5
+	UpdatePattern_Mirror(left, PATTERN_LINE4, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0808080808080808, &bBlack, &bWhite);//x=5
+	UpdatePattern_Mirror(left, PATTERN_LINE4, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x1010101010101010, &bBlack, &bWhite);//x=4
+	UpdatePattern_Mirror(left, PATTERN_LINE4, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
 
-	index = getLineIndex(black, white, 0x0000FF0000000000);//y=3
-	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x0000000000FF0000);//y=6
-	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x2020202020202020);//x=3
-	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x0404040404040404);//x=6
-	UpdatePattern_Mirror(left, PATTERN_LINE3, index, getMirrorLine8(index), diff);
+	getBWbitsM(black, white, 0x0000FF0000000000, &bBlack, &bWhite);//y=3
+	UpdatePattern_Mirror(left, PATTERN_LINE3, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0000000000FF0000, &bBlack, &bWhite);//y=6
+	UpdatePattern_Mirror(left, PATTERN_LINE3, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x2020202020202020, &bBlack, &bWhite);//x=3
+	UpdatePattern_Mirror(left, PATTERN_LINE3, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0404040404040404, &bBlack, &bWhite);//x=6
+	UpdatePattern_Mirror(left, PATTERN_LINE3, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
 
-	index = getLineIndex(black, white, 0x00FF000000000000);//y=2
-	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x000000000000FF00);//y=7
-	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x4040404040404040);//x=2
-	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x0202020202020202);//x=7
-	UpdatePattern_Mirror(left, PATTERN_LINE2, index, getMirrorLine8(index), diff);
+	getBWbitsM(black, white, 0x00FF000000000000, &bBlack, &bWhite);//y=2
+	UpdatePattern_Mirror(left, PATTERN_LINE2, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x000000000000FF00, &bBlack, &bWhite);//y=7
+	UpdatePattern_Mirror(left, PATTERN_LINE2, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x4040404040404040, &bBlack, &bWhite);//x=2
+	UpdatePattern_Mirror(left, PATTERN_LINE2, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0202020202020202, &bBlack, &bWhite);//x=7
+	UpdatePattern_Mirror(left, PATTERN_LINE2, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+
 														  //斜め線
-	index = getLineIndex(black, white, 0x8040201008040201);//UL-DR
-	UpdatePattern_Mirror(left, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
-	index = getLineIndex(black, white, 0x0102040810204080);//UR-DL
-	UpdatePattern_Mirror(left, PATTERN_DIAG8, index, getMirrorLine8(index), diff);
+	getBWbitsM(black, white, 0x8040201008040201, &bBlack, &bWhite);//UL-DR
+	UpdatePattern_Mirror(left, PATTERN_DIAG8, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0102040810204080, &bBlack, &bWhite);//UR-DL
+	UpdatePattern_Mirror(left, PATTERN_DIAG8, getIndex(bBlack, bWhite), getMirrorLine8_3(bBlack, bWhite), diff);
 	
-	index = getLineIndex(black, white, 0x4020100804020100);//2,1 - 8,7
-	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
-	index = getLineIndex(black, white, 0x0080402010080402);//1,2 - 7,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
-	index = getLineIndex(black, white, 0x0204081020408000);//7,1 - 1,7
-	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
-	index = getLineIndex(black, white, 0x0001020408102040);//8,2 - 2,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG7, index, getMirrorLine7(index), diff);
+	getBWbitsM(black, white, 0x4020100804020100, &bBlack, &bWhite);//2,1 - 8,7
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, getIndex(bBlack, bWhite), getMirrorLine7_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0080402010080402, &bBlack, &bWhite);//1,2 - 7,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, getIndex(bBlack, bWhite), getMirrorLine7_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0204081020408000, &bBlack, &bWhite);//7,1 - 1,7
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, getIndex(bBlack, bWhite), getMirrorLine7_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0001020408102040, &bBlack, &bWhite);//8,2 - 2,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG7, getIndex(bBlack, bWhite), getMirrorLine7_3(bBlack, bWhite), diff);
 
-	index = getLineIndex(black, white, 0x0000804020100804);//1,3 - 6,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
-	index = getLineIndex(black, white, 0x2010080402010000);//3,1 - 8,6
-	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
-	index = getLineIndex(black, white, 0x0408102040800000);//6,1 - 1,6
-	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
-	index = getLineIndex(black, white, 0x0000010204081020);//8,3 - 3,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG6, index, getMirrorLine6(index), diff);
+	getBWbitsM(black, white, 0x0000804020100804, &bBlack, &bWhite);//1,3 - 6,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, getIndex(bBlack, bWhite), getMirrorLine6_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x2010080402010000, &bBlack, &bWhite);//3,1 - 8,6
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, getIndex(bBlack, bWhite), getMirrorLine6_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0408102040800000, &bBlack, &bWhite);//6,1 - 1,6
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, getIndex(bBlack, bWhite), getMirrorLine6_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0000010204081020, &bBlack, &bWhite);//8,3 - 3,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG6, getIndex(bBlack, bWhite), getMirrorLine6_3(bBlack, bWhite), diff);
 
-	index = getLineIndex(black, white, 0x0000008040201008);//1,4 - 5,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
-	index = getLineIndex(black, white, 0x1008040201000000);//4,1 - 8,5
-	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
-	index = getLineIndex(black, white, 0x0810204080000000);//5,1 - 1,5
-	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
-	index = getLineIndex(black, white, 0x0000000102040810);//8,4 - 4,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG5, index, getMirrorLine5(index), diff);
+	getBWbitsM(black, white, 0x0000008040201008, &bBlack, &bWhite);//1,4 - 5,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, getIndex(bBlack, bWhite), getMirrorLine5_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x1008040201000000, &bBlack, &bWhite);//4,1 - 8,5
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, getIndex(bBlack, bWhite), getMirrorLine5_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0810204080000000, &bBlack, &bWhite);//5,1 - 1,5
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, getIndex(bBlack, bWhite), getMirrorLine5_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0000000102040810, &bBlack, &bWhite);//8,4 - 4,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG5, getIndex(bBlack, bWhite), getMirrorLine5_3(bBlack, bWhite), diff);
 	
-	index = getLineIndex(black, white, 0x0000000080402010);//1,5 - 4,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
-	index = getLineIndex(black, white, 0x0804020100000000);//5,1 - 8,4
-	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
-	index = getLineIndex(black, white, 0x1020408000000000);//4,1 - 1,4
-	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
-	index = getLineIndex(black, white, 0x0000000001020408);//8,5 - 5,8
-	UpdatePattern_Mirror(left, PATTERN_DIAG4, index, getMirrorLine4(index), diff);
+	getBWbitsM(black, white, 0x0000000080402010, &bBlack, &bWhite);//1,5 - 4,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, getIndex(bBlack, bWhite), getMirrorLine4_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0804020100000000, &bBlack, &bWhite);//5,1 - 8,4
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, getIndex(bBlack, bWhite), getMirrorLine4_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x1020408000000000, &bBlack, &bWhite);//4,1 - 1,4
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, getIndex(bBlack, bWhite), getMirrorLine4_3(bBlack, bWhite), diff);
+	getBWbitsM(black, white, 0x0000000001020408, &bBlack, &bWhite);//8,5 - 5,8
+	UpdatePattern_Mirror(left, PATTERN_DIAG4, getIndex(bBlack, bWhite), getMirrorLine4_3(bBlack, bWhite), diff);
 
-	index = getCornerIndexUL(black, white);
-	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
-	index = getCornerIndexUR(black, white);
-	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
-	index = getCornerIndexDR(black, white);
-	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
-	index = getCornerIndexDL(black, white);
-	UpdatePattern_nonMirror(left, PATTERN_CORNER, index, diff);
+	getBWbits_UL(black, white, &bBlack, &bWhite);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, getIndex(bBlack, bWhite), getMirrorCorner_Diag_3(bBlack, bWhite), diff);
+	getBWbits_UR(black, white, &bBlack, &bWhite);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, getIndex(bBlack, bWhite), getMirrorCorner_Diag_3(bBlack, bWhite), diff);
+	getBWbits_DR(black, white, &bBlack, &bWhite);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, getIndex(bBlack, bWhite), getMirrorCorner_Diag_3(bBlack, bWhite), diff);
+	getBWbits_DL(black, white, &bBlack, &bWhite);
+	UpdatePattern_Mirror(left, PATTERN_CORNER, getIndex(bBlack, bWhite), getMirrorCorner_Diag_3(bBlack, bWhite), diff);
 
+	//printf("asd\n");
+	unsigned short index;
 	index = getEdgeIndexUL_D(black, white);
 	UpdatePattern_nonMirror(left, PATTERN_EDGE, index, diff);
 	index = getEdgeIndexUL_R(black, white);
@@ -598,4 +672,15 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	UpdatePattern_nonMirror(left, PATTERN_X_STONE, BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4, diff);
 
 	UpdatePattern_nonMirror(left, PATTERN_PARITY, (BITBOARD_SIZE * BITBOARD_SIZE - blackCount - whiteCount) & 1, diff);
+}
+
+void Patttern_Debug(BitBoard *board) {
+	unsigned char black, white;
+	printf("\n\n\nDebug\n");
+	getBWbits_DR(board->stone[BLACK], board->stone[WHITE], &black, &white);
+	drawBits(getIndex(black, white));
+	drawBits(getMirrorCorner_Diag_3(black, white));
+	printf("%d\n", getIndex(black, white));
+	printf("%d\n", getMirrorCorner_Diag_3(black, white));
+
 }

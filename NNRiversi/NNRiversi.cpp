@@ -77,7 +77,6 @@ int main()
 
 	printf("\nÝ’è\n");
 
-
 	while (mode == NODEF_MODE) {
 		printf("ƒ‚[ƒh(B:battle or L:Learning or T:Time P:PVP):");
 		fgets(tmp, sizeof(tmp), stdin);
@@ -148,7 +147,9 @@ void Game_PVP(char showMobility) {
 	uint64 put;
 
 	system("cls");
-	BitBoard_Draw(bitboard, showMobility);
+	
+	Patttern_Debug(bitboard);
+
 	while (!endFlag) {
 		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
 			passed = FALSE;

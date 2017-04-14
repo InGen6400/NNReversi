@@ -6,7 +6,7 @@
 const char PATTERN_VALUE_FILE[] = "PatternValue.dat";
 
 const short TURN_SPLIT = 15;//15’iŠK‚É•ª‚¯‚Ä•]‰¿’l‚ð•Ï‚¦‚é
-const double UPDATE_RATIO = 0.00005;
+const double UPDATE_RATIO = 0.0015;
 const int MAX_VALUE = INT_MAX;
 
 enum {
@@ -64,3 +64,5 @@ void Pattern_setAVX(unsigned char AVX2_FLAG);
 int getValue(uint64 black, uint64 white, char left);
 
 void UpdateAllPattern(uint64 black, uint64 white, int value, char left);
+
+void Patttern_Debug(BitBoard *board);

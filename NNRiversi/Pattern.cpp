@@ -531,7 +531,9 @@ int getValue(uint64 black, uint64 white, char left) {
 	ret += PatternValue[left][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(black, white))];//BLACKの着手可能位置の数
 	ret += PatternValue[left][PATTERN_MOBILITY_W][BitBoard_CountStone(BitBoard_getMobility(white, black))];//WHITEの着手可能位置の数
 	//石差
-	ret += PatternValue[left][PATTERN_STONEDIFF][(black_count = BitBoard_CountStone(black)) - (white_count = BitBoard_CountStone(white)) + 64];//BLACKから見たWHITEとの石差
+	black_count = BitBoard_CountStone(black);
+	white_count = BitBoard_CountStone(white);
+	ret += PatternValue[left][PATTERN_STONEDIFF][black_count - white_count + 64];//BLACKから見たWHITEとの石差
 	//角の石差(0x8100000000000081は角のマスク)
 	ret += PatternValue[left][PATTERN_CORNER_STONE][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4];
 	//Xの石差 (0x0042000000004200はXのマスク)
@@ -558,7 +560,7 @@ inline void UpdatePattern_nonMirror(char left, char pattern, unsigned short inde
 
 void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	int diff;
-	char blackCount, whiteCount;
+	unsigned char blackCount, whiteCount;
 	unsigned char bBlack, bWhite;
 
 	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
@@ -665,7 +667,9 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	index = BitBoard_CountStone(BitBoard_getMobility(white, black));
 	UpdatePattern_nonMirror(left, PATTERN_MOBILITY_W, index, diff);
 
-	UpdatePattern_nonMirror(left, PATTERN_STONEDIFF, (blackCount = BitBoard_CountStone(black)) - (whiteCount = BitBoard_CountStone(white)), diff);
+	blackCount = BitBoard_CountStone(black);
+	whiteCount = BitBoard_CountStone(white);
+	UpdatePattern_nonMirror(left, PATTERN_STONEDIFF, blackCount - whiteCount + 64, diff);
 
 	UpdatePattern_nonMirror(left, PATTERN_CORNER_STONE, BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4, diff);
 

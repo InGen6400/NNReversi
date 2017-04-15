@@ -264,7 +264,7 @@ void Game_Battle(char showMobility) {
 		setLevel(hive, 9, 18);
 	}
 	else {
-		setLevel(hive, 7, 18);
+		setLevel(hive, 4, 18);
 	}
 	//CPU‚ÌFÝ’è
 	while (cpuTurn == -2)
@@ -545,7 +545,7 @@ void MODE_LEARN() {
 	int i, j, num, turn, value;
 	int left;
 	char color;
-	char ShowLearn = 'n';
+	char ShowLearn[10] = "n";
 	int result;
 	srand((unsigned)time(NULL));
 	printf("‘Îí‰ñ”:");
@@ -553,7 +553,7 @@ void MODE_LEARN() {
 
 	printf("ŠÏí‚µ‚Ü‚·‚©H(y/n):");
 	scanf("%s", &ShowLearn);
-	while (ShowLearn != 'n' && ShowLearn != 'y') {
+	while (ShowLearn[0] != 'n' && ShowLearn[0] != 'y') {
 		printf("y‚©n‚Å“ü—Í‚µ‚Ä‚­‚¾‚³‚¢\n");
 		printf("ŠÏí‚µ‚Ü‚·‚©H(y/n):");
 		scanf("%s", &ShowLearn);
@@ -611,7 +611,7 @@ void MODE_LEARN() {
 				break;
 			}
 			color = oppColor(color);
-			if (ShowLearn == 'y') {
+			if (ShowLearn[0] == 'y') {
 				system("cls");
 				BitBoard_Draw(bitboard, FALSE);
 			}
@@ -625,6 +625,7 @@ void MODE_LEARN() {
 		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < BITBOARD_SIZE * BITBOARD_SIZE - 12; j++) {
 			left++;
 			BitBoard_Undo(bitboard);
+			printf("start\n");
 			if (history[left] == BLACK) {
 				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], result, left);
 			}

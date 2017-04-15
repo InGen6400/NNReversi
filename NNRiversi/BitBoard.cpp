@@ -197,14 +197,14 @@ void BitBoard_Draw(const BitBoard *bitboard, char isMob) {
 }
 
 //color‚ÌÎ”‚ð•Ô‚·(—§‚Á‚Ä‚¢‚éƒrƒbƒg”‚ð•Ô‚·)
-char BitBoard_CountStone(uint64 bits) {
+unsigned char BitBoard_CountStone(uint64 bits) {
 	/*bits = bits - (bits>>1 & 0x5555555555555555);
 	bits = (bits & 0x3333333333333333) + (bits >> 2 & 0x3333333333333333);
 	bits = (bits & 0x0F0F0F0F0F0F0F0F) + (bits >> 4 & 0x0F0F0F0F0F0F0F0F);
 	bits = (bits & 0x00FF00FF00FF00FF) + (bits >> 8 & 0x00FF00FF00FF00FF);
 	bits = (bits & 0x0000FFFF0000FFFF) + (bits >> 16 & 0x0000FFFF0000FFFF);
 	return (bits & 0x00000000FFFFFFFF) + (bits >> 32 & 0x00000000FFFFFFFF);*/
-	return (char)_mm_popcnt_u64(bits);
+	return (unsigned char)_mm_popcnt_u64(bits);
 }
 
 //pos‚É’…Žè‚·‚é

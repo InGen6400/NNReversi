@@ -40,7 +40,7 @@ void BitBoard_AllOpp(BitBoard *source);
 
 void BitBoard_Draw(const BitBoard *bitboard, char isMob);
 
-char BitBoard_CountStone(uint64 bits);
+unsigned char BitBoard_CountStone(uint64 bits);
 
 char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos);
 

@@ -85,7 +85,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="kifu.gam.tar">
+    <None Include="x64\Debug\PatternValue.dat">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>

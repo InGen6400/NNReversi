@@ -185,7 +185,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="kifu.gam.tar" />
+    <None Include="x64\Debug\PatternValue.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

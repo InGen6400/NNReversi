@@ -625,7 +625,7 @@ void MODE_LEARN() {
 		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < BITBOARD_SIZE * BITBOARD_SIZE - 12; j++) {
 			left++;
 			BitBoard_Undo(bitboard);
-			printf("start\n");
+			//printf("start\n");
 			if (history[left] == BLACK) {
 				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], result, left);
 			}

@@ -161,7 +161,6 @@
     <ClInclude Include="const.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="CPU.h" />
-    <ClInclude Include="Eval_Const.h" />
     <ClInclude Include="Flags.h" />
     <ClInclude Include="Hive_routine.h" />
     <ClInclude Include="Pattern.h" />

@@ -45,9 +45,6 @@
     <ClInclude Include="Pattern.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Eval_Const.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="bitTest.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

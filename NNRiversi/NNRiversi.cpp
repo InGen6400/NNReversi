@@ -568,7 +568,6 @@ void MODE_LEARN() {
 
 	printf("\n0%%                      50%%                      100%%\n");
 	printf("+-----------------------+------------------------+\n");
-
 	for (i = 0; i < num; i++) {
 		BitBoard_Reset(bitboard);
 		color = BLACK;
@@ -650,6 +649,7 @@ void MODE_LEARN() {
 	if (Pattern_Save() == 1) {
 		printf("Save success\n");
 	}
+	printf("asd2\n");
 	printf("exit\n");
 }
 

@@ -90,7 +90,6 @@ int Pattern_Save() {
 		printf("[pattern value] file OPEN error\n");
 		return 0;
 	}
-
 	for (turn = 0; turn < 16; turn++) {
 		for (id = 0; id < PATTERN_AMOUNT; id++) {
 			if (fwrite(PatternValue[turn][id], sizeof(int), PatternIndex[id], fp) < (size_t)PatternIndex[id]) {

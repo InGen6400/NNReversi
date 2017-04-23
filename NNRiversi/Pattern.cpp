@@ -621,6 +621,7 @@ int getValue(uint64 black, uint64 white, char left) {
 	ret += PatternValue[left][PATTERN_CORNER][getCornerIndexDR(black, white)];//右下
 	ret += PatternValue[left][PATTERN_CORNER][getCornerIndexDL(black, white)];//左下
 	//エッジ
+
 	ret += PatternValue[left][PATTERN_EDGE][getEdgeIndexUL_R(black, white)];//左上から右
 	ret += PatternValue[left][PATTERN_EDGE][getEdgeIndexUL_D(black, white)];//左上から下
 	ret += PatternValue[left][PATTERN_EDGE][getEdgeIndexUR_L(black, white)];//右上から左
@@ -639,7 +640,7 @@ int getValue(uint64 black, uint64 white, char left) {
 	//角の石差(0x8100000000000081は角のマスク)
 	ret += PatternValue[left][PATTERN_CORNER_STONE][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4];
 	//Xの石差 (0x0042000000004200はXのマスク)
-	ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
+	//ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
 	//パリティー
 	//ret += PatternValue[left][PATTERN_PARITY][(BITBOARD_SIZE * BITBOARD_SIZE - black_count - white_count)&1];//空きます数の偶奇
 
@@ -682,7 +683,7 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	unsigned char blackCount, whiteCount;
 	unsigned char bBlack, bWhite;
 
-	diff = ((value - getValue(black, white, left))*UPDATE_RATIO);
+	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
 	left /= 4;
 	index = getLineIndex(black, white, 0x000000FF00000000);
 	UpdatePattern_Mirror(left, PATTERN_LINE4,index, MirrorLine8[index], diff);
@@ -761,6 +762,7 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	UpdatePattern_Mirror(left, PATTERN_CORNER, index, MirrorCorner8[index], diff);
 	index = getCornerIndexDL(black, white);
 	UpdatePattern_Mirror(left, PATTERN_CORNER, index, MirrorCorner8[index], diff);
+
 
 	//printf("asd\n");
 	index = getEdgeIndexUL_D(black, white);

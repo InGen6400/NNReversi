@@ -1,9 +1,5 @@
 #pragma once
 #include "BitBoard.h"
-#include <limits.h>
-
-const int VALUE_MAX = INT_MAX;
-const int STONE_VALUE = 1000;
 
 struct _Hive
 {

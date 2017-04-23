@@ -9,7 +9,7 @@
 #include "BitBoard.h"
 #include "const.h"
 #include "Container.h"
-#include "CPU.h"
+//#include "CPU.h"
 #include "Flags.h"
 
 #ifdef __AVX2__
@@ -122,7 +122,7 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外00x0000000000000000
-	//bitboard->stone[BLACK] = 0x000000000002000F;//
+	//bitboard->stone[BLACK] = (uint64)1<<43;//
 	//bitboard->stone[BLACK] = 0x0000000000000000;//
 	//角のインデックスが22011021になるはず
 	bitboard->Sp = bitboard->Stack;
@@ -621,7 +621,7 @@ void drawBits(const uint64 bits) {
 
 //x,y座標からビットボード座標に変換
 uint64 getBitPos(char x, char y) {
-	return (uint64)1 << (x + y * BOARD_SIZE);
+	return (uint64)1 << (x + y * BITBOARD_SIZE);
 }
 
 //Bookの座標(A1形式)をビットボード座標に変換する

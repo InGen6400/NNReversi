@@ -102,7 +102,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -158,9 +158,9 @@
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
     <ClInclude Include="bitTest.h" />
+    <ClInclude Include="Comb.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="Container.h" />
-    <ClInclude Include="CPU.h" />
     <ClInclude Include="Flags.h" />
     <ClInclude Include="Hive_routine.h" />
     <ClInclude Include="Pattern.h" />
@@ -171,8 +171,8 @@
   <ItemGroup>
     <ClCompile Include="BitBoard.cpp" />
     <ClCompile Include="bitTester.cpp" />
+    <ClCompile Include="Comb.cpp" />
     <ClCompile Include="Container.cpp" />
-    <ClCompile Include="CPU.cpp" />
     <ClCompile Include="Hive_routine.cpp" />
     <ClCompile Include="NNRiversi.cpp" />
     <ClCompile Include="Pattern.cpp" />

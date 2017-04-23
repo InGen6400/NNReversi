@@ -16,6 +16,20 @@ const uint64 NOMOVE = 0b111;
 
 const char BITBOARD_SIZE = 8;
 
+#pragma region POSITIONS
+
+const char A1 = 63;
+const char B1 = 62;
+const char C1 = 61;
+const char D1 = 60;
+const char E1 = 59;
+const char F1 = 58;
+const char G1 = 57;
+const char H1 = 56;
+
+#pragma endregion
+
+
 struct _BitBoard
 {
 	//color index

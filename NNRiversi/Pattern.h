@@ -6,8 +6,8 @@
 const char PATTERN_VALUE_FILE[] = "PatternValue.dat";
 
 const short TURN_SPLIT = 15;//15段階に分けて評価値を変える
-const double UPDATE_RATIO = 0.0015;
-const int MAX_VALUE = INT_MAX;
+const double UPDATE_RATIO = 0.003;
+const int MAX_VALUE = STONE_VALUE * 20;
 
 enum {
 	PATTERN_LINE4,
@@ -52,6 +52,12 @@ static const short PatternIndex[] =
 
 //評価に利用する各パターンの評価値(黒優勢で+)
 static int *PatternValue[TURN_SPLIT+1][PATTERN_AMOUNT];
+static int MirrorLine8[POW3_8];
+static int MirrorLine7[POW3_7];
+static int MirrorLine6[POW3_6];
+static int MirrorLine5[POW3_5];
+static int MirrorLine4[POW3_4];
+static int MirrorCorner8[POW3_8];
 
 void Pattern_Init();
 
@@ -65,4 +71,4 @@ int getValue(uint64 black, uint64 white, char left);
 
 void UpdateAllPattern(uint64 black, uint64 white, int value, char left);
 
-void Patttern_Debug(BitBoard *board);
+void Patttern_Debug(int index);

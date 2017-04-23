@@ -13,6 +13,7 @@ int Hive_Init(Hive *hive) {
 	hive->midDepth = 0;
 	hive->endDepth = 0;
 	hive->Node = 0;
+
 	return 1;
 }
 
@@ -64,7 +65,7 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 			color = i_color;
 		}
 		return (int)(((double)MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -VALUE_MAX, VALUE_MAX,
-			FALSE, color, left, hive->midDepth, PutPos)+0.5)/STONE_VALUE);
+			FALSE, color, left, hive->midDepth, PutPos)+0.5)/*/STONE_VALUE*/);
 	}
 }
 

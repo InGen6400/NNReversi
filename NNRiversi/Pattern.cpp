@@ -541,7 +541,7 @@ inline unsigned char swap_EdgeDL_U(unsigned char in) {
 }
 
 inline unsigned short getEdgeIndexDL_U(uint64 black, uint64 white) {
-	return getIndex(swap_EdgeDL_U(MirrorLine8_2(bitGather(black, 0x008080808080C080))), swap_EdgeDR_U(MirrorLine8_2(bitGather(white, 0x008080808080C080))));
+	return getIndex(swap_EdgeDL_U(MirrorLine8_2(bitGather(black, 0x008080808080C080))), swap_EdgeDL_U(MirrorLine8_2(bitGather(white, 0x008080808080C080))));
 }
 
 

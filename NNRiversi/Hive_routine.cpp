@@ -64,8 +64,8 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 		else {
 			color = i_color;
 		}
-		return (int)(((double)MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -VALUE_MAX, VALUE_MAX,
-			FALSE, color, left, hive->midDepth, PutPos)+0.5)/*/STONE_VALUE*/);
+		return MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -VALUE_MAX, VALUE_MAX,
+			FALSE, color, left, hive->midDepth, PutPos);
 	}
 }
 

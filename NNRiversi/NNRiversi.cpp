@@ -615,14 +615,14 @@ void MODE_LEARN() {
 			}
 			//getchar();
 		}
-		result = (BitBoard_CountStone(bitboard->stone[BLACK]) - BitBoard_CountStone(bitboard->stone[WHITE]));
+		result = (BitBoard_CountStone(bitboard->stone[BLACK]) - BitBoard_CountStone(bitboard->stone[WHITE])) * STONE_VALUE;
 		for (j = left; j < 8; j++) {
 			left++;
 			BitBoard_Undo(bitboard);
 		}
 		for (j = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE])); j < BITBOARD_SIZE * BITBOARD_SIZE - 12; j++) {
-			left++;
 			BitBoard_Undo(bitboard);
+			left++;
 			//printf("start\n");
 			if (history[left] == BLACK) {
 				UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], result, left);
@@ -648,7 +648,6 @@ void MODE_LEARN() {
 	if (Pattern_Save() == 1) {
 		printf("Save success\n");
 	}
-	printf("asd2\n");
 	printf("exit\n");
 }
 
@@ -758,10 +757,10 @@ void MODE_READBOOK() {
 				//パターンの評価値の更新
 				if (skip == FALSE) {
 					if (color == BLACK) {
-						UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff, left);
+						UpdateAllPattern(bitboard->stone[BLACK], bitboard->stone[WHITE], diff * STONE_VALUE, left);
 					}
 					else {
-						UpdateAllPattern(bitboard->stone[WHITE], bitboard->stone[BLACK], -diff, left);
+						UpdateAllPattern(bitboard->stone[WHITE], bitboard->stone[BLACK], -diff * STONE_VALUE, left);
 					}
 				}
 			}

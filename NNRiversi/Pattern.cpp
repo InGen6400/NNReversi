@@ -643,16 +643,15 @@ int getValue(uint64 black, uint64 white, char left) {
 	//ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
 	//パリティー
 	//ret += PatternValue[left][PATTERN_PARITY][(BITBOARD_SIZE * BITBOARD_SIZE - black_count - white_count)&1];//空きます数の偶奇
-
 	return ret;
 }
 
 inline void UpdatePattern_Mirror(char left, char pattern, unsigned short index, unsigned short mirror, int diff) {
-	if ((long)PatternValue[left][pattern][index] + diff >= MAX_VALUE) {
+	if (PatternValue[left][pattern][index] + diff >= MAX_VALUE) {
 		//もし評価値がMAXより大きかったら
 		PatternValue[left][pattern][index] = MAX_VALUE;
 	}
-	else if ((long)PatternValue[left][pattern][index] + diff <= -MAX_VALUE) {
+	else if (PatternValue[left][pattern][index] + diff <= -MAX_VALUE) {
 		//もし評価値が-MAXより小さかったら
 		PatternValue[left][pattern][index] = -MAX_VALUE;
 	}
@@ -682,7 +681,6 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	unsigned short index;
 	unsigned char blackCount, whiteCount;
 	unsigned char bBlack, bWhite;
-
 	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
 	left /= 4;
 	index = getLineIndex(black, white, 0x000000FF00000000);

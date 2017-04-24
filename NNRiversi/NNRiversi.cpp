@@ -698,13 +698,13 @@ void MODE_READBOOK() {
 		printf("data:%d ", dataCount);
 		skip = FALSE;
 		//correctbkは通し番号があるのでカット
-		//strtok(Line, " ");
+		strtok(Line, " ");
 		//序盤のランダムは無視しターンカウントだけ進める
-		positions = strtok(Line, " ");
+		positions = strtok(NULL, " ");
 		for (i = 0; positions[i] != '\0'; i += 2) {
 			c_pos[0] = positions[i];
 			c_pos[1] = positions[i + 1];
-			put = getPos_book_upper(c_pos);
+			put = getPos_book_lower(c_pos);
 			//もし着手できなかった場合パスとして色を変えて着手
 			if (BitBoard_Flip(bitboard, color, put) == 0) {
 				color = oppColor(color);
@@ -735,7 +735,7 @@ void MODE_READBOOK() {
 				//二文字だけ取り出す(A1 etc...)
 				c_pos[0] = positions[i];
 				c_pos[1] = positions[i + 1];
-				put = getPos_book_upper(c_pos);
+				put = getPos_book_lower(c_pos);
 				//printf("dataCount:%d randomTurn:%d left:%d diff:%d\n", dataCount, randomTurn, left, diff);
 				//もし着手できなかった場合パスとして色を変えて着手
 				if (BitBoard_Flip(bitboard, color, put) == 0) {

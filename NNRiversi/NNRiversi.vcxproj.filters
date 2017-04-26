@@ -91,7 +91,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="x64\Debug\PatternValue.dat">
+    <None Include="x64\Debug\Resources\PatternValue.bin">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>

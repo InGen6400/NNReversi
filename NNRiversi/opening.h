@@ -1,5 +1,5 @@
 #pragma once
-#include "Hash.h"
+#include "bsTree.h"
 
 struct _Opening {
 	int num;

@@ -110,7 +110,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <DebugInformationFormat>None</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
@@ -154,6 +154,7 @@
   <ItemGroup>
     <Text Include="ReadMe.txt" />
     <Text Include="Board_Image.txt" />
+    <Text Include="x64\Debug\Resources\book.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="const.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="Flags.h" />
+    <ClInclude Include="Hash.h" />
     <ClInclude Include="Hive_routine.h" />
     <ClInclude Include="Pattern.h" />
     <ClInclude Include="Player.h" />

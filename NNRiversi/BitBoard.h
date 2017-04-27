@@ -4,17 +4,17 @@
 #include "const.h"
 #include <intrin.h>
 
+#define WALL -1
+#define NONE 2
+#define WHITE 0
+#define BLACK 1
+
+#define PASS 0b11
+#define NOMOVE 0b111
+
+#define BITBOARD_SIZE 8
+
 typedef unsigned long long uint64;
-
-const char WALL = -1;
-const char NONE = 2;
-const char WHITE = 0;
-const char BLACK = 1;
-
-const uint64 PASS = 0b11;
-const uint64 NOMOVE = 0b111;
-
-const char BITBOARD_SIZE = 8;
 
 #pragma region POSITIONS
 
@@ -73,6 +73,8 @@ char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos);
 void drawBits(uint64 bits);
 
 uint64 getBitPos(char x, char y);
+
+char getPos(char x, char y);
 
 void getXY(uint64 pos, int *x, int *y);
 

@@ -624,6 +624,10 @@ uint64 getBitPos(char x, char y) {
 	return (uint64)1 << (x + y * BITBOARD_SIZE);
 }
 
+char getPos(char x, char y) {
+	return x + y * BITBOARD_SIZE;
+}
+
 //Bookの座標(A1形式)をビットボード座標に変換する
 uint64 getPos_book_upper(char *in) {
 	return (uint64)1 << (('H'-in[0]) + ('8'-in[1])*8);

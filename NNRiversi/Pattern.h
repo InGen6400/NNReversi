@@ -3,7 +3,7 @@
 #include "const.h"
 #include <limits.h>
 
-const char PATTERN_VALUE_FILE[] = "PatternValue.dat";
+const char PATTERN_VALUE_FILE[] = "Resources\\PatternValue.bin";
 
 const short TURN_SPLIT = 15;//15’iŠK‚É•ª‚¯‚Ä•]‰¿’l‚ð•Ï‚¦‚é
 const double UPDATE_RATIO = 0.001;

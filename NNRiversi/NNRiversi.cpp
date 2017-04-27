@@ -10,6 +10,8 @@
 #include "Pattern.h"
 #include "Flags.h"
 #include "Comb.h"
+#include "opening.h"
+#include "bsTree.h"
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
@@ -35,7 +37,7 @@ void Game_Battle(char showMobility);
 
 //void Game_Time(char showMobility);
 
-//void MODE_DEBUG();
+void MODE_DEBUG();
 
 void MODE_READBOOK();
 
@@ -122,7 +124,7 @@ int main()
 		//Game_Time(FALSE);
 	}
 	else if (mode == DEBUG) {
-		//MODE_DEBUG();
+		MODE_DEBUG();
 	}
 	else if (mode == READ) {
 		MODE_READBOOK();
@@ -448,88 +450,16 @@ void Game_Time(char showMobility) {
 	CPU_Delete(cpu2);
 }
 */
-/*hive 未対応
 void MODE_DEBUG() {
 
 	BitBoard *bitboard;
-
-	int turn = BLACK;
-	int x, y;
-
-	char endFlag = FALSE;
-	char tmp[10];
-	char cpuTurn = BLACK;
-	char left = 60;
-	char passed = FALSE;
-
-	uint64 put;
-
-	bitboard = BitBoard_New();
-	CPU *cpu = CPU_Init();
-	CPU *cpu2 = CPU_Init();
-	cpu2->start = timeGetTime();
-	cpu->start = timeGetTime();
-
-	//CPUの色設定
-	system("cls");
-	BitBoard_Draw(bitboard, FALSE);
-	while (!endFlag) {
-		if (BitBoard_getMobility(bitboard->stone[turn], (bitboard->stone[oppColor(turn)])) > 0) {
-			passed = FALSE;
-			if (turn == cpuTurn) {
-				//CPUのターン
-				cpu->node = 0;
-				CPU_PUT(cpu, &put, turn, left);
-				getXY(put, &x, &y);
-			}
-			else {
-				//CPU2のターン
-				cpu->node = 0;
-				CPU_PUT(cpu, &put, turn, left);
-				getXY(put, &x, &y);
-			}
-
-			system("cls");
-			if (BitBoard_Flip(bitboard, turn, put) >= 1) {
-				if (turn == cpuTurn) {
-					printf("CPU Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
-					left--;
-				}
-				else {
-					printf("You Put (%c, %c)\n", "ABCDEFGH"[x], "12345678"[y]);
-					left--;
-				}
-				turn = oppColor(turn);
-			}
-			else {
-				printf("Can't put (%d,%d)\n", x-8, y-8);
-			}
-
-			BitBoard_Draw(bitboard, FALSE);
-
-
-		}
-		else {
-			if (passed) {
-				endFlag = TRUE;
-			}
-			else {
-				passed = TRUE;
-				turn = oppColor(turn);
-			}
-		}
-	}
+	OPNode *root = (OPNode*)malloc(sizeof(OPNode));
 	
-	put=getPos_book_upper("D3");
+	bitboard = BitBoard_New();
 
-	cpu2->end = timeGetTime();
-	cpu->end = timeGetTime();
-	printf("Time:%.4f", ((cpu2->end - cpu2->start)) / 1000.0);
-	BitBoard_Delete(bitboard);
-	CPU_Delete(cpu);
-	CPU_Delete(cpu2);
+	open_read(bitboard, root);
 }
-*/
+
 inline int get_rand(int max)
 {
 	return (int)((double)max * rand() / (RAND_MAX + 1.0));

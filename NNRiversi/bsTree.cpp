@@ -39,3 +39,21 @@ void bsTree_Delete(ONode *data) {
 	bsTree_Delete(data->right);
 	free(data);
 }
+
+ONode *bsTreeSearch(ONode *root, OPdata *data) {
+	ONode *p = root;
+
+	while (p != NULL) {
+		if (p->data->bKey == data->bKey && p->data->wKey == data->wKey) {
+			return p;
+		}
+		else if ((p->data->bKey < data->bKey) && (p->data->bKey == data->bKey && p->data->wKey < data->wKey)) {
+			p = p->right;
+		}
+		else {
+			p = p->left;
+		}
+	}
+
+	return NULL;
+}

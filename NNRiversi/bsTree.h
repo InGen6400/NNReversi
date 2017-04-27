@@ -25,3 +25,6 @@ int bsTree_add(ONode *root, OPdata* data);
 
 //–Ø‚ğ‘Síœ
 void bsTree_Delete(ONode *root);
+
+//’Tõ–Ø’Tõ
+ONode *bsTreeSearch(ONode *root, OPdata *data);

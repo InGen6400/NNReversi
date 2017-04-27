@@ -6,3 +6,7 @@ struct _Opening {
 	int max;
 	ONode *node;
 };
+
+void open_read() {
+
+}

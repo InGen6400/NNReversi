@@ -223,13 +223,13 @@ char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos) {
 		Stack_PUSH(bitboard, pos);
 		Stack_PUSH(bitboard, reverse);
 		Stack_PUSH(bitboard, color);
-		return 1;
+		return TRUE;
 	}/*
 	else {
 		printf("iligal position\n");
 	}*/
 
-	return 0;
+	return FALSE;
 }
 
 int get_rand(int max)

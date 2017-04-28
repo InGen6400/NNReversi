@@ -37,12 +37,13 @@ void open_read(BitBoard *board, OPNode *root) {
 			}
 			else {
 				history_move[turn] = getPos(tolower(buf[i]) - 'a', buf[i+1] - '1');
-				if (BitBoard_Flip(board, color, (uint64)1 << history_move[turn])) {
+				if (BitBoard_Flip(board, color, (uint64)0x8000000000000000 >> history_move[turn]) == FALSE) {
 					break;
 				}
 			}
 			turn++;
 			color = oppColor(color);
+			BitBoard_Draw(board, FALSE);
 		}
 		history_move[turn] = NOMOVE;
 	}

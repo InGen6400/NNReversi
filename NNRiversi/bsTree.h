@@ -29,4 +29,4 @@ int bsTree_add(OPNode *root, OPdata* data);
 void bsTree_Delete(OPNode *root);
 
 //íTçıñÿíTçı
-OPNode *bsTreeSearch(OPNode *root, OPdata *data);
+OPdata *bsTreeSearch(OPNode *root, OPdata *data);

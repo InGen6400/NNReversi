@@ -14,7 +14,7 @@
 
 #define BITBOARD_SIZE 8
 
-enum RotateCode
+typedef enum
 {
 	ROT_NONE,
 	ROT_R90,
@@ -24,7 +24,7 @@ enum RotateCode
 	ROT_UD,
 	ROT_DIAGA1,
 	ROT_DIAGH1,
-};
+}RotateCode;
 
 typedef unsigned long long uint64;
 

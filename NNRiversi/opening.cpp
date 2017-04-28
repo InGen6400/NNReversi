@@ -1,5 +1,6 @@
 #include "opening.h"
 #include "bsTree.h"
+#include "BitBoard.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +13,7 @@ void open_read(BitBoard *board, OPNode *root) {
 	int value, min;
 	char history_move[BITBOARD_SIZE * BITBOARD_SIZE * 2];
 	char color, turn;
-	int i;
+	uint64 i;
 
 	fp = fopen(OPEN_FILE_NAME, "r");
 	if (!fp) {
@@ -55,13 +56,52 @@ void open_read(BitBoard *board, OPNode *root) {
 				min = value;
 			}
 			if (history_move[turn] == PASS) {
-				
+				open_find(board, color, opdata);
+				if (opdata != NULL) {
+					min = opdata->value;
+				}
 			}
 			else {
-
+				for (i = 1; i <= 0x8000000000000000; i <<= 1) {
+					if (BitBoard_Flip(board, color, i) == TRUE) {
+						open_find(board, color, opdata);
+						if (opdata != NULL && opdata->value < min) {
+							min = opdata->value;
+						}
+						BitBoard_Undo(board);
+					}
+				}
 			}
+			opdata->value = -min;
+			bsTree_add(OPTree, opdata);
+			BitBoard_Undo(board);
+			color = oppColor(color);
 		}
 	}
 	fclose(fp);
+	printf("’èÎƒf[ƒ^“Ç‚İ‚İŠ®—¹\n");
 }
 
+void BitBoard_getKey(OPdata *data) {
+	char code;
+	OPdata tmpData = *data;
+	for (code = ROT_NONE; code <= ROT_DIAGH1; code++) {
+		BitRotate128(&tmpData.bKey, &tmpData.wKey, (RotateCode)code);
+		if (code == ROT_NONE || nodeKeyComp(&tmpData, data) < 0) {
+			*data = tmpData;
+		}
+	}
+}
+
+void open_find(const BitBoard *board, char color, OPdata *data) {
+	OPdata dummyData;
+	if (color == BLACK) {
+		dummyData.bKey = board->stone[BLACK];
+		dummyData.wKey = board->stone[WHITE];
+	}
+	else {
+		dummyData.bKey = board->stone[WHITE];
+		dummyData.wKey = board->stone[BLACK];
+	}
+	data = bsTreeSearch(OPTree ,&dummyData);
+}

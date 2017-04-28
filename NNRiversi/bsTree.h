@@ -18,6 +18,8 @@ struct OpenNode
 //戻り値:作成した要素
 OPNode *OtreeCreate(OPdata* data);
 
+char nodeKeyComp(OPdata *dat1, OPdata *dat2);
+
 //戻り値:
 //既にデータが存在する:0
 //追加成功:1

@@ -99,6 +99,7 @@ public:
 
 	M128I operator| (const M128I &in) { return _mm_or_si128(this->m128i, in.m128i); }
 	M128I operator& (const M128I &in) { return _mm_and_si128(this->m128i, in.m128i); }
+	M128I operator^ (const M128I &in) { return _mm_xor_si128(this->m128i, in.m128i); }
 
 };
 
@@ -257,6 +258,11 @@ inline unsigned long ntz(uint64 in) {
 	{
 		return 64;
 	}
+}
+
+inline M128I delta_swap(M128I bits, unsigned char mask, unsigned char delta) {
+	M128I x = (bits ^ (bits >> delta)) & mask;
+	return bits ^ x ^ (x << delta);
 }
 
 #ifdef __AVX2__
@@ -583,6 +589,59 @@ char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos) {
 	uint64 reverse = getReverseBits(&me, &ene, pos);
 
 	return BitBoard_CountStone(reverse);
+}
+
+inline M128I rot_LR(M128I in) {
+	in = delta_swap(in, 0x5555555555555555, 1);
+	in = delta_swap(in, 0x3333333333333333, 2);
+	return delta_swap(in, 0x0F0F0F0F0F0F0F0F, 4);
+}
+
+inline M128I rot_UD(M128I in) {
+	return _mm_shuffle_epi8(in.m128i, M128I(0x08090A0B0C0D0E0F, 0x0001020304050607).m128i);
+}
+
+inline M128I rot_diagA1(M128I in) {
+	in = delta_swap(in, 0xaa00aa00aa00aa00, 36);
+	in = delta_swap(in, 0xcccc0000cccc0000, 18);
+	return delta_swap(in, 0xf0f0f0f00f0f0f0f, 9);
+}
+
+inline M128I rot_diagH1(M128I in) {
+	in = delta_swap(in, 0x5500550055005500, 28);
+	in = delta_swap(in, 0x3333000033330000, 14);
+	return delta_swap(in, 0x0f0f0f0f00000000, 7);
+}
+
+void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code) {
+	M128I out = _mm_set_epi64x(*data1, *data2);
+	switch (code) {
+	case ROT_180:
+		out = rot_UD(rot_LR(out));
+		break;
+	case ROT_R90:
+		out = rot_LR(rot_diagA1(out));
+		break;
+	case ROT_L90:
+		out = rot_diagA1(rot_UD(out));
+		break;
+	case ROT_LR:
+		out = rot_LR(out);
+		break;
+	case ROT_UD:
+		out = rot_UD(out);
+		break;
+	case ROT_DIAGA1:
+		out = rot_diagA1(out);
+		break;
+	case ROT_DIAGH1:
+		out = rot_diagH1(out);
+		break;
+	default:
+
+	}
+	*data1 = _mm_extract_epi64(out.m128i, 1);
+	*data2 = _mm_extract_epi64(out.m128i, 0);
 }
 
 void drawBits(const uint64 bits) {

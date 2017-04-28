@@ -7,3 +7,5 @@
 #define OPFILE_LINE_SIZE (64*2 + 3 + 4)
 
 void open_read(BitBoard *board, OPNode *root);
+
+void open_getData(BitBoard *board, );

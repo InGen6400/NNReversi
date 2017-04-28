@@ -46,6 +46,21 @@ void open_read(BitBoard *board, OPNode *root) {
 			BitBoard_Draw(board, FALSE);
 		}
 		history_move[turn] = NOMOVE;
+
+		for (; turn >= 0; turn--) {
+			if (color == BLACK) {
+				min = -value;
+			}
+			else {
+				min = value;
+			}
+			if (history_move[turn] == PASS) {
+				
+			}
+			else {
+
+			}
+		}
 	}
 	fclose(fp);
 }

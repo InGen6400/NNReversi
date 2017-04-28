@@ -14,6 +14,18 @@
 
 #define BITBOARD_SIZE 8
 
+enum RotateCode
+{
+	ROT_NONE,
+	ROT_R90,
+	ROT_L90,
+	ROT_180,
+	ROT_LR,
+	ROT_UD,
+	ROT_DIAGA1,
+	ROT_DIAGH1,
+};
+
 typedef unsigned long long uint64;
 
 #pragma region POSITIONS
@@ -69,6 +81,8 @@ uint64 BitBoard_getMobility(uint64 me, uint64 ene);
 char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos);
 
 char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos);
+
+void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code);
 
 void drawBits(uint64 bits);
 

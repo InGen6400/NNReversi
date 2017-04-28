@@ -123,8 +123,8 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外00x0000000000000000
-	//bitboard->stone[BLACK] = (uint64)1<<43;//
-	//bitboard->stone[BLACK] = 0x0000000000000000;//
+	bitboard->stone[WHITE] = 0x0000000810042840;//
+	bitboard->stone[BLACK] = 0x0124400000000000;//
 	//角のインデックスが22011021になるはず
 	bitboard->Sp = bitboard->Stack;
 	Stack_PUSH(bitboard, 0xFFFFFFFFFFFFFFFFULL);
@@ -260,7 +260,7 @@ inline unsigned long ntz(uint64 in) {
 	}
 }
 
-inline M128I delta_swap(M128I bits, unsigned char mask, unsigned char delta) {
+inline M128I delta_swap(M128I bits, uint64 mask, unsigned char delta) {
 	M128I x = (bits ^ (bits >> delta)) & mask;
 	return bits ^ x ^ (x << delta);
 }
@@ -602,15 +602,15 @@ inline M128I rot_UD(M128I in) {
 }
 
 inline M128I rot_diagA1(M128I in) {
-	in = delta_swap(in, 0xaa00aa00aa00aa00, 36);
-	in = delta_swap(in, 0xcccc0000cccc0000, 18);
-	return delta_swap(in, 0xf0f0f0f00f0f0f0f, 9);
+	in = delta_swap(in, 0x00000000F0F0F0F0, 28);
+	in = delta_swap(in, 0x0000CCCC0000CCCC, 14);
+	return delta_swap(in, 0x00AA00AA00AA00AA, 7);
 }
 
 inline M128I rot_diagH1(M128I in) {
-	in = delta_swap(in, 0x5500550055005500, 28);
-	in = delta_swap(in, 0x3333000033330000, 14);
-	return delta_swap(in, 0x0f0f0f0f00000000, 7);
+	in = delta_swap(in, 0x000000000F0F0F0F, 36);
+	in = delta_swap(in, 0x0000333300003333, 18);
+	return delta_swap(in, 0x0055005500550055, 9);
 }
 
 void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code) {
@@ -620,7 +620,7 @@ void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code) {
 		out = rot_UD(rot_LR(out));
 		break;
 	case ROT_R90:
-		out = rot_LR(rot_diagA1(out));
+		out = rot_UD(rot_diagA1(out));
 		break;
 	case ROT_L90:
 		out = rot_diagA1(rot_UD(out));
@@ -638,7 +638,7 @@ void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code) {
 		out = rot_diagH1(out);
 		break;
 	default:
-
+		return;
 	}
 	*data1 = _mm_extract_epi64(out.m128i, 1);
 	*data2 = _mm_extract_epi64(out.m128i, 0);

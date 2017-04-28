@@ -457,7 +457,18 @@ void MODE_DEBUG() {
 	
 	bitboard = BitBoard_New();
 
-	open_read(bitboard, root);
+	BitBoard_Draw(bitboard, FALSE);
+
+	BitRotate128(&bitboard->stone[BLACK], &bitboard->stone[WHITE], ROT_R90);
+
+	BitBoard_Draw(bitboard, FALSE);
+
+
+	BitRotate128(&bitboard->stone[BLACK], &bitboard->stone[WHITE], ROT_L90);
+
+	BitBoard_Draw(bitboard, FALSE);
+
+	//open_read(bitboard, root);
 }
 
 inline int get_rand(int max)

@@ -8,4 +8,3 @@
 
 void open_read(BitBoard *board, OPNode *root);
 
-void open_getData(BitBoard *board, );

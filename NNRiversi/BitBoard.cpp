@@ -7,10 +7,12 @@
 #include <string.h>
 #include <intrin.h>
 #include "BitBoard.h"
+#include "bsTree.h"
 #include "const.h"
 #include "Container.h"
 //#include "CPU.h"
 #include "Flags.h"
+
 
 #ifdef __AVX2__
 alignas(64) __m256i flip_v8_table256;
@@ -403,7 +405,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 
 //ˆêŽè–ß‚·(–¢ŽÀ‘•)
 int BitBoard_Undo(BitBoard *bitboard) {
-	if (bitboard->Sp <= bitboard->Stack)return 0;
+	if (*(bitboard->Sp - 1) == 0xFFFFFFFFFFFFFFFFULL)return 0;
 	char color = (char)Stack_POP(bitboard);
 	uint64 rev = Stack_POP(bitboard);
 	bitboard->stone[color] ^= rev | Stack_POP(bitboard);
@@ -557,6 +559,28 @@ void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code) {
 	}
 	*data1 = _mm_extract_epi64(out.m128i, 1);
 	*data2 = _mm_extract_epi64(out.m128i, 0);
+}
+
+void BitBoard_getKey(const BitBoard *board, char color, uint64 *bKey, uint64 *wKey) {
+	char code;
+	uint64 rotB, rotW;
+	if (color == BLACK) {
+		*bKey = board->stone[BLACK];
+		*wKey = board->stone[WHITE];
+	}
+	else {
+		*bKey = board->stone[WHITE];
+		*wKey = board->stone[BLACK];
+	}
+	rotB = *bKey;
+	rotW = *wKey;
+	for (code = ROT_NONE; code <= ROT_DIAGH1; code++) {
+		BitRotate128(bKey, wKey, (RotateCode)code);
+		if (code == ROT_NONE || nodeKeyComp(bKey, wKey, &rotB, &rotW) < 0) {
+			*bKey = rotB;
+			*wKey = rotW;
+		}
+	}
 }
 
 void drawBits(const uint64 bits) {

@@ -680,7 +680,6 @@ void UpdateAllPattern(uint64 black, uint64 white, int value, char left) {
 	int diff;
 	unsigned short index;
 	unsigned char blackCount, whiteCount;
-	unsigned char bBlack, bWhite;
 	diff = (int)((value - getValue(black, white, left))*UPDATE_RATIO);
 	left /= 4;
 	index = getLineIndex(black, white, 0x000000FF00000000);

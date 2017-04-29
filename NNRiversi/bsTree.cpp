@@ -1,9 +1,17 @@
 #include "bsTree.h"
 #include <stdio.h>
 
-OPNode *OtreeCreate(OPdata* data) {
+OPdata *OPdata_New(const BitBoard *board, char color, int value) {
+	OPdata *data = (OPdata*)malloc(sizeof(OPdata));
+	data->value = value;
+	BitBoard_getKey(board, color, &(data->bKey), &(data->wKey));
+	return data;
+}
+
+OPNode *OPNode_New(OPdata* data) {
 	OPNode *node = (OPNode*)malloc(sizeof(OPNode));
-	node->data = data;
+	node->data = (OPdata*)malloc(sizeof(OPdata));
+	*(node->data) = *data;
 	node->left = NULL;
 	node->right = NULL;
 
@@ -27,38 +35,40 @@ int bsTree_add(OPNode *root, OPdata* data) {
 			p = p->left;
 		}
 	}
-	p = OtreeCreate(data);
+	p = OPNode_New(data);
 
 	return TRUE;
 }
 
-void bsTree_Delete(OPNode *data) {
-	if (data == NULL) {
+void bsTree_Delete(OPNode *node) {
+	if (node == NULL) {
 		return;
 	}
-	bsTree_Delete(data->left);
-	bsTree_Delete(data->right);
-	free(data);
+	bsTree_Delete(node->left);
+	bsTree_Delete(node->right);
+	free(node->data);
+	free(node);
 }
 
-char nodeKeyComp(OPdata *dat1, OPdata *dat2) {
-	if (dat1->bKey == dat2->bKey && dat1->wKey == dat2->wKey) {
+char nodeKeyComp(uint64 *bKey1, uint64 *wKey1, uint64 *bKey2, uint64 *wKey2) {
+	if (bKey1 == bKey2 && bKey1 == bKey2) {
 		return 0;
 	}
-	if (dat1->bKey > dat2->bKey) {
+	if (bKey1 > bKey2) {
 		return 1;
 	}
-	if (dat1->bKey == dat2->bKey && dat1->wKey > dat2->wKey) {
+	if (bKey1 == bKey2 && bKey1 > bKey2) {
 		return 1;
 	}
 
-	if (dat1->bKey < dat2->bKey) {
+	if (bKey1 < bKey2) {
 		return -1;
 	}
-	if (dat1->bKey == dat2->bKey && dat1->wKey < dat2->wKey) {
+	if (bKey1 == bKey2 && bKey1 < bKey2) {
 		return -1;
 	}
 	printf("bsTree nodeKeyComp Bug\n");
+	return 0;
 }
 
 OPdata *bsTreeSearch(OPNode *root, OPdata *data) {
@@ -79,8 +89,9 @@ OPdata *bsTreeSearch(OPNode *root, OPdata *data) {
 	return NULL;
 }
 
-int bsTreeSave(FILE *fp, const OPNode *root) {
+void bsTreeSave(FILE *fp, const OPNode *root) {
 	if (root == NULL) {
+		printf("leaf\n");
 		return;
 	}
 	bsTreeSave(fp, root->right);

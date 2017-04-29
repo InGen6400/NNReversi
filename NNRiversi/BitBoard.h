@@ -70,6 +70,8 @@ unsigned char BitBoard_CountStone(uint64 bits);
 
 char BitBoard_Flip(BitBoard *bitboard, char color, uint64 pos);
 
+int get_rand(int max);
+
 void move_random(BitBoard *bitboard, char color);
 
 uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos);
@@ -83,6 +85,8 @@ char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos);
 char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos);
 
 void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code);
+
+void BitBoard_getKey(const BitBoard *board, char color, uint64 *bKey, uint64 *wKey);
 
 void drawBits(uint64 bits);
 

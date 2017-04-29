@@ -1,16 +1,15 @@
 #pragma once
+
 #include "bsTree.h"
 
 #define OPEN_TEXT_NAME "Resources\\book.txt"
 #define OPEN_BIN_NAME "Resources\\opbook.bin"
 
-//64[pos]x2[char] “ñ•¶Žš‚Å1pos + 3‹ó”’ + 4•]‰¿’l
-#define OPFILE_LINE_SIZE (64*2 + 3 + 4)
+//64[pos]x2[char]+64 ‘SŠp•¶Žš1+”¼Šp‚Å1pos + 3‹ó”’ + 4•]‰¿’l + 10—\”õ
+#define OPFILE_LINE_SIZE (64*3 + 3 + 4+1000)
 
-OPNode *OPTree;
+char open_Save();
 
-int open_Save();
+void open_read_text();
 
-void open_read_text(BitBoard *board, OPNode *root);
-
-void BitBoard_getKey(OPdata *data);
+void open_find(const BitBoard *board, char color, OPdata *data);

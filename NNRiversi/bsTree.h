@@ -1,5 +1,7 @@
 #pragma once
+
 #include "BitBoard.h"
+#include <stdio.h>
 
 struct OpenData {
 	uint64 bKey;
@@ -14,11 +16,13 @@ struct OpenNode
 	OPdata *data;
 }typedef OPNode;
 
+OPdata *OPdata_New(const BitBoard *board, char color, int value);
+
 //探索木の要素を作成する
 //戻り値:作成した要素
-OPNode *OtreeCreate(OPdata* data);
+OPNode *OPNode_New(OPdata* data);
 
-char nodeKeyComp(OPdata *dat1, OPdata *dat2);
+char nodeKeyComp(uint64 *bKey1, uint64 *wKey1, uint64 *bKey2, uint64 *wKey2);
 
 //戻り値:
 //既にデータが存在する:0
@@ -32,4 +36,4 @@ void bsTree_Delete(OPNode *root);
 OPdata *bsTreeSearch(OPNode *root, OPdata *data);
 
 //探索木保存(次回読み込み時の順番は根からの順にならない)
-int bsTreeSave(FILE *fp, const OPNode *root);
+void bsTreeSave(FILE *fp, const OPNode *root);

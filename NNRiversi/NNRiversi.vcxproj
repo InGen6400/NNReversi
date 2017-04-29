@@ -104,14 +104,15 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <DebugInformationFormat>None</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <SDLCheck>false</SDLCheck>
+      <MinimalRebuild>false</MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,7 +161,6 @@
     <ClInclude Include="BitBoard.h" />
     <ClInclude Include="bitTest.h" />
     <ClInclude Include="bsTree.h" />
-    <ClInclude Include="Comb.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="Flags.h" />
@@ -176,7 +176,6 @@
     <ClCompile Include="BitBoard.cpp" />
     <ClCompile Include="bitTester.cpp" />
     <ClCompile Include="bsTree.cpp" />
-    <ClCompile Include="Comb.cpp" />
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="Hive_routine.cpp" />
     <ClCompile Include="NNRiversi.cpp" />

@@ -11,7 +11,7 @@
 #include "Flags.h"
 #include "Comb.h"
 #include "opening.h"
-#include "bsTree.h"
+//#include "bsTree.h"
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
@@ -50,15 +50,12 @@ int main()
 	char tmp[50] = "";
 	char mode = -1;
 	char showMobility = FALSE;
-	int x, y;
 
 #ifdef __AVX2__
 	printf("compiled AVX2!!!\n");
 #elif __AVX__
 	printf("compiled AVX!!!\n");
 #endif
-
-
 //AVX2が利用可能かどうかの判定
 	int CPUInfo[4];
 	__cpuidex(CPUInfo, 7, 0);
@@ -107,6 +104,9 @@ int main()
 		}
 		else if (tmp[0] == '@' && tmp[1] == 'D') {
 			mode = DEBUG;
+		}
+		else if (tmp[0] == 'O' && tmp[1] == 'P') {
+			open_read_text();
 		}
 		else {
 			printf("そのようなモードは存じておりません\n");
@@ -450,31 +450,6 @@ void Game_Time(char showMobility) {
 	CPU_Delete(cpu2);
 }
 */
-void MODE_DEBUG() {
-
-	BitBoard *bitboard;
-	OPNode *root = (OPNode*)malloc(sizeof(OPNode));
-	
-	bitboard = BitBoard_New();
-
-	BitBoard_Draw(bitboard, FALSE);
-
-	BitRotate128(&bitboard->stone[BLACK], &bitboard->stone[WHITE], ROT_R90);
-
-	BitBoard_Draw(bitboard, FALSE);
-
-
-	BitRotate128(&bitboard->stone[BLACK], &bitboard->stone[WHITE], ROT_L90);
-
-	BitBoard_Draw(bitboard, FALSE);
-
-	//open_read(bitboard, root);
-}
-
-inline int get_rand(int max)
-{
-	return (int)((double)max * rand() / (RAND_MAX + 1.0));
-}
 
 
 void MODE_LEARN() {
@@ -482,7 +457,7 @@ void MODE_LEARN() {
 	Hive *hive = Hive_New();
 	uint64 move;
 	int history[BITBOARD_SIZE * BITBOARD_SIZE];
-	int i, j, num, turn, value;
+	int i, j, num, value;
 	int left;
 	char color;
 	char ShowLearn[10] = "n";
@@ -743,4 +718,15 @@ void MODE_ResetReadEnd() {
 	system(cmd);
 	fgets(tmp, sizeof(tmp), stdin);
 	printf("\n");
+}
+
+void MODE_DEBUG() {
+
+	FILE *fp;
+	fp = fopen(OPEN_TEXT_NAME, "r");
+	char buf[OPFILE_LINE_SIZE];
+
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
+		printf("%s\n", buf);
+	}
 }

@@ -6,7 +6,16 @@
 #include <string.h>
 #include <ctype.h>
 
-void open_read(BitBoard *board, OPNode *root) {
+char open_Save() {
+	FILE *fp;
+	fp = fopen(OPEN_BIN_NAME, "rb");
+	if (fp == NULL) {
+		printf("can't open opening data file: %s\n", OPEN_BIN_NAME);
+		return FALSE;
+	}
+}
+
+void open_read_text(BitBoard *board, OPNode *root) {
 	FILE *fp;
 	char buf[OPFILE_LINE_SIZE];
 	OPdata *opdata;
@@ -15,7 +24,7 @@ void open_read(BitBoard *board, OPNode *root) {
 	char color, turn;
 	uint64 i;
 
-	fp = fopen(OPEN_FILE_NAME, "r");
+	fp = fopen(OPEN_TEXT_NAME, "r");
 	if (!fp) {
 		printf("Can't open opening file\n");
 		return;

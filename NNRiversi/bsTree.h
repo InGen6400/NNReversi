@@ -30,3 +30,6 @@ void bsTree_Delete(OPNode *root);
 
 //’Tõ–Ø’Tõ
 OPdata *bsTreeSearch(OPNode *root, OPdata *data);
+
+//’Tõ–Ø•Û‘¶(Ÿ‰ñ“Ç‚İ‚İ‚Ì‡”Ô‚Íª‚©‚ç‚Ì‡‚É‚È‚ç‚È‚¢)
+int bsTreeSave(FILE *fp, const OPNode *root);

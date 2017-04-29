@@ -78,3 +78,12 @@ OPdata *bsTreeSearch(OPNode *root, OPdata *data) {
 
 	return NULL;
 }
+
+int bsTreeSave(FILE *fp, const OPNode *root) {
+	if (root == NULL) {
+		return;
+	}
+	bsTreeSave(fp, root->right);
+	bsTreeSave(fp, root->left);
+	fwrite(root->data, sizeof(OPdata), 1, fp);
+}

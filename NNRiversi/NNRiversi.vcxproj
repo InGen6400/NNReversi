@@ -190,6 +190,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="x64\Debug\Resources\opbook.bin" />
     <None Include="x64\Debug\Resources\PatternValue.bin" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

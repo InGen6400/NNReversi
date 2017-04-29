@@ -100,5 +100,8 @@
     <None Include="x64\Debug\Resources\PatternValue.bin">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="x64\Debug\Resources\opbook.bin">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
 </Project>

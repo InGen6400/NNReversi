@@ -561,26 +561,28 @@ void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code) {
 	*data2 = _mm_extract_epi64(out.m128i, 0);
 }
 
-void BitBoard_getKey(const BitBoard *board, char color, uint64 *bKey, uint64 *wKey) {
+OKey BitBoard_getKey(const BitBoard *board, char color) {
 	char code;
 	uint64 rotB, rotW;
+	OKey ret;
 	if (color == BLACK) {
-		*bKey = board->stone[BLACK];
-		*wKey = board->stone[WHITE];
+		ret.b = board->stone[BLACK];
+		ret.w = board->stone[WHITE];
 	}
 	else {
-		*bKey = board->stone[WHITE];
-		*wKey = board->stone[BLACK];
+		ret.b = board->stone[WHITE];
+		ret.w = board->stone[BLACK];
 	}
-	rotB = *bKey;
-	rotW = *wKey;
+	rotB = ret.b;
+	rotW = ret.w;
 	for (code = ROT_NONE; code <= ROT_DIAGH1; code++) {
-		BitRotate128(bKey, wKey, (RotateCode)code);
-		if (code == ROT_NONE || nodeKeyComp(bKey, wKey, &rotB, &rotW) < 0) {
-			*bKey = rotB;
-			*wKey = rotW;
+		BitRotate128(&ret.b, &ret.w, (RotateCode)code);
+		if (code == ROT_NONE || nodeKeyComp(&ret.b, &ret.w, &rotB, &rotW) < 0) {
+			ret.b = rotB;
+			ret.w = rotW;
 		}
 	}
+	return ret;
 }
 
 void drawBits(const uint64 bits) {

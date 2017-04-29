@@ -724,7 +724,7 @@ void MODE_DEBUG() {
 
 	FILE *fp;
 	fp = fopen(OPEN_TEXT_NAME, "r");
-	char buf[OPFILE_LINE_SIZE];
+	char buf[OP_LINE_SIZE];
 
 	while (fgets(buf, sizeof(buf), fp) != NULL) {
 		printf("%s\n", buf);

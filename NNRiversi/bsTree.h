@@ -3,9 +3,13 @@
 #include "BitBoard.h"
 #include <stdio.h>
 
+struct OpenKey {
+	uint64 b;
+	uint64 w;
+}typedef OKey;
+
 struct OpenData {
-	uint64 bKey;
-	uint64 wKey;
+	OpenKey key;
 	int value;
 }typedef OPdata;
 
@@ -13,27 +17,24 @@ struct OpenNode
 {
 	OpenNode *right;
 	OpenNode *left;
-	OPdata *data;
+	OPdata data;
 }typedef OPNode;
-
-OPdata *OPdata_New(const BitBoard *board, char color, int value);
 
 //’Tõ–Ø‚Ì—v‘f‚ğì¬‚·‚é
 //–ß‚è’l:ì¬‚µ‚½—v‘f
-OPNode *OPNode_New(OPdata* data);
 
 char nodeKeyComp(uint64 *bKey1, uint64 *wKey1, uint64 *bKey2, uint64 *wKey2);
 
 //–ß‚è’l:
 //Šù‚Éƒf[ƒ^‚ª‘¶İ‚·‚é:0
 //’Ç‰Á¬Œ÷:1
-int bsTree_add(OPNode *root, OPdata* data);
+int bsTree_add(OPNode **root, OKey *key, int value);
 
 //–Ø‚ğ‘Síœ
 void bsTree_Delete(OPNode *root);
 
 //’Tõ–Ø’Tõ
-OPdata *bsTreeSearch(OPNode *root, OPdata *data);
+char bsTreeSearch(OPNode *root, OKey *key, int *value);
 
 //’Tõ–Ø•Û‘¶(Ÿ‰ñ“Ç‚İ‚İ‚Ì‡”Ô‚Íª‚©‚ç‚Ì‡‚É‚È‚ç‚È‚¢)
 void bsTreeSave(FILE *fp, const OPNode *root);

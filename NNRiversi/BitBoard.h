@@ -14,6 +14,9 @@
 
 #define BITBOARD_SIZE 8
 
+extern struct OpenKey;
+typedef OpenKey OKey;
+
 typedef enum
 {
 	ROT_NONE,
@@ -86,7 +89,7 @@ char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos);
 
 void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code);
 
-void BitBoard_getKey(const BitBoard *board, char color, uint64 *bKey, uint64 *wKey);
+OKey BitBoard_getKey(const BitBoard *board, char color);
 
 void drawBits(uint64 bits);
 

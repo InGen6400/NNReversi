@@ -1,21 +1,10 @@
 #include "bsTree.h"
 #include <stdio.h>
 
-OPdata *OPdata_New(const BitBoard *board, char color, int value) {
-	OPdata *data = (OPdata*)malloc(sizeof(OPdata));
-	data->value = value;
-	BitBoard_getKey(board, color, &(data->bKey), &(data->wKey));
-	return data;
+OPdata *OPdata_New() {
 }
 
-OPNode *OPNode_New(OPdata* data) {
-	OPNode *node = (OPNode*)malloc(sizeof(OPNode));
-	node->data = (OPdata*)malloc(sizeof(OPdata));
-	*(node->data) = *data;
-	node->left = NULL;
-	node->right = NULL;
-
-	return node;
+OPNode *OPNode_New() {
 }
 
 //Šù‚Éƒf[ƒ^‚ª‘¶Ý‚·‚é:0 FALSE
@@ -44,10 +33,6 @@ void bsTree_Delete(OPNode *node) {
 	if (node == NULL) {
 		return;
 	}
-	bsTree_Delete(node->left);
-	bsTree_Delete(node->right);
-	free(node->data);
-	free(node);
 }
 
 char nodeKeyComp(uint64 *bKey1, uint64 *wKey1, uint64 *bKey2, uint64 *wKey2) {

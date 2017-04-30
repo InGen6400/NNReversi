@@ -116,7 +116,9 @@ void bsTreeSave(FILE *fp, const OPNode *root) {
 		//printf("leaf\n");
 		return;
 	}
+	fwrite(&(root->data.key.b), sizeof(uint64), 1, fp);
+	fwrite(&(root->data.key.w), sizeof(uint64), 1, fp);
+	fwrite(&(root->data.value), sizeof(int), 1, fp);
 	bsTreeSave(fp, root->left);
-	fwrite(&(root->data), sizeof(OPdata), 1, fp);
 	bsTreeSave(fp, root->right);
 }

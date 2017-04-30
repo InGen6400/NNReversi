@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "BitBoard.h"
 #include "Pattern.h"
+#include "opening.h"
+#include "bsTree.h"
 #include "Hive_routine.h"
 
 int Hive_Init(Hive *hive) {
@@ -9,7 +11,7 @@ int Hive_Init(Hive *hive) {
 	if (!hive->bitboard) {
 		return 0;
 	}
-	hive->openDepth = 0;
+	hive->use_opening = TRUE;
 	hive->midDepth = 0;
 	hive->endDepth = 0;
 	hive->Node = 0;
@@ -36,21 +38,26 @@ void Hive_Del(Hive *hive) {
 	free(hive);
 }
 
-void setLevel(Hive *hive, int mid, int end) {
+void setLevel(Hive *hive, int mid, int end, char use_opening) {
 	hive->midDepth = mid;
 	hive->endDepth = end;
+	hive->use_opening = use_opening;
 }
 
 int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos) {
 	char left;
 	char color;
+	int value;
 
 	BitBoard_Copy(bitboard, hive->bitboard);
 	hive->Node = 0;
 	left = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE]));
 	//open‚Í–¢ì¬(ì¬—\’è)
 	//I”Õ’Tõ
-	if (left <= hive->endDepth) {
+	value = OpeningSearch(hive, color, PutPos);
+	if (*PutPos != NOMOVE) {
+		return value;
+	}else if (left <= hive->endDepth) {
 		return EndAlphaBeta(hive, hive->bitboard->stone[i_color], hive->bitboard->stone[oppColor(i_color)], -BITBOARD_SIZE * BITBOARD_SIZE, BITBOARD_SIZE*BITBOARD_SIZE,
 			FALSE, i_color, left, PutPos);
 	}
@@ -67,6 +74,37 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 		return MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -VALUE_MAX, VALUE_MAX,
 			FALSE, color, left, hive->midDepth, PutPos);
 	}
+}
+
+int OpeningSearch(Hive *hive, char color, uint64 *move) {
+	int value, max = -MAX_VALUE;
+	int count = 0;
+	uint64 mobility, pos;
+
+	*move = NOMOVE;
+	if (hive->use_opening == FALSE || hive->OPTree == NULL) {
+		return max;
+	}
+	mobility = BitBoard_getMobility(hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)]);
+	while (mobility != 0) {
+		pos = ((-mobility) & mobility);
+		mobility ^= pos;
+		BitBoard_Flip(hive->bitboard, oppColor(color), pos);
+		bsTreeSearch(hive->OPTree, &BitBoard_getKey(hive->bitboard, oppColor(color)), &value);
+		if (value > max) {
+			*move = pos;
+			max = value;
+			count = 1;
+		}
+		else if (value == max) {
+			count++;
+			if (get_rand(count) < 1) {
+				*move = pos;
+			}
+		}
+		BitBoard_Undo(hive->bitboard);
+	}
+	return max;
 }
 
 int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char isPassed, char color, char left, char depth, uint64 *PutPos) {

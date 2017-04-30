@@ -5,10 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 
-static OPNode *OPTree = NULL;
-
-char open_Save() {
+char open_Save(OPNode *OPTree) {
 	FILE *fp;
 	fp = fopen(OPEN_BIN_NAME, "wb");
 	if (fp == NULL) {
@@ -20,22 +19,31 @@ char open_Save() {
 	return TRUE;
 }
 
-char open_Load() {
+char open_Load(OPNode *OPTree) {
 	FILE *fp;
-	OPdata dbuf;
+	OKey key;
+	uint64 w,b;
+	int value;
+	
 	fp = fopen(OPEN_BIN_NAME, "rb");
 	if (fp == NULL) {
 		printf("can't open opening data file: %s\n", OPEN_BIN_NAME);
 		return FALSE;
 	}
-	while (fread(&dbuf, sizeof(OPdata), 1, fp) == sizeof(OPdata)) {
-		bsTree_add(&OPTree , &(dbuf.key), dbuf.value);
+	printf("Load Opening Data...\n");
+	while (fread(&b, sizeof(uint64), 1, fp) > 0) {
+		fread(&w, sizeof(uint64), 1, fp);
+		fread(&value, sizeof(int), 1, fp);
+		key.b = b;
+		key.w = w;
+		bsTree_add(&OPTree , &key, value);
 	}
+	printf("Finish loading\n");
 	fclose(fp);
 	return TRUE;
 }
 
-void open_read_text() {
+void open_read_text(OPNode *OPTree) {
 	BitBoard *board = BitBoard_New();
 	FILE *fp;
 	char buf[OP_LINE_SIZE];
@@ -108,7 +116,7 @@ void open_read_text() {
 	}
 	fclose(fp);
 	BitBoard_Delete(board);
-	open_Save();
+	open_Save(OPTree);
 	printf("’èÎ•ÏŠ·•“o˜^Š®—¹\n");
 }
 

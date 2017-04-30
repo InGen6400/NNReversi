@@ -45,6 +45,8 @@ void MODE_ResetReadEnd();
 
 void MODE_LEARN();
 
+static OPNode *OPTree;
+
 int main()
 {
 	char tmp[50] = "";
@@ -72,6 +74,7 @@ int main()
 	Pattern_Init();
 	//Pattern_Save();
 	Pattern_Load();
+	open_Load(OPTree);
 
 	Board_InitConst();
 	
@@ -106,11 +109,7 @@ int main()
 			mode = DEBUG;
 		}
 		else if (tmp[0] == 'O' && tmp[1] == 'P') {
-			open_read_text();
-		}
-		else if (tmp[0] == 'S') {
-			open_Load();
-			open_Save();
+			open_read_text(OPTree);
 		}
 		else {
 			printf("ÇªÇÃÇÊÇ§Ç»ÉÇÅ[ÉhÇÕë∂Ç∂ÇƒÇ®ÇËÇ‹ÇπÇÒ\n");
@@ -265,11 +264,13 @@ void Game_Battle(char showMobility) {
 	uint64 put;
 
 	Hive *hive = Hive_New();
+	hive->OPTree = &(*OPTree);
+
 	if (AVX2_FLAG == TRUE) {
-		setLevel(hive, 9, 18);
+		setLevel(hive, 9, 18, TRUE);
 	}
 	else {
-		setLevel(hive, 4, 18);
+		setLevel(hive, 4, 18, TRUE);
 	}
 	//CPUÇÃêFê›íË
 	while (cpuTurn == -2)
@@ -478,10 +479,10 @@ void MODE_LEARN() {
 		scanf("%s", &ShowLearn);
 	}
 	if (AVX2_FLAG == TRUE) {
-		setLevel(hive, 4, 12);
+		setLevel(hive, 4, 12, FALSE);
 	}
 	else {
-		setLevel(hive, 4, 12);
+		setLevel(hive, 4, 12, FALSE);
 	}
 	getchar();
 

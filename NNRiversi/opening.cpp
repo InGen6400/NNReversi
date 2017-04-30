@@ -8,7 +8,7 @@
 
 static OPNode *OPTree = NULL;
 
-char open_Save() {
+char open_Save(OPNode *OPTree) {
 	FILE *fp;
 	fp = fopen(OPEN_BIN_NAME, "wb");
 	if (fp == NULL) {
@@ -20,7 +20,7 @@ char open_Save() {
 	return TRUE;
 }
 
-char open_Load() {
+char open_Load(OPNode *OPTree) {
 	FILE *fp;
 	OPdata dbuf;
 	fp = fopen(OPEN_BIN_NAME, "rb");
@@ -49,7 +49,7 @@ void open_read_text() {
 		printf("Can't open Opening Data:%s\n", OPEN_TEXT_NAME);
 		return;
 	}
-
+	
 	while (1) {
 		BitBoard_Reset(board);
 		color = BLACK;
@@ -60,16 +60,16 @@ void open_read_text() {
 		}
 
 		strtok(buf, " ");
-		value = (int)(atof(strtok(buf, "\n")) * STONE_VALUE);
-
+		value = (int)(atof(strtok(NULL, "\n")) * STONE_VALUE);
 		/*データを読み込みプレイする*/
 		for (i = 0; buf[i] != '\0' && buf[i + 1] != '\0'; i += 2) {
-			if (BitBoard_getMobility(board->stone[color], board->stone[oppColor(color)]) != 0) {
+			if (BitBoard_getMobility(board->stone[color], board->stone[oppColor(color)]) == 0) {
 				history_move[turn] = PASS;
 			}
 			else {
 				history_move[turn] = getPos(tolower(buf[i]) - 'a', buf[i+1] - '1');
-				if (BitBoard_Flip(board, color, history_move[turn]) != FALSE) {
+				if (BitBoard_Flip(board, color, (uint64)0x8000000000000000 >> history_move[turn]) == FALSE) {
+					printf("Can't put opening:%dl\n", __LINE__);
 					break;
 				}
 			}
@@ -87,12 +87,12 @@ void open_read_text() {
 				min = value;
 			}
 			if (history_move[turn] == PASS) {
-				if (bsTreeSearch(OPTree, &BitBoard_getKey(board, oppColor(color)), &min) == TRUE);
+				bsTreeSearch(OPTree, &BitBoard_getKey(board, oppColor(color)), &min);
 			}
 			else {
 				for (i = 1; i != 0x8000000000000000; i <<= 1) {
 					if (BitBoard_Flip(board, color, i)) {
-						if (bsTreeSearch(OPTree, &BitBoard_getKey(board, oppColor(color)), &min) == TRUE);
+						bsTreeSearch(OPTree, &BitBoard_getKey(board, oppColor(color)), &min);
 						BitBoard_Undo(board);
 					}
 				}
@@ -102,14 +102,13 @@ void open_read_text() {
 				//printf("add\n");
 			}
 			//printf("after:%d\n", OPTree->data.value);
-			//printf("after:%d\n", OPTree->data.value);
 			BitBoard_Undo(board);
 			color = oppColor(color);
 		}
 	}
 	fclose(fp);
 	BitBoard_Delete(board);
-	open_Save();
+	open_Save(OPTree);
 	printf("定石変換＆登録完了\n");
 }
 

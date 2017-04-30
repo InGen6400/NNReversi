@@ -7,42 +7,58 @@ inline void OPdata_Init(OPdata *data, OKey key, int value) {
 }
 
 OPNode *OPNode_New() {
-	OPNode *node = (OPNode*)malloc(sizeof(OPNode));
+	OPNode *node;
+	node = (OPNode*)malloc(sizeof(OPNode));
 	if (node == NULL) {
-		printf("can't allocate OPNode:%s", __LINE__);
+		printf("can't allocate OPNode:%dl", __LINE__);
 		return NULL;
 	}
 	node->left = NULL;
 	node->right = NULL;
+	node->data.value = 0;
 	return node;
 }
 
 //既にデータが存在する:0 FALSE
 //追加成功:1 TRUE
 int bsTree_add(OPNode **root, OKey *key, int value) {
-	OPNode** p = root;
-	OPNode* newNode = NULL;
-	while (*p != NULL) {
+	if (*root == NULL) {
+		*root = OPNode_New();
+		(*root)->data.value = value;
+		(*root)->data.key = *key;
+		printf("new\n");
+		return TRUE;
+	}
+	OPNode *p = NULL;
+	OPNode *n = *root;
+	while (n != NULL) {
+		p = n;
 		//キーが同じ
-		if ((*p)->data.key.b == key->b && (*p)->data.key.w == key->w) {
-			(*p)->data.value = value;
+		if (n->data.key.b == key->b && n->data.key.w == key->w) {
+			n->data.value = value;
+			printf("same\n");
 			return FALSE;
 		}
 		//blackを比較して入力のほうが大きい　もしくは　blackが同じで入力のwhiteのほうが大きい
-		else if ((*p)->data.key.b < key->b || ((*p)->data.key.b == key->b && (*p)->data.key.w < key->w)) {
-			p = &(*p)->right;
+		else if (n->data.key.b < key->b || (n->data.key.b == key->b && n->data.key.w < key->w)) {
+			n = n->right;
 		}
 		else {
-			p = &(*p)->left;
+			n = n->left;
 		}
 	}
-	newNode = OPNode_New();
-	if (newNode == NULL) {
-		printf("null node:%s", __LINE__);
+	n = OPNode_New();
+	if (n == NULL) {
+		printf("null node:%dl", __LINE__);
 		return FALSE;
 	}
-	OPdata_Init(&newNode->data, *key, value);
-	*p = newNode;
+	OPdata_Init(&n->data, *key, value);
+	if (p->data.key.b < key->b || (p->data.key.b == key->b && p->data.key.w < key->w)) {
+		p->right = n;
+	}
+	else {
+		p->left = n;
+	}
 
 	return TRUE;
 }
@@ -98,11 +114,10 @@ char bsTreeSearch(OPNode *root, OKey *key, int *value) {
 
 void bsTreeSave(FILE *fp, const OPNode *root) {
 	if (root == NULL) {
-		printf("leaf\n");
+		//printf("leaf\n");
 		return;
 	}
 	bsTreeSave(fp, root->left);
-	printf("save %d\n", root->data.value);
 	fwrite(&(root->data), sizeof(OPdata), 1, fp);
 	bsTreeSave(fp, root->right);
 }

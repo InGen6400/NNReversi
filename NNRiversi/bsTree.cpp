@@ -36,7 +36,6 @@ int bsTree_add(OPNode **root, OKey *key, int value) {
 		//キーが同じ
 		if (n->data.key.b == key->b && n->data.key.w == key->w) {
 			n->data.value = value;
-			printf("same\n");
 			return FALSE;
 		}
 		//blackを比較して入力のほうが大きい　もしくは　blackが同じで入力のwhiteのほうが大きい

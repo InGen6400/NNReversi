@@ -8,7 +8,9 @@
 //64[pos]x2[char]+64 ‘SŠp•¶Žš1+”¼Šp‚Å1pos + 3‹ó”’ + 4•]‰¿’l + 10—\”õ
 #define OP_LINE_SIZE (64*3 + 3 + 4+1000)
 
-char open_Save(OPNode *OPTree);
+char open_Save();
+
+char open_Load();
 
 void open_read_text();
 

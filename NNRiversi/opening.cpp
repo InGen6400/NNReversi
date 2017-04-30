@@ -8,7 +8,7 @@
 
 static OPNode *OPTree = NULL;
 
-char open_Save(OPNode *OPTree) {
+char open_Save() {
 	FILE *fp;
 	fp = fopen(OPEN_BIN_NAME, "wb");
 	if (fp == NULL) {
@@ -20,7 +20,7 @@ char open_Save(OPNode *OPTree) {
 	return TRUE;
 }
 
-char open_Load(OPNode *OPTree) {
+char open_Load() {
 	FILE *fp;
 	OPdata dbuf;
 	fp = fopen(OPEN_BIN_NAME, "rb");
@@ -108,7 +108,7 @@ void open_read_text() {
 	}
 	fclose(fp);
 	BitBoard_Delete(board);
-	open_Save(OPTree);
+	open_Save();
 	printf("’èÎ•ÏŠ·•“o˜^Š®—¹\n");
 }
 

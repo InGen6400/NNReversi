@@ -108,6 +108,10 @@ int main()
 		else if (tmp[0] == 'O' && tmp[1] == 'P') {
 			open_read_text();
 		}
+		else if (tmp[0] == 'S') {
+			open_Load();
+			open_Save();
+		}
 		else {
 			printf("‚»‚Ì‚æ‚¤‚Èƒ‚[ƒh‚Í‘¶‚¶‚Ä‚¨‚è‚Ü‚¹‚ñ\n");
 		}

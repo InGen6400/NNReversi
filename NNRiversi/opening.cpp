@@ -7,19 +7,19 @@
 #include <ctype.h>
 #include <time.h>
 
-char open_Save(OPNode *OPTree) {
+char open_Save(OpenTree *tree) {
 	FILE *fp;
 	fp = fopen(OPEN_BIN_NAME, "wb");
 	if (fp == NULL) {
 		printf("can't open opening data file: %s\n", OPEN_BIN_NAME);
 		return FALSE;
 	}
-	bsTreeSave(fp, OPTree);
+	bsTreeSave(fp, tree->root);
 	fclose(fp);
 	return TRUE;
 }
 
-char open_Load(OPNode *OPTree) {
+char open_Load(OpenTree *tree) {
 	FILE *fp;
 	OKey key;
 	uint64 w,b;
@@ -36,21 +36,22 @@ char open_Load(OPNode *OPTree) {
 		fread(&value, sizeof(int), 1, fp);
 		key.b = b;
 		key.w = w;
-		bsTree_add(&OPTree , &key, value);
+		bsTree_add(tree , &key, value);
 	}
 	printf("Finish loading\n");
 	fclose(fp);
 	return TRUE;
 }
 
-void open_read_text(OPNode *OPTree) {
+void open_read_text(OpenTree *tree) {
 	BitBoard *board = BitBoard_New();
 	FILE *fp;
 	char buf[OP_LINE_SIZE];
 	char color, turn;
-	int value, min;
+	int value, min, searchResult;
 	char history_move[BITBOARD_SIZE * BITBOARD_SIZE * 2];
 	uint64 i;
+	OKey key;
 
 	fp = fopen(OPEN_TEXT_NAME, "r");
 	if (fp == NULL) {
@@ -95,28 +96,30 @@ void open_read_text(OPNode *OPTree) {
 				min = value;
 			}
 			if (history_move[turn] == PASS) {
-				bsTreeSearch(OPTree, &BitBoard_getKey(board, oppColor(color)), &min);
+				BitBoard_getKey(board, oppColor(color), &key.b, &key.w);
+				bsTreeSearch(tree, &key, &min);
 			}
 			else {
 				for (i = 1; i != 0x8000000000000000; i <<= 1) {
-					if (BitBoard_Flip(board, color, i)) {
-						bsTreeSearch(OPTree, &BitBoard_getKey(board, oppColor(color)), &min);
+					if (BitBoard_Flip(board, color, i) == TRUE) {
+						BitBoard_getKey(board, oppColor(color), &key.b, &key.w);
+						bsTreeSearch(tree, &key, &searchResult);
+						if (searchResult < min) {
+							min = searchResult;
+						}
 						BitBoard_Undo(board);
 					}
 				}
 			}
-			//printf("before:%d\n", -min);
-			if (bsTree_add(&OPTree, &BitBoard_getKey(board, color), -min) == FALSE) {
-				//printf("add\n");
-			}
-			//printf("after:%d\n", OPTree->data.value);
+			BitBoard_getKey(board, color, &key.b, &key.w);
+			bsTree_add(tree, &key, -min);
 			BitBoard_Undo(board);
 			color = oppColor(color);
 		}
 	}
 	fclose(fp);
 	BitBoard_Delete(board);
-	open_Save(OPTree);
+	open_Save(tree);
 	printf("íËêŒïœä∑Åïìoò^äÆóπ\n");
 }
 

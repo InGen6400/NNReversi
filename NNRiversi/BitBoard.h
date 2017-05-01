@@ -89,7 +89,7 @@ char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos);
 
 void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code);
 
-OKey BitBoard_getKey(const BitBoard *board, char color);
+void BitBoard_getKey(const BitBoard *board, char color, uint64 *retB, uint64 *retW);
 
 void drawBits(uint64 bits);
 

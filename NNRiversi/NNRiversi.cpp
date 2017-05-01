@@ -73,8 +73,7 @@ int main()
 	Pattern_Init();
 	//Pattern_Save();
 	Pattern_Load();
-	open_Load(OPTree.root);
-
+	open_Load(&OPTree);
 	Board_InitConst();
 	
 	printf("\nÝ’è\n");
@@ -108,7 +107,11 @@ int main()
 			mode = DEBUG;
 		}
 		else if (tmp[0] == 'O' && tmp[1] == 'P') {
-			open_read_text(OPTree.root);
+			open_read_text(&OPTree);
+		}
+		else if (tmp[0] == 'D'&& tmp[1] == 'O' &&tmp[2] == 'P') {
+			bsTree_Delete(OPTree.root);
+			OPTree.root = NULL;
 		}
 		else {
 			printf("‚»‚Ì‚æ‚¤‚Èƒ‚[ƒh‚Í‘¶‚¶‚Ä‚¨‚è‚Ü‚¹‚ñ\n");
@@ -263,7 +266,14 @@ void Game_Battle(char showMobility) {
 	uint64 put;
 
 	Hive *hive = Hive_New();
-	hive->OPTree = OPTree.root;
+	hive->tree = &OPTree;
+
+	int value = -1;
+	OKey key;
+	BitBoard_getKey(bitboard, BLACK, &key.b, &key.w);
+	bsTree_add(&OPTree, &key, 1000);
+	bsTreeSearch(&OPTree, &key, &value);
+	printf("%d\n", value);
 
 	if (AVX2_FLAG == TRUE) {
 		setLevel(hive, 9, 18, TRUE);

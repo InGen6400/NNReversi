@@ -11,7 +11,6 @@
 #include "Flags.h"
 #include "Comb.h"
 #include "opening.h"
-//#include "bsTree.h"
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
@@ -45,7 +44,7 @@ void MODE_ResetReadEnd();
 
 void MODE_LEARN();
 
-static OPNode *OPTree;
+static OpenTree OPTree;
 
 int main()
 {
@@ -74,7 +73,7 @@ int main()
 	Pattern_Init();
 	//Pattern_Save();
 	Pattern_Load();
-	open_Load(OPTree);
+	open_Load(OPTree.root);
 
 	Board_InitConst();
 	
@@ -109,7 +108,7 @@ int main()
 			mode = DEBUG;
 		}
 		else if (tmp[0] == 'O' && tmp[1] == 'P') {
-			open_read_text(OPTree);
+			open_read_text(OPTree.root);
 		}
 		else {
 			printf("‚»‚Ì‚æ‚¤‚Èƒ‚[ƒh‚Í‘¶‚¶‚Ä‚¨‚è‚Ü‚¹‚ñ\n");
@@ -264,7 +263,7 @@ void Game_Battle(char showMobility) {
 	uint64 put;
 
 	Hive *hive = Hive_New();
-	hive->OPTree = &(*OPTree);
+	hive->OPTree = OPTree.root;
 
 	if (AVX2_FLAG == TRUE) {
 		setLevel(hive, 9, 18, TRUE);

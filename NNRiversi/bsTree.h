@@ -20,6 +20,11 @@ struct OpenNode
 	OPdata data;
 }typedef OPNode;
 
+struct OpenTree {
+	OPNode *root;
+	int count;
+}typedef OpenTree;
+
 //’Tõ–Ø‚Ì—v‘f‚ğì¬‚·‚é
 //–ß‚è’l:ì¬‚µ‚½—v‘f
 

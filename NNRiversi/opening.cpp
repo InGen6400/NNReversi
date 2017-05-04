@@ -1,25 +1,25 @@
 #include "opening.h"
-#include "bsTree.h"
 #include "BitBoard.h"
+#include "Hash.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
 
-char open_Save(OpenTree *tree) {
+char open_Save(OHash *hash) {
 	FILE *fp;
 	fp = fopen(OPEN_BIN_NAME, "wb");
 	if (fp == NULL) {
 		printf("can't open opening data file: %s\n", OPEN_BIN_NAME);
 		return FALSE;
 	}
-	bsTreeSave(fp, tree->root);
+	Hash_Save(hash, fp);
 	fclose(fp);
 	return TRUE;
 }
 
-char open_Load(OpenTree *tree) {
+char open_Load(OHash *hash) {
 	FILE *fp;
 	OKey key;
 	uint64 w,b;
@@ -36,14 +36,14 @@ char open_Load(OpenTree *tree) {
 		fread(&value, sizeof(int), 1, fp);
 		key.b = b;
 		key.w = w;
-		bsTree_add(tree , &key, value);
+		OHash_Add(hash , &key, value);
 	}
 	printf("Finish loading\n");
 	fclose(fp);
 	return TRUE;
 }
 
-void open_read_text(OpenTree *tree) {
+void open_read_text(OHash *hash) {
 	BitBoard *board = BitBoard_New();
 	FILE *fp;
 	char buf[OP_LINE_SIZE];
@@ -97,13 +97,13 @@ void open_read_text(OpenTree *tree) {
 			}
 			if (history_move[turn] == PASS) {
 				BitBoard_getKey(board, oppColor(color), &key.b, &key.w);
-				bsTreeSearch(tree, &key, &min);
+				OHash_Search(hash, &key, &min);
 			}
 			else {
 				for (i = 1; i != 0x8000000000000000; i <<= 1) {
 					if (BitBoard_Flip(board, color, i) == TRUE) {
 						BitBoard_getKey(board, oppColor(color), &key.b, &key.w);
-						bsTreeSearch(tree, &key, &searchResult);
+						OHash_Search(hash, &key, &searchResult);
 						if (searchResult < min) {
 							min = searchResult;
 						}
@@ -112,14 +112,14 @@ void open_read_text(OpenTree *tree) {
 				}
 			}
 			BitBoard_getKey(board, color, &key.b, &key.w);
-			bsTree_add(tree, &key, -min);
+			OHash_Add(hash, &key, -min);
 			BitBoard_Undo(board);
 			color = oppColor(color);
 		}
 	}
 	fclose(fp);
 	BitBoard_Delete(board);
-	open_Save(tree);
+	open_Save(hash);
 	printf("’èÎ•ÏŠ·•“o˜^Š®—¹\n");
 }
 
@@ -133,5 +133,5 @@ void open_find(const BitBoard *board, char color, OPdata *data) {
 		dummyData.key.b = board->stone[WHITE];
 		dummyData.key.w = board->stone[BLACK];
 	}
-	//data = bsTreeSearch(OPTree ,&dummyData);
+	//data = OHash_Search(OPTree ,&dummyData);
 }

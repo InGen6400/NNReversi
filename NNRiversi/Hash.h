@@ -1,11 +1,33 @@
 #pragma once
-#include "BitBoard.h"
 
+typedef unsigned long long uint64;
 
-struct TranceNode
+#define HASH_LENGHT 1048576
+
+struct OpenKey {
+	uint64 b;
+	uint64 w;
+}typedef OKey;
+
+struct OpenNode
 {
-	uint64 wKey;
-	uint64 bKey;
-	int max;
-	int min;
-}typedef TNode;
+	OpenNode *next;
+	OpenKey key;
+	int value;
+}typedef OPNode;
+
+struct OpenHash {
+	OpenNode *elmnt[HASH_LENGHT];
+	int count;
+	int collide;
+}typedef OHash;
+
+OHash *OHash_New();
+
+void OHash_Add(OHash *hash, OKey *key, int value);
+
+char OHash_Search(OHash *hash, OKey *key, int *value);
+
+void Hash_Save(OHash *hash, FILE *fp);
+
+char nodeKeyComp(OKey *key1, OKey *key2);

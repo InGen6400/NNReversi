@@ -10,7 +10,8 @@
 #include "Pattern.h"
 #include "Flags.h"
 #include "Comb.h"
-#include "opening.h"
+//#include "opening.h"
+#include "Hash.h"
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
@@ -27,6 +28,7 @@ enum {
 	READ,
 	DEBUG
 };
+/*
 
 const short LINE_MAX = 200;
 
@@ -465,7 +467,7 @@ void Game_Time(char showMobility) {
 }
 */
 
-
+/*
 void MODE_LEARN() {
 	BitBoard *bitboard = BitBoard_New();
 	Hive *hive = Hive_New();
@@ -511,7 +513,7 @@ void MODE_LEARN() {
 			/*system("cls");
 			BitBoard_Draw(bitboard, FALSE);*/
 			//getchar();
-		}
+/*		}
 		while (1) {
 			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
 				if (left > 12 && get_rand(100) < 1) {
@@ -645,10 +647,8 @@ void MODE_READBOOK() {
 			}
 			left--;
 
-			/*
 			BitBoard_Draw(bitboard, TRUE);
 			getc(stdin);
-			*/
 			//パターンの更新はしない
 			color = oppColor(color);
 		}
@@ -676,10 +676,6 @@ void MODE_READBOOK() {
 						break;
 					}
 				}
-				/*
-				if (left == 1) {
-				BitBoard_Draw(bitboard, TRUE);
-				}*/
 				//getc(stdin);
 
 				color = oppColor(color);
@@ -735,12 +731,27 @@ void MODE_ResetReadEnd() {
 }
 
 void MODE_DEBUG() {
+	
+}
+*/
+#include <immintrin.h>
 
-	FILE *fp;
-	fp = fopen(OPEN_TEXT_NAME, "r");
-	char buf[OP_LINE_SIZE];
-
-	while (fgets(buf, sizeof(buf), fp) != NULL) {
-		printf("%s\n", buf);
+int main() {
+	const int size = 15000;
+	OHash *hash = OHash_New();
+	OKey key[size];
+	int value[size];
+	int ovalue;
+	srand((unsigned int)time(NULL));
+	for (int i = 0; i < size; i++) {
+		_rdrand64_step(&key[i].b);
+		_rdrand64_step(&key[i].w);
+		value[i] = rand();
+		OHash_Add(hash, &key[i], value[i]);
 	}
+	int index = rand()%size; 
+	OHash_Search(hash, &key[index], &ovalue);
+	printf("[%llu,%llu]:%d = %d\n", key[index].b, key[index].w, value[index], ovalue);
+	printf("collide:%d\n", hash->collide);
+	printf("count:%d\n", hash->count);
 }

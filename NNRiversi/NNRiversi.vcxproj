@@ -112,7 +112,7 @@
       <SDLCheck>false</SDLCheck>
       <MinimalRebuild>false</MinimalRebuild>
       <Optimization>Disabled</Optimization>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -177,6 +177,7 @@
     <ClCompile Include="bitTester.cpp" />
     <ClCompile Include="bsTree.cpp" />
     <ClCompile Include="Container.cpp" />
+    <ClCompile Include="Hash.cpp" />
     <ClCompile Include="Hive_routine.cpp" />
     <ClCompile Include="NNRiversi.cpp" />
     <ClCompile Include="opening.cpp" />

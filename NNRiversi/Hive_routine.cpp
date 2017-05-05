@@ -2,7 +2,7 @@
 #include "BitBoard.h"
 #include "Pattern.h"
 #include "opening.h"
-#include "bsTree.h"
+#include "Hash.h"
 #include "Hive_routine.h"
 
 int Hive_Init(Hive *hive) {
@@ -83,17 +83,18 @@ int OpeningSearch(Hive *hive, char color, uint64 *move) {
 	OpenKey key;
 
 	*move = NOMOVE;
-	if (hive->use_opening == FALSE || hive->tree->root == NULL) {
+	if (hive->use_opening == FALSE || hive->opHash->count == 0) {
 		return max;
 	}
 	mobility = BitBoard_getMobility(hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)]);
 	while (mobility != 0) {
+
 		pos = ((-mobility) & mobility);
 		mobility ^= pos;
 		BitBoard_Flip(hive->bitboard, color, pos);
-		BitBoard_Draw(hive->bitboard, FALSE);
 		BitBoard_getKey(hive->bitboard, oppColor(color), &key.b, &key.w);
-		bsTreeSearch(hive->tree, &key, &value);
+		OHash_Search(hive->opHash, &key, &value);
+
 		if (value > max) {
 			*move = pos;
 			max = value;
@@ -105,6 +106,7 @@ int OpeningSearch(Hive *hive, char color, uint64 *move) {
 				*move = pos;
 			}
 		}
+
 		BitBoard_Undo(hive->bitboard);
 	}
 	return max;

@@ -1,13 +1,13 @@
 #pragma once
 #include "BitBoard.h"
 
-extern struct OpenTree;
-typedef struct OpenTree OpenTree;
+extern struct OpenHash;
+typedef struct OpenHash OHash;
 
 struct _Hive
 {
 	BitBoard *bitboard;
-	OpenTree *tree;
+	OHash *opHash;
 	char use_opening;
 	int midDepth;
 	int endDepth;

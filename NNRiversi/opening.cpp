@@ -14,7 +14,7 @@ char open_Save(OHash *hash) {
 		printf("can't open opening data file: %s\n", OPEN_BIN_NAME);
 		return FALSE;
 	}
-	Hash_Save(hash, fp);
+	OHash_Save(hash, fp);
 	fclose(fp);
 	return TRUE;
 }
@@ -120,18 +120,6 @@ void open_read_text(OHash *hash) {
 	fclose(fp);
 	BitBoard_Delete(board);
 	open_Save(hash);
+	printf("collide:%d count:%d\n", hash->collide, hash->count);
 	printf("’èÎ•ÏŠ·•“o˜^Š®—¹\n");
-}
-
-void open_find(const BitBoard *board, char color, OPdata *data) {                                                                                                  
-	OPdata dummyData;
-	if (color == BLACK) {
-		dummyData.key.b = board->stone[BLACK];
-		dummyData.key.w = board->stone[WHITE];
-	}
-	else {
-		dummyData.key.b = board->stone[WHITE];
-		dummyData.key.w = board->stone[BLACK];
-	}
-	//data = OHash_Search(OPTree ,&dummyData);
 }

@@ -7,12 +7,11 @@
 #include <string.h>
 #include <intrin.h>
 #include "BitBoard.h"
-#include "bsTree.h"
 #include "const.h"
 #include "Container.h"
 //#include "CPU.h"
 #include "Flags.h"
-
+#include "Hash.h"
 
 #ifdef __AVX2__
 alignas(64) __m256i flip_v8_table256;
@@ -72,6 +71,27 @@ inline uint64 sr(uint64 a, uint64 b) {
 inline uint64 sl(uint64 a, uint64 b) {
 	return a << b;
 }
+
+inline char nodeKeyComp(OKey key1, OKey key2) {
+	if (key1.b == key2.b && key1.w == key2.w) {
+		return 0;
+	}
+	if (key1.b > key2.b) {
+		return 1;
+	}
+	if (key1.b == key2.b && key1.w > key2.w) {
+		return 1;
+	}
+
+	if (key1.b < key2.b) {
+		return -1;
+	}
+	if (key1.b == key2.b && key1.w < key2.w) {
+		return -1;
+	}
+	return 0;
+}
+
 class M128I {
 public:
 	__m128i m128i;
@@ -564,13 +584,18 @@ void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code) {
 void BitBoard_getKey(const BitBoard *board, char color, uint64 *retB, uint64 *retW) {
 	char code;
 	uint64 rotB, rotW;
+	OKey key1, key2;
 	*retB = board->stone[oppColor(color)];
 	*retW = board->stone[color];
 	rotB = *retB;
 	rotW = *retW;
 	for (code = ROT_NONE; code <= ROT_DIAGH1; code++) {
 		BitRotate128(retB, retW, (RotateCode)code);
-		if (code == ROT_NONE || nodeKeyComp(retB, retW, &rotB, &rotW) > 0) {
+		key1.b = *retB;
+		key1.w = *retW;
+		key2.b = rotB;
+		key2.w = rotW;
+		if (code == ROT_NONE || nodeKeyComp(key1, key2) > 0) {
 			*retB = rotB;
 			*retW = rotW;
 		}

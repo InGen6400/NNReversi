@@ -112,7 +112,7 @@
       <SDLCheck>false</SDLCheck>
       <MinimalRebuild>false</MinimalRebuild>
       <Optimization>Disabled</Optimization>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,7 +160,6 @@
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
     <ClInclude Include="bitTest.h" />
-    <ClInclude Include="bsTree.h" />
     <ClInclude Include="const.h" />
     <ClInclude Include="Container.h" />
     <ClInclude Include="Flags.h" />
@@ -175,7 +174,6 @@
   <ItemGroup>
     <ClCompile Include="BitBoard.cpp" />
     <ClCompile Include="bitTester.cpp" />
-    <ClCompile Include="bsTree.cpp" />
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="Hash.cpp" />
     <ClCompile Include="Hive_routine.cpp" />

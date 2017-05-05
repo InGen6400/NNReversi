@@ -10,7 +10,7 @@
 #include "Pattern.h"
 #include "Flags.h"
 #include "Comb.h"
-//#include "opening.h"
+#include "opening.h"
 #include "Hash.h"
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +28,6 @@ enum {
 	READ,
 	DEBUG
 };
-/*
 
 const short LINE_MAX = 200;
 
@@ -46,7 +45,7 @@ void MODE_ResetReadEnd();
 
 void MODE_LEARN();
 
-static OpenTree OPTree;
+static OHash *opHash;
 
 int main()
 {
@@ -75,7 +74,8 @@ int main()
 	Pattern_Init();
 	//Pattern_Save();
 	Pattern_Load();
-	open_Load(&OPTree);
+	opHash = OHash_New();
+	open_Load(opHash);
 	Board_InitConst();
 	
 	printf("\nÝ’è\n");
@@ -109,11 +109,10 @@ int main()
 			mode = DEBUG;
 		}
 		else if (tmp[0] == 'O' && tmp[1] == 'P') {
-			open_read_text(&OPTree);
+			open_read_text(opHash);
 		}
 		else if (tmp[0] == 'D'&& tmp[1] == 'O' &&tmp[2] == 'P') {
-			bsTree_Delete(OPTree.root);
-			OPTree.root = NULL;
+			OHash_DeleteAll(opHash);
 		}
 		else {
 			printf("‚»‚Ì‚æ‚¤‚Èƒ‚[ƒh‚Í‘¶‚¶‚Ä‚¨‚è‚Ü‚¹‚ñ\n");
@@ -268,14 +267,7 @@ void Game_Battle(char showMobility) {
 	uint64 put;
 
 	Hive *hive = Hive_New();
-	hive->tree = &OPTree;
-
-	int value = -1;
-	OKey key;
-	BitBoard_getKey(bitboard, BLACK, &key.b, &key.w);
-	bsTree_add(&OPTree, &key, 1000);
-	bsTreeSearch(&OPTree, &key, &value);
-	printf("%d\n", value);
+	hive->opHash = opHash;
 
 	if (AVX2_FLAG == TRUE) {
 		setLevel(hive, 9, 18, TRUE);
@@ -467,7 +459,6 @@ void Game_Time(char showMobility) {
 }
 */
 
-/*
 void MODE_LEARN() {
 	BitBoard *bitboard = BitBoard_New();
 	Hive *hive = Hive_New();
@@ -510,10 +501,7 @@ void MODE_LEARN() {
 				left--;
 			}
 			color = oppColor(color);
-			/*system("cls");
-			BitBoard_Draw(bitboard, FALSE);*/
-			//getchar();
-/*		}
+		}
 		while (1) {
 			if (BitBoard_getMobility(bitboard->stone[color], bitboard->stone[oppColor(color)]) > 0) {
 				if (left > 12 && get_rand(100) < 1) {
@@ -732,26 +720,4 @@ void MODE_ResetReadEnd() {
 
 void MODE_DEBUG() {
 	
-}
-*/
-#include <immintrin.h>
-
-int main() {
-	const int size = 15000;
-	OHash *hash = OHash_New();
-	OKey key[size];
-	int value[size];
-	int ovalue;
-	srand((unsigned int)time(NULL));
-	for (int i = 0; i < size; i++) {
-		_rdrand64_step(&key[i].b);
-		_rdrand64_step(&key[i].w);
-		value[i] = rand();
-		OHash_Add(hash, &key[i], value[i]);
-	}
-	int index = rand()%size; 
-	OHash_Search(hash, &key[index], &ovalue);
-	printf("[%llu,%llu]:%d = %d\n", key[index].b, key[index].w, value[index], ovalue);
-	printf("collide:%d\n", hash->collide);
-	printf("count:%d\n", hash->count);
 }

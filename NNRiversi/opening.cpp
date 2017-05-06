@@ -103,9 +103,10 @@ void open_read_text(OHash *hash) {
 				for (i = 1; i != 0x8000000000000000; i <<= 1) {
 					if (BitBoard_Flip(board, color, i) == TRUE) {
 						BitBoard_getKey(board, oppColor(color), &key.b, &key.w);
-						OHash_Search(hash, &key, &searchResult);
-						if (searchResult < min) {
-							min = searchResult;
+						if (OHash_Search(hash, &key, &searchResult) == TRUE) {
+							if (searchResult < min) {
+								min = searchResult;
+							}
 						}
 						BitBoard_Undo(board);
 					}

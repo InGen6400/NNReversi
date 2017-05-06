@@ -94,20 +94,22 @@ int OpeningSearch(Hive *hive, char color, uint64 *move) {
 		mobility ^= pos;
 		BitBoard_Flip(hive->bitboard, color, pos);
 		BitBoard_getKey(hive->bitboard, oppColor(color), &key.b, &key.w);
-		OHash_Search(hive->opHash, &key, &value);
-
-		if (value > max) {
-			*move = pos;
-			max = value;
-			count = 1;
-		}
-		else if (value == max) {
-			count++;
-			if (get_rand(count) < 1) {
+		if (OHash_Search(hive->opHash, &key, &value) == TRUE) {
+			value -= value;
+			if (value > max) {
 				*move = pos;
+				max = value;
+				count = 1;
 			}
+			/*
+			else if (value == max) {
+				count++;
+				if (get_rand(count) < 1) {
+					*move = pos;
+				}
+			}
+			*/
 		}
-
 		BitBoard_Undo(hive->bitboard);
 	}
 	return max;

@@ -719,5 +719,13 @@ void MODE_ResetReadEnd() {
 }
 
 void MODE_DEBUG() {
-	
+	BitBoard *board = BitBoard_New();
+	OKey key;
+	uint64 tmp;
+	BitBoard_getKey(board, BLACK, &key.w, &key.b);
+	drawBits(key.b);
+	drawBits(key.w);
+	int value = 12345678;
+	OHash_Search(opHash, &key, &value);
+	printf("value:%d\n", value);
 }

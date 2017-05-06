@@ -111,7 +111,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <SDLCheck>false</SDLCheck>
       <MinimalRebuild>false</MinimalRebuild>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>

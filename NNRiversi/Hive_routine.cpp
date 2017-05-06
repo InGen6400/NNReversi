@@ -54,8 +54,9 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 	left = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE]));
 	//openÇÕñ¢çÏê¨(çÏê¨ó\íË)
 	//èIî’íTçı
-	value = OpeningSearch(hive, color, PutPos);
+	value = OpeningSearch(hive, i_color, PutPos);
 	if (*PutPos != NOMOVE) {
+		printf("Opening Search\n");
 		return value;
 	}else if (left <= hive->endDepth) {
 		return EndAlphaBeta(hive, hive->bitboard->stone[i_color], hive->bitboard->stone[oppColor(i_color)], -BITBOARD_SIZE * BITBOARD_SIZE, BITBOARD_SIZE*BITBOARD_SIZE,

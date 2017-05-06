@@ -145,9 +145,10 @@ void BitBoard_Delete(BitBoard *bitboard) {
 void BitBoard_Reset(BitBoard *bitboard) {
 	bitboard->stone[WHITE] = 0x0000001008000000;//真ん中二つ以外0
 	bitboard->stone[BLACK] = 0x0000000810000000;//真ん中二つ以外00x0000000000000000
-	//bitboard->stone[WHITE] = 0x0000000810042840;//
-	//bitboard->stone[BLACK] = 0x0124400000000000;//
-	//角のインデックスが22011021になるはず
+
+	//bitboard->stone[WHITE] = 0x0000000008000000;//
+	//bitboard->stone[BLACK] = 0x0000003810000000;//
+
 	bitboard->Sp = bitboard->Stack;
 	Stack_PUSH(bitboard, 0xFFFFFFFFFFFFFFFFULL);
 }
@@ -585,8 +586,8 @@ void BitBoard_getKey(const BitBoard *board, char color, uint64 *retB, uint64 *re
 	char code;
 	uint64 rotB, rotW;
 	OKey key1, key2;
-	*retB = board->stone[oppColor(color)];
-	*retW = board->stone[color];
+	*retB = board->stone[color];
+	*retW = board->stone[oppColor(color)];
 	rotB = *retB;
 	rotW = *retW;
 	for (code = ROT_NONE; code <= ROT_DIAGH1; code++) {

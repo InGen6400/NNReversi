@@ -7,7 +7,7 @@
 #include "const.h"
 //#include "CPU.h"
 #include "Hive_routine.h"
-#include "Pattern.h"
+#include "Evaluation.h"
 #include "Flags.h"
 #include "Comb.h"
 #include "opening.h"

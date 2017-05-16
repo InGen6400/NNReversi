@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BitBoard.h"
-#include "Pattern.h"
+#include "Evaluation.h"
 #include "opening.h"
 #include "Hash.h"
 #include "Hive_routine.h"

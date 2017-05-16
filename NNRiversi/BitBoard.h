@@ -44,6 +44,12 @@ const char H1 = 56;
 
 #pragma endregion
 
+#pragma region POSITIONS_16
+
+const uint64 A1_ = 0x8000000000000000;
+
+#pragma endregion
+
 
 struct _BitBoard
 {

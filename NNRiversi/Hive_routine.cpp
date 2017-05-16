@@ -59,6 +59,7 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 		printf("Opening Search\n");
 		return value;
 	}else if (left <= hive->endDepth) {
+		printf("Ending Search\n");
 		return EndAlphaBeta(hive, hive->bitboard->stone[i_color], hive->bitboard->stone[oppColor(i_color)], -BITBOARD_SIZE * BITBOARD_SIZE, BITBOARD_SIZE*BITBOARD_SIZE,
 			FALSE, i_color, left, PutPos);
 	}
@@ -123,6 +124,10 @@ int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 
 	if (depth == 0) {
 		return getValue(me, opp, left);
+	}
+
+	if (depth >= 4) {
+
 	}
 
 	*PutPos = NOMOVE;

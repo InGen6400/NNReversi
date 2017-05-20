@@ -270,10 +270,10 @@ void Game_Battle(char showMobility) {
 	hive->opHash = opHash;
 
 	if (AVX2_FLAG == TRUE) {
-		setLevel(hive, 9, 18, TRUE);
+		setLevel(hive, 10, 19, TRUE);
 	}
 	else {
-		setLevel(hive, 4, 18, TRUE);
+		setLevel(hive, 8, 19, TRUE);
 	}
 	//CPU‚ÌFÝ’è
 	while (cpuTurn == -2)
@@ -303,6 +303,7 @@ void Game_Battle(char showMobility) {
 				//CPU‚Ìƒ^[ƒ“
 				printf("CPU Thinking...\n");
 				printf("value:%d\n", NextMove(hive, bitboard, color, &put));
+				printf("Time:%.3f, Node:%d", (hive->stop - hive->start)/(double)CLOCKS_PER_SEC, hive->Node);
 				getXY(put, &x, &y);
 			}
 			else {

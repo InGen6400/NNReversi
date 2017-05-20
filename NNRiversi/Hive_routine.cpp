@@ -4,6 +4,8 @@
 #include "opening.h"
 #include "Hash.h"
 #include "Hive_routine.h"
+#include "MoveOrdering.h"
+#include <time.h>
 
 int Hive_Init(Hive *hive) {
 	memset(hive, 0, sizeof(Hive));
@@ -49,6 +51,9 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 	char color;
 	int value;
 
+	hive->Node = 0;
+	hive->start = clock();
+
 	BitBoard_Copy(bitboard, hive->bitboard);
 	hive->Node = 0;
 	left = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE]));
@@ -57,10 +62,13 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 	value = OpeningSearch(hive, i_color, PutPos);
 	if (*PutPos != NOMOVE) {
 		printf("Opening Search\n");
+		hive->stop = clock();
 		return value;
 	}else if (left <= hive->endDepth) {
-		return EndAlphaBeta(hive, hive->bitboard->stone[i_color], hive->bitboard->stone[oppColor(i_color)], -BITBOARD_SIZE * BITBOARD_SIZE, BITBOARD_SIZE*BITBOARD_SIZE,
+		value = EndAlphaBeta(hive, hive->bitboard->stone[i_color], hive->bitboard->stone[oppColor(i_color)], -BITBOARD_SIZE * BITBOARD_SIZE, BITBOARD_SIZE*BITBOARD_SIZE,
 			FALSE, i_color, left, PutPos);
+		hive->stop = clock();
+		return value;
 	}
 	else {//中盤探索
 		if ((i_color == WHITE && hive->midDepth % 2 == 0) ||
@@ -72,8 +80,10 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 		else {
 			color = i_color;
 		}
-		return MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -VALUE_MAX, VALUE_MAX,
+		value = MidAlphaBeta(hive, hive->bitboard->stone[color], hive->bitboard->stone[oppColor(color)], -1000000, 1000000,
 			FALSE, color, left, hive->midDepth, PutPos);
+		hive->stop = clock();
+		return value;
 	}
 }
 
@@ -118,39 +128,67 @@ int OpeningSearch(Hive *hive, char color, uint64 *move) {
 int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char isPassed, char color, char left, char depth, uint64 *PutPos) {
 	int value, max = alpha;
 	int moved = FALSE;
+	int i;
 	uint64 move;
 	uint64 mobility, pos, rev;
+	PList posList;
 
 	if (depth == 0) {
+		hive->Node++;
 		return getValue(me, opp, left);
 	}
 
-	*PutPos = NOMOVE;
-	mobility = BitBoard_getMobility(me, opp);
-	while (mobility != 0) {
-		//mobilityから一つ取り出す
-		pos = ((-mobility) & mobility);
-		mobility ^= pos;
 
-		if (moved == FALSE) {
-			*PutPos = pos;
-			moved = TRUE;
-		}
+	if (depth > 0) {
+		PList_Init(&posList, me, opp);
+		*PutPos = NOMOVE;
+		for (i = 0; i < posList.count; i++) {
+			pos = 0x8000000000000000 >> posList.element[i].pos;
+			if (moved == FALSE) {
+				*PutPos = pos;
+				moved = TRUE;
+			}
 
-		rev = getReverseBits(&me, &opp, pos);
-		value = -MidAlphaBeta(hive, opp^rev, (me^rev) | pos, -beta, -max, FALSE, oppColor(color), left - 1, depth - 1, &move);
-		if (value > max) {
-			max = value;
-			*PutPos = pos;
-			if (max >= beta) {
-				return beta;
+			rev = getReverseBits(&me, &opp, pos);
+			value = -MidAlphaBeta(hive, opp^rev, (me^rev) | pos, -beta, -max, FALSE, oppColor(color), left - 1, depth - 1, &move);
+			if (value > max) {
+				max = value;
+				*PutPos = pos;
+				if (max >= beta) {
+					return beta;
+				}
 			}
 		}
 	}
+	else {
+		*PutPos = NOMOVE;
+		mobility = BitBoard_getMobility(me, opp);
+		while (mobility != 0) {
+			//mobilityから一つ取り出す
+			pos = ((-mobility) & mobility);
+			mobility ^= pos;
 
+			if (moved == FALSE) {
+				*PutPos = pos;
+				moved = TRUE;
+			}
+
+			rev = getReverseBits(&me, &opp, pos);
+			value = -MidAlphaBeta(hive, opp^rev, (me^rev) | pos, -beta, -max, FALSE, oppColor(color), left - 1, depth - 1, &move);
+			if (value > max) {
+				max = value;
+				*PutPos = pos;
+				if (max >= beta) {
+					return beta;
+				}
+			}
+		}
+	}
+	
 	if (moved == FALSE) {
 		if (isPassed == TRUE) {
 			*PutPos = NOMOVE;
+			hive->Node++;
 			max = BitBoard_CountStone(me) - BitBoard_CountStone(opp);
 		}
 		else {
@@ -165,32 +203,58 @@ int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 int EndAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char isPassed, char color, char left, uint64 *PutPos) {
 	int value, max = alpha;
 	int moved = FALSE;
+	int i;
 	uint64 move;
 	uint64 mobility, pos, rev;
+	PList posList;
 
 	if (left == 0) {
+		hive->Node++;
 		return BitBoard_CountStone(me) - BitBoard_CountStone(opp);
 	}
 
-	*PutPos = NOMOVE;
-	mobility = BitBoard_getMobility(me, opp);
-	while (mobility != 0) {
-		//mobilityから一つ取り出す
-		pos = ((-mobility) & mobility);
-		mobility ^= pos;
+	if (left > 7) {
+		PList_Init(&posList, me, opp);
+		*PutPos = NOMOVE;
+		for (i = 0; i < posList.count; i++) {
+			pos = 0x8000000000000000 >> posList.element[i].pos;
+			if (moved == FALSE) {
+				*PutPos = pos;
+				moved = TRUE;
+			}
 
-		if (moved == FALSE) {
-			*PutPos = pos;
-			moved = TRUE;
+			rev = getReverseBits(&me, &opp, pos);
+			value = -EndAlphaBeta(hive, opp^rev, (me^rev) | pos, -beta, -max, FALSE, oppColor(color), left - 1, &move);
+			if (value > max) {
+				max = value;
+				*PutPos = pos;
+				if (max >= beta) {
+					return beta;
+				}
+			}
 		}
+	}
+	else {
+		*PutPos = NOMOVE;
+		mobility = BitBoard_getMobility(me, opp);
+		while (mobility != 0) {
+			//mobilityから一つ取り出す
+			pos = ((-mobility) & mobility);
+			mobility ^= pos;
 
-		rev = getReverseBits(&me, &opp, pos);
-		value = -EndAlphaBeta(hive, opp^rev, (me^rev)|pos, -beta, -max, FALSE, oppColor(color), left - 1, &move);
-		if (value > max) {
-			max = value;
-			*PutPos = pos;
-			if (max >= beta) {
-				return beta;
+			if (moved == FALSE) {
+				*PutPos = pos;
+				moved = TRUE;
+			}
+
+			rev = getReverseBits(&me, &opp, pos);
+			value = -EndAlphaBeta(hive, opp^rev, (me^rev) | pos, -beta, -max, FALSE, oppColor(color), left - 1, &move);
+			if (value > max) {
+				max = value;
+				*PutPos = pos;
+				if (max >= beta) {
+					return beta;
+				}
 			}
 		}
 	}
@@ -198,6 +262,7 @@ int EndAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 	if (moved == FALSE) {
 		if (isPassed == TRUE) {
 			*PutPos = NOMOVE;
+			hive->Node++;
 			max = BitBoard_CountStone(me) - BitBoard_CountStone(opp);
 		}
 		else {

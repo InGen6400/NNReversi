@@ -636,13 +636,41 @@ int getValue(uint64 black, uint64 white, char left) {
 	//石差
 	black_count = BitBoard_CountStone(black);
 	white_count = BitBoard_CountStone(white);
-	//ret += PatternValue[left][PATTERN_STONEDIFF][black_count - white_count + 64];//BLACKから見たWHITEとの石差
+	ret += PatternValue[left][PATTERN_STONEDIFF][black_count - white_count + 64];//BLACKから見たWHITEとの石差
 	//角の石差(0x8100000000000081は角のマスク)
 	ret += PatternValue[left][PATTERN_CORNER_STONE][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4];
 	//Xの石差 (0x0042000000004200はXのマスク)
-	//ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
+	ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
 	//パリティー
 	//ret += PatternValue[left][PATTERN_PARITY][(BITBOARD_SIZE * BITBOARD_SIZE - black_count - white_count)&1];//空きます数の偶奇
+	return ret;
+}
+
+int getOrderValue(uint64 black, uint64 white, char left) {
+	int ret = 0;
+	char black_count, white_count;
+	left /= 4;
+	//着手可能数
+	ret += PatternValue[left][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(black, white))]*1.2;//BLACKの着手可能位置の数
+	ret += PatternValue[left][PATTERN_MOBILITY_W][BitBoard_CountStone(BitBoard_getMobility(white, black))]*1.2;//WHITEの着手可能位置の数
+																										   //石差
+	black_count = BitBoard_CountStone(black);
+	white_count = BitBoard_CountStone(white);
+	ret += PatternValue[left][PATTERN_STONEDIFF][black_count - white_count + 64];//BLACKから見たWHITEとの石差
+																				 //角の石差(0x8100000000000081は角のマスク)
+	ret += PatternValue[left][PATTERN_CORNER_STONE][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4] * 1.5;
+	//Xの石差 (0x0042000000004200はXのマスク)
+	ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
+	return ret;
+}
+
+int getOrderValue_fast(uint64 black, uint64 white, char left) {
+	int ret = 0;
+	char black_count, white_count;
+	left /= 4;
+	//着手可能数
+	ret += PatternValue[left][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(black, white))];//BLACKの着手可能位置の数
+
 	return ret;
 }
 

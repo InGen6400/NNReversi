@@ -12,6 +12,7 @@ struct _Hive
 	int midDepth;
 	int endDepth;
 	int Node;
+	int start, stop;
 }typedef Hive;
 
 int Hive_Init(Hive *hive);

@@ -69,6 +69,10 @@ void Pattern_setAVX(unsigned char AVX2_FLAG);
 
 int getValue(uint64 black, uint64 white, char left);
 
+int getOrderValue(uint64 black, uint64 white, char left);
+
+int getOrderValue_fast(uint64 black, uint64 white, char left);
+
 void UpdateAllPattern(uint64 black, uint64 white, int value, char left);
 
 void Patttern_Debug(int index);

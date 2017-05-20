@@ -22,6 +22,9 @@
     <Text Include="x64\Debug\Resources\book.txt">
       <Filter>リソース ファイル</Filter>
     </Text>
+    <Text Include="speed_no_ordering.csv">
+      <Filter>リソース ファイル</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

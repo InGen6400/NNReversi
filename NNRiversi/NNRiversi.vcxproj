@@ -155,6 +155,7 @@
   <ItemGroup>
     <Text Include="ReadMe.txt" />
     <Text Include="Board_Image.txt" />
+    <Text Include="speed_no_ordering.csv" />
     <Text Include="x64\Debug\Resources\book.txt" />
   </ItemGroup>
   <ItemGroup>

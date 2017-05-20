@@ -3,21 +3,21 @@ BOARD
  @{[{[{[{[{[{[{[{[{[{[{
    b”b”b”b”b”b”b”b”b”b”b
  @{[{[{[{[{[{[{[{[{[{[{
- 1 b”b@b@b@b@b@b@b@b@b”b
+ 1 b”b‚Ob‚Pb‚Qb‚Rb‚Sb‚Tb‚Ub‚Vb”b
  @{[{[{[{[{[{[{[{[{[{[{
- 2 b”b@b@b@b@b@b@b@b@b”b
+ 2 b”b‚Wb‚Xb‚Ob‚Pb‚Qb‚Rb‚Sb‚Tb”b10
  @{[{[{[{[{[{[{[{[{[{[{
- 3 b”b@b@b@b@b@b@b@b@b”b
+ 3 b”b‚Ub‚Vb‚Wb‚Xb‚Ob‚Pb‚Qb‚Rb”b20
  @{[{[{[{[{[{[{[{[{[{[{
- 4 b”b@b@b@bZbœb@b@b@b”b
+ 4 b”b‚Sb‚Tb‚UbZbœb‚Xb‚Ob‚Pb”b30
  @{[{[{[{[{[{[{[{[{[{[{
- 5 b”b@b@b@bœbZb@b@b@b”b
+ 5 b”b‚Qb‚Rb‚SbœbZb‚Vb‚Wb‚Xb”b
  @{[{[{[{[{[{[{[{[{[{[{
- 6 b”b@b@b@b@b@b@b@b@b”b
+ 6 b”b‚Ob‚Pb‚Qb‚Rb‚Sb‚Tb‚Ub‚Vb”b40
  @{[{[{[{[{[{[{[{[{[{[{
- 7 b”b@b@b@b@b@b@b@b@b”b
+ 7 b”b‚Wb‚Xb‚Ob‚Pb‚Qb‚Rb‚Sb‚Tb”b50
  @{[{[{[{[{[{[{[{[{[{[{
- 8 b”b@b@b@b@b@b@b@b@b”b
+ 8 b”b‚Ub‚Vb‚Wb‚Xb‚Ob‚Pb‚Qb‚Rb”b60
  @{[{[{[{[{[{[{[{[{[{[{
    b”b”b”b”b”b”b”b”b”b”b
  @{[{[{[{[{[{[{[{[{[{[{

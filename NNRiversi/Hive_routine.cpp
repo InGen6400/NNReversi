@@ -140,7 +140,7 @@ int MidAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 
 
 	if (depth > 0) {
-		PList_Init(&posList, me, opp);
+		PList_Init(&posList, me, opp, left);
 		*PutPos = NOMOVE;
 		for (i = 0; i < posList.count; i++) {
 			pos = 0x8000000000000000 >> posList.element[i].pos;
@@ -214,7 +214,7 @@ int EndAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 	}
 
 	if (left > 7) {
-		PList_Init(&posList, me, opp);
+		PList_Init(&posList, me, opp, left);
 		*PutPos = NOMOVE;
 		for (i = 0; i < posList.count; i++) {
 			pos = 0x8000000000000000 >> posList.element[i].pos;

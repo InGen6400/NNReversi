@@ -14,6 +14,6 @@ struct PositionList
 	char count;
 }typedef PList;
 
-void PList_Init(PList *list, uint64 black, uint64 white);
+void PList_Init(PList *list, uint64 black, uint64 white, char left);
 
 void PList_Sort(PList *list);

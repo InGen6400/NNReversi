@@ -85,7 +85,7 @@ uint64 BitBoard_getMobility(uint64 me, uint64 ene);
 
 char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos);
 
-char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos);
+char BitBoard_CountFlips(const uint64 me, const uint64 ene, uint64 pos);
 
 void BitRotate128(uint64 *data1, uint64 *data2, RotateCode code);
 

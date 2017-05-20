@@ -208,9 +208,26 @@ int EndAlphaBeta(Hive *hive, uint64 me, uint64 opp, int alpha, int beta, char is
 	uint64 mobility, pos, rev;
 	PList posList;
 
-	if (left == 0) {
+	if (left == 1) {
 		hive->Node++;
-		return BitBoard_CountStone(me) - BitBoard_CountStone(opp);
+		pos = ~(me | opp);
+		value = BitBoard_CountFlips(me, opp, pos);
+		max = BitBoard_CountStone(me) - BitBoard_CountStone(opp);
+		if (value > 0) {
+			*PutPos = pos;
+			//石差+ひっくり返した数(相手が自分のになるので2倍)+1(置いた石)
+			return max + value * 2 + 1;
+		}
+		//パスなら実行される
+		value = BitBoard_CountFlips(opp, me, pos);
+		max = BitBoard_CountStone(opp) - BitBoard_CountStone(me);
+		if (value > 0) {
+			*PutPos = PASS;
+			//相手が増えるので,石差-ひっくり返した数(相手が自分のになるので2倍)-1(置いた石)
+			return max - value * 2 - 1;
+		}
+		*PutPos = NOMOVE;
+		return max;
 	}
 
 	if (left > 7) {

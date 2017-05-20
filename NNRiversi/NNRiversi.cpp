@@ -270,10 +270,10 @@ void Game_Battle(char showMobility) {
 	hive->opHash = opHash;
 
 	if (AVX2_FLAG == TRUE) {
-		setLevel(hive, 10, 19, TRUE);
+		setLevel(hive, 10, 18, TRUE);
 	}
 	else {
-		setLevel(hive, 8, 19, TRUE);
+		setLevel(hive, 8, 18, TRUE);
 	}
 	//CPUÇÃêFê›íË
 	while (cpuTurn == -2)

@@ -522,11 +522,8 @@ char BitBoard_CanFlip(const uint64 me, const uint64 ene, uint64 pos) {
 }
 
 //”½“]”‚ğ•Ô‚·
-char BitBoard_CountFlips(const uint64 me, const uint64 ene, char pos) {
-
-	uint64 reverse = getReverseBits(&me, &ene, pos);
-
-	return BitBoard_CountStone(reverse);
+char BitBoard_CountFlips(const uint64 me, const uint64 ene, uint64 pos) {
+	return BitBoard_CountStone(getReverseBits(&me, &ene, pos));
 }
 
 inline M128I rot_LR(M128I in) {

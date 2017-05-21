@@ -22,13 +22,7 @@ typedef struct BookNode {
 	uint64 keyW;
 	BookData *bookData;
 }BookNode;
-/*
-BookNode **BookTable_Init();
 
-void BookList_Add(BookNode *prev, BookNode *node);
-
-void BookList_Del(BookNode *node);
-*/
 charNode *CharListInit(int num);
 
 void addNode(charNode *node);

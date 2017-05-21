@@ -3,7 +3,7 @@
 #include "BitBoard.h"
 #include <stdio.h>
 
-char posList_stat[64] = {
+static char posList_stat[64] = {
 	//Šp
 	0 , 7 , 56, 63,
 	//Šp‚Ì2—×

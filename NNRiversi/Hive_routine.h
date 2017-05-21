@@ -9,8 +9,8 @@ struct _Hive
 	BitBoard *bitboard;
 	OHash *opHash;
 	char use_opening;
-	int midDepth;
-	int endDepth;
+	char midDepth;
+	char endDepth;
 	int Node;
 	int start, stop;
 }typedef Hive;
@@ -21,7 +21,7 @@ Hive *Hive_New();
 
 void Hive_Del(Hive *hive);
 
-void setLevel(Hive *hive, int mid, int end, char use_opening);
+void setLevel(Hive *hive, char mid, char end, char use_opening);
 
 int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos);
 

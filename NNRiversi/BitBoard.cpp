@@ -425,7 +425,7 @@ inline uint64 getReverseBits(const uint64 *me, const uint64 *opp, const uint64 p
 }
 
 //ˆêŽè–ß‚·(–¢ŽÀ‘•)
-int BitBoard_Undo(BitBoard *bitboard) {
+char BitBoard_Undo(BitBoard *bitboard) {
 	if (*(bitboard->Sp - 1) == 0xFFFFFFFFFFFFFFFFULL)return 0;
 	char color = (char)Stack_POP(bitboard);
 	uint64 rev = Stack_POP(bitboard);

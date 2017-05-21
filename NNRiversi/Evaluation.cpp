@@ -20,7 +20,7 @@ unsigned short (*getIndex)(const unsigned char player, const unsigned char opp);
 unsigned char(*bitGather)(uint64 in, uint64 mask);
 
 //関数ポインタにAVX2使用時と未使用時の場合で別の関数を指定
-void Pattern_setAVX(unsigned char AVX2_FLAG) {
+void Pattern_setAVX() {
 #if __AVX2__
 	printf(">>Set AVX2 Mode\n");
 	bitGather = bitGatherAVX2;
@@ -651,14 +651,14 @@ int getOrderValue(uint64 black, uint64 white, char left) {
 	char black_count, white_count;
 	left /= 4;
 	//着手可能数
-	ret += PatternValue[left][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(black, white))]*1.2;//BLACKの着手可能位置の数
-	ret += PatternValue[left][PATTERN_MOBILITY_W][BitBoard_CountStone(BitBoard_getMobility(white, black))]*1.2;//WHITEの着手可能位置の数
+	ret += (int)(PatternValue[left][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(black, white))]*1.2);//BLACKの着手可能位置の数
+	ret += (int)(PatternValue[left][PATTERN_MOBILITY_W][BitBoard_CountStone(BitBoard_getMobility(white, black))]*1.2);//WHITEの着手可能位置の数
 																										   //石差
 	black_count = BitBoard_CountStone(black);
 	white_count = BitBoard_CountStone(white);
 	ret += PatternValue[left][PATTERN_STONEDIFF][black_count - white_count + 64];//BLACKから見たWHITEとの石差
 																				 //角の石差(0x8100000000000081は角のマスク)
-	ret += PatternValue[left][PATTERN_CORNER_STONE][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4] * 1.5;
+	ret += (int)(PatternValue[left][PATTERN_CORNER_STONE][BitBoard_CountStone(black & 0x8100000000000081) - BitBoard_CountStone(white & 0x8100000000000081) + 4] * 1.5);
 	//Xの石差 (0x0042000000004200はXのマスク)
 	ret += PatternValue[left][PATTERN_X_STONE][BitBoard_CountStone(black & 0x0042000000004200) - BitBoard_CountStone(white & 0x0042000000004200) + 4];
 	return ret;
@@ -666,7 +666,6 @@ int getOrderValue(uint64 black, uint64 white, char left) {
 
 int getOrderValue_fast(uint64 black, uint64 white, char left) {
 	int ret = 0;
-	char black_count, white_count;
 	left /= 4;
 	//着手可能数
 	ret += PatternValue[left][PATTERN_MOBILITY_B][BitBoard_CountStone(BitBoard_getMobility(black, white))];//BLACKの着手可能位置の数

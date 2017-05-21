@@ -9,7 +9,6 @@
 #include "Hive_routine.h"
 #include "Evaluation.h"
 #include "Flags.h"
-#include "Comb.h"
 #include "opening.h"
 #include "Hash.h"
 #include <stdlib.h>
@@ -69,7 +68,7 @@ int main()
 		printf("CPUInfo[1]:%d\nAVX2は利用'不'可能です。\n低速モードで起動します。\n", CPUInfo[1]);
 		AVX2_FLAG = FALSE;
 	}
-	Pattern_setAVX(AVX2_FLAG);
+	Pattern_setAVX();
 	putchar('\n');
 	Pattern_Init();
 	//Pattern_Save();
@@ -144,7 +143,7 @@ void Game_PVP(char showMobility) {
 	BitBoard *bitboard;
 	bitboard = BitBoard_New();
 
-	int turn = BLACK;
+	char turn = BLACK;
 	int x, y;
 
 	char endFlag = FALSE;
@@ -153,7 +152,7 @@ void Game_PVP(char showMobility) {
 	char passed = FALSE;
 
 	char player2Turn = WHITE;
-	uint64 put;
+	uint64 put = NOMOVE;
 
 	system("cls");
 
@@ -264,7 +263,7 @@ void Game_Battle(char showMobility) {
 	char left = 60;
 	char passed = FALSE;
 
-	uint64 put;
+	uint64 put = NOMOVE;
 
 	Hive *hive = Hive_New();
 	hive->opHash = opHash;
@@ -722,7 +721,6 @@ void MODE_ResetReadEnd() {
 void MODE_DEBUG() {
 	BitBoard *board = BitBoard_New();
 	OKey key;
-	uint64 tmp;
 	BitBoard_getKey(board, BLACK, &key.w, &key.b);
 	drawBits(key.b);
 	drawBits(key.w);

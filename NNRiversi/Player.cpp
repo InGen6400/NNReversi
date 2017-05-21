@@ -44,6 +44,6 @@ int Player_Input(char *Input, int *x, int *y) {
 
 //A~H ‚ð 1~8‚É‚·‚é
 char CharToPos(char Input) {
-	Input = tolower(Input);
+	Input = (char)tolower(Input);
 	return 'h' - Input;
 }

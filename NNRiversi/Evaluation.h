@@ -52,12 +52,12 @@ static const short PatternIndex[] =
 
 //評価に利用する各パターンの評価値(黒優勢で+)
 static int *PatternValue[TURN_SPLIT+1][PATTERN_AMOUNT];
-static int MirrorLine8[POW3_8];
-static int MirrorLine7[POW3_7];
-static int MirrorLine6[POW3_6];
-static int MirrorLine5[POW3_5];
-static int MirrorLine4[POW3_4];
-static int MirrorCorner8[POW3_8];
+static unsigned short MirrorLine8[POW3_8];
+static unsigned short MirrorLine7[POW3_7];
+static unsigned short MirrorLine6[POW3_6];
+static unsigned short MirrorLine5[POW3_5];
+static unsigned short MirrorLine4[POW3_4];
+static unsigned short MirrorCorner8[POW3_8];
 
 void Pattern_Init();
 
@@ -65,7 +65,7 @@ void Pattern_Load();
 
 int Pattern_Save();
 
-void Pattern_setAVX(unsigned char AVX2_FLAG);
+void Pattern_setAVX();
 
 int getValue(uint64 black, uint64 white, char left);
 

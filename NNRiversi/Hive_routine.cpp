@@ -40,7 +40,7 @@ void Hive_Del(Hive *hive) {
 	free(hive);
 }
 
-void setLevel(Hive *hive, int mid, int end, char use_opening) {
+void setLevel(Hive *hive, char mid, char end, char use_opening) {
 	hive->midDepth = mid;
 	hive->endDepth = end;
 	hive->use_opening = use_opening;
@@ -57,8 +57,7 @@ int NextMove(Hive *hive, const BitBoard *bitboard, char i_color, uint64 *PutPos)
 	BitBoard_Copy(bitboard, hive->bitboard);
 	hive->Node = 0;
 	left = BitBoard_CountStone(~(bitboard->stone[BLACK] | bitboard->stone[WHITE]));
-	//open‚Í–¢ì¬(ì¬—\’è)
-	//I”Õ’Tõ
+
 	value = OpeningSearch(hive, i_color, PutPos);
 	if (*PutPos != NOMOVE) {
 		printf("Opening Search\n");

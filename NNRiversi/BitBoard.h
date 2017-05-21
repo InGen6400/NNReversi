@@ -79,7 +79,7 @@ void move_random(BitBoard *bitboard, char color);
 
 uint64 getReverseBits(const uint64 *me, const uint64 *ene, const uint64 pos);
 
-int BitBoard_Undo(BitBoard *bitboard);
+char BitBoard_Undo(BitBoard *bitboard);
 
 uint64 BitBoard_getMobility(uint64 me, uint64 ene);
 

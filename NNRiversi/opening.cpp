@@ -1,6 +1,6 @@
 #include "opening.h"
 #include "BitBoard.h"
-#include "Hash.h"
+#include "OHash.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,7 +43,7 @@ char open_Load(OHash *hash) {
 	return TRUE;
 }
 
-void open_read_text(OHash *hash) {
+void open_read_text(OHash *opHash) {
 	BitBoard *board = BitBoard_New();
 	FILE *fp;
 	char buf[OP_LINE_SIZE];
@@ -97,13 +97,13 @@ void open_read_text(OHash *hash) {
 			}
 			if (history_move[turn] == PASS) {
 				BitBoard_getKey(board, oppColor(color), &key.b, &key.w);
-				OHash_Search(hash, &key, &min);
+				OHash_Search(opHash, &key, &min);
 			}
 			else {
 				for (i = 1; i != 0x8000000000000000; i <<= 1) {
 					if (BitBoard_Flip(board, color, i) == TRUE) {
 						BitBoard_getKey(board, oppColor(color), &key.b, &key.w);
-						if (OHash_Search(hash, &key, &searchResult) == TRUE) {
+						if (OHash_Search(opHash, &key, &searchResult) == TRUE) {
 							if (searchResult < min) {
 								min = searchResult;
 							}
@@ -113,14 +113,14 @@ void open_read_text(OHash *hash) {
 				}
 			}
 			BitBoard_getKey(board, color, &key.b, &key.w);
-			OHash_Add(hash, &key, -min);
+			OHash_Add(opHash, &key, -min);
 			BitBoard_Undo(board);
 			color = oppColor(color);
 		}
 	}
 	fclose(fp);
 	BitBoard_Delete(board);
-	open_Save(hash);
-	printf("collide:%d count:%d\n", hash->collide, hash->count);
+	open_Save(opHash);
+	printf("collide:%d count:%d\n", opHash->collide, opHash->count);
 	printf("’èÎ•ÏŠ·•“o˜^Š®—¹\n");
 }

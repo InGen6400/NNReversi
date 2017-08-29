@@ -11,7 +11,7 @@
 #include "Container.h"
 //#include "CPU.h"
 #include "Flags.h"
-#include "Hash.h"
+#include "OHash.h"
 
 #ifdef __AVX2__
 alignas(64) __m256i flip_v8_table256;

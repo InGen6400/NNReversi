@@ -1,4 +1,4 @@
-#include "Hash.h"
+#include "OHash.h"
 #include "const.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,6 +42,7 @@ inline uint32 getHash(OKey key) {
 	hash = (FNV_PRIME_32 * hash) ^ _mm_extract_epi8(key128, 6);
 	hash = (FNV_PRIME_32 * hash) ^ _mm_extract_epi8(key128, 7);
 	hash = (FNV_PRIME_32 * hash) ^ _mm_extract_epi8(key128, 8);
+	hash = (FNV_PRIME_32 * hash) ^ _mm_extract_epi8(key128, 9);
 	hash = (FNV_PRIME_32 * hash) ^ _mm_extract_epi8(key128, 10);
 	hash = (FNV_PRIME_32 * hash) ^ _mm_extract_epi8(key128, 11);
 	hash = (FNV_PRIME_32 * hash) ^ _mm_extract_epi8(key128, 12);
@@ -68,31 +69,31 @@ OPNode *OPNode_New(OpenKey *key, int value) {
 	return node;
 }
 
-void OHash_Init(OHash *hash) {
+void OHash_Init(OHash *opHash) {
 	for (int i = 0; i < HASH_LENGHT; i++) {
-		hash->elmnt[i] = NULL;
+		opHash->elmnt[i] = NULL;
 	}
-	hash->count = 0;
-	hash->collide = 0;
+	opHash->count = 0;
+	opHash->collide = 0;
 }
 
 OHash *OHash_New() {
-	OHash *hash;
-	hash = (OHash*)malloc(sizeof(OHash));
-	if (hash == NULL) {
+	OHash *opHash;
+	opHash = (OHash*)malloc(sizeof(OHash));
+	if (opHash == NULL) {
 		return NULL;
 	}
-	OHash_Init(hash);
-	return hash;
+	OHash_Init(opHash);
+	return opHash;
 }
 
-void OHash_Add(OHash *hash, OKey *key, int value) {
+void OHash_Add(OHash *opHash, OKey *key, int value) {
 	unsigned int index;
 	OPNode *node;
 	OPNode *prev;
 	index =	getHash(*key);
-	node = hash->elmnt[index];
-	if (hash->elmnt[index] != NULL) {
+	node = opHash->elmnt[index];
+	if (opHash->elmnt[index] != NULL) {
 		while (node != NULL) {
 			if (nodeKeyComp(*key, node->key) == 0) {
 				node->value = value;
@@ -102,33 +103,33 @@ void OHash_Add(OHash *hash, OKey *key, int value) {
 			node = node->next;
 		}
 		prev->next = OPNode_New(key, value);
-		hash->count++;
-		hash->collide++;
+		opHash->count++;
+		opHash->collide++;
 	}
 	else {
-		hash->elmnt[index] = OPNode_New(key, value);
-		hash->count++;
+		opHash->elmnt[index] = OPNode_New(key, value);
+		opHash->count++;
 	}
 }
 
-void OHash_DeleteAll(OHash *hash) {
+void OHash_DeleteAll(OHash *opHash) {
 	int i;
 	for (i = 0; i < HASH_LENGHT; i++) {
 		OPNode *node;
-		while (hash->elmnt[i] != NULL) {
-			node = hash->elmnt[i]->next;
-			free(hash->elmnt[i]);
-			hash->elmnt[i] = node;
-			hash->count--;
-			hash->collide--;
+		while (opHash->elmnt[i] != NULL) {
+			node = opHash->elmnt[i]->next;
+			free(opHash->elmnt[i]);
+			opHash->elmnt[i] = node;
+			opHash->count--;
+			opHash->collide--;
 		}
 	}
-	hash->collide = 0;
+	opHash->collide = 0;
 }
 
-char OHash_Search(OHash *hash, OKey *key, int *value) {
+char OHash_Search(OHash *opHash, OKey *key, int *value) {
 	int index = getHash(*key);
-	OPNode *node = hash->elmnt[index];
+	OPNode *node = opHash->elmnt[index];
 	while (node != NULL) {
 		if (nodeKeyComp(*key, node->key) == 0) {
 			*value = node->value;
@@ -139,10 +140,10 @@ char OHash_Search(OHash *hash, OKey *key, int *value) {
 	return FALSE;
 }
 
-void OHash_Save(OHash *hash, FILE *fp) {
+void OHash_Save(OHash *opHash, FILE *fp) {
 	int i;
 	for (i = 0; i < HASH_LENGHT; i++) {
-		OPNode *node = hash->elmnt[i];
+		OPNode *node = opHash->elmnt[i];
 		while (node != NULL) {
 			fwrite(&node->key, sizeof(OKey), 1, fp);
 			fwrite(&node->value, sizeof(int), 1, fp);

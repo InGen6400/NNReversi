@@ -11,7 +11,7 @@
 #include "Flags.h"
 #include "Comb.h"
 #include "opening.h"
-#include "Hash.h"
+#include "OHash.h"
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
